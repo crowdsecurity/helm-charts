@@ -14,7 +14,7 @@ helm repo add crowdsec https://crowdsecurity.github.io/helm-charts
 You can then run `helm search repo crowdsec` to see the charts.
 
 <!-- Keep full URL links to repo files because this README syncs from main to gh-pages.  -->
-Chart documentation is available in [crowdsecurity directory](https://github.com/crowdsecurity/helm-charts/blob/main/charts/grafana/README.md).
+Chart documentation is available in [crowdsecurity directory](https://github.com/crowdsecurity/helm-charts/blob/main/charts/crowdsec/README.md).
 
 ## Contributing
 
