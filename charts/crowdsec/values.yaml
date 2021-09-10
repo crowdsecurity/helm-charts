@@ -1,0 +1,104 @@
+# Default values for crowdsec-chart.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+image:
+  repository: crowdsecurity/crowdsec
+  pullPolicy: IfNotPresent
+  tag: "v1.2.0-rc6"
+
+# If you want to specify secrets that will be used for all your crowdsec-agents
+# secrets can be provided be env variables
+secrets:
+  username: ""
+  password: ""
+
+# lapi will deploy pod with crowdsec lapi and dashboard as deployment
+lapi:
+  env:
+    - name: AGENT_NAME
+      valueFrom:
+        fieldRef:
+          fieldPath: spec.nodeName
+    # environment variables from crowdsecurity/crowdsec docker image
+    - name: COLLECTIONS
+      value: "crowdsecurity/linux"
+    - name: DISABLE_AGENT
+      value: "true"
+    - name: DISABLE_ONLINE_API
+      value: "true"
+  dashboard:
+    enabled: true
+    image:
+      repository: metabase/metabase
+      pullPolicy: IfNotPresent
+      tag: "v0.37.5"
+    assetURL: https://crowdsec-statics-assets.s3-eu-west-1.amazonaws.com/metabase_sqlite.zip
+  resources:
+    limits:
+      memory: 100Mi
+    requests:
+      cpu: 150m
+      memory: 100Mi
+
+# agent will deploy pod on every node as daemonSet to read wanted pods logs
+agent:
+  serviceAccount:
+    # account needed for read node logs (deployed in kube-system namespace)
+    # The name of the service account to use.
+    name: "crowdsec-agent"
+  acquisition:
+    # You need to specify each pod you want to process it logs (pods present in the node)
+    - namespace: ingress-nginx
+      podName: ingress-nginx-controller-*
+      type: docker
+      program: nginx
+  resources:
+    limits:
+      memory: 100Mi
+    requests:
+      cpu: 150m
+      memory: 100Mi
+  env:
+    #- name: AGENT_NAME
+    #  valueFrom:
+    #    fieldRef:
+    #      fieldPath: spec.nodeName
+    # environment variables from crowdsecurity/crowdsec docker image
+    - name: COLLECTIONS
+      value: "crowdsecurity/nginx"
+    - name: PARSERS
+      value: "crowdsecurity/docker-logs"
+    - name: DISABLE_ONLINE_API
+      value: "true"
+    - name: DISABLE_LOCAL_API
+      value: "true"
+    # - name: SCENARIOS
+    #   value: "scenario/name otherScenario/name"
+    # - name: PARSERS
+    #   value: "parser/name otherParser/name"
+    # - name: POSTOVERFLOWS
+    #   value: "postoverflow/name otherPostoverflow/name"
+    # - name: CONFIG_FILE
+    #   value: "/etc/crowdsec/config.yaml"
+    # - name: DSN
+    #   value: "file:///var/log/toto.log"
+    # - name: TYPE
+    #   value: "Labels.type_for_time-machine_mode"
+    # - name: TEST_MODE
+    #   value: "false"
+    # - name: TZ
+    #   value: ""
+    # - name: DISABLE_AGENT
+    #   value: "false"
+    # - name: DISABLE_ONLINE_API
+    #   value: "false"
+    # - name: LEVEL_TRACE
+    #   value: "false"
+    # - name: LEVEL_DEBUG
+    #   value: "false"
+    # - name: LEVEL_INFO
+    #   value: "false"
+
+#service: {}
+

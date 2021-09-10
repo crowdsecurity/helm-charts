@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: acquis-configmap
+data:
+  acquis.yaml: |-
+    {{- range .Values.agent.acquisition }}
+    filenames:
+      - /var/log/containers/{{ .podName }}_{{ .namespace }}_*.log
+    labels:
+      type: {{ .type }}
+      program: {{ .program }}
+    {{- end }}
