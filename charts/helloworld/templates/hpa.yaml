@@ -2,14 +2,14 @@
 apiVersion: autoscaling/v2beta1
 kind: HorizontalPodAutoscaler
 metadata:
-  name: {{ include "helloworld-chart.fullname" . }}
+  name: {{ include "helloworld.fullname" . }}
   labels:
-    {{- include "helloworld-chart.labels" . | nindent 4 }}
+    {{- include "helloworld.labels" . | nindent 4 }}
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: {{ include "helloworld-chart.fullname" . }}
+    name: {{ include "helloworld.fullname" . }}
   minReplicas: {{ .Values.autoscaling.minReplicas }}
   maxReplicas: {{ .Values.autoscaling.maxReplicas }}
   metrics:

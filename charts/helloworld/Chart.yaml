@@ -1,5 +1,5 @@
 apiVersion: v2
-name: helloworld-chart
+name: helloworld
 description: A helloWorld chart for Kubernetes using ingress nginx
 
 # A chart can be either an 'application' or a 'library' chart.
