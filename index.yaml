@@ -1,0 +1,26 @@
+apiVersion: v1
+entries:
+  crowdsec:
+  - apiVersion: v2
+    appVersion: 1.2.0
+    created: "2021-09-20T15:44:41.784678216Z"
+    description: Crowdsec helm chart is an open-source, lightweight agent to detect
+      and respond to bad behaviours.
+    digest: b6221ab1b84541d8d001477369b27285782a32ca26403f890d1c8eed3d2490fc
+    name: crowdsec
+    type: application
+    urls:
+    - https://github.com/crowdsecurity/helm-charts/releases/download/crowdsec-0.1.0/crowdsec-0.1.0.tgz
+    version: 0.1.0
+  helloworld:
+  - apiVersion: v2
+    appVersion: 1.16.0
+    created: "2021-09-20T15:44:41.944894773Z"
+    description: A helloWorld chart for Kubernetes using ingress nginx
+    digest: 1586502ec344bc3a0f79b93796794adc7508ec43b8b0f46571167c029ad5d6f4
+    name: helloworld
+    type: application
+    urls:
+    - https://github.com/crowdsecurity/helm-charts/releases/download/helloworld-0.1.0/helloworld-0.1.0.tgz
+    version: 0.1.0
+generated: "2021-09-20T15:44:41.944908674Z"
