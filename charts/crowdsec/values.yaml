@@ -5,7 +5,7 @@
 image:
   repository: crowdsecurity/crowdsec
   pullPolicy: IfNotPresent
-  tag: "v1.2.0-rc6"
+  tag: "v1.2.0"
 
 # If you want to specify secrets that will be used for all your crowdsec-agents
 # secrets can be provided be env variables
@@ -28,7 +28,7 @@ lapi:
     - name: DISABLE_ONLINE_API
       value: "true"
   dashboard:
-    enabled: true
+    enabled: false
     image:
       repository: metabase/metabase
       pullPolicy: IfNotPresent
@@ -49,10 +49,9 @@ agent:
     name: "crowdsec-agent"
   acquisition:
     # You need to specify each pod you want to process it logs (pods present in the node)
-    - namespace: ingress-nginx
-      podName: ingress-nginx-controller-*
-      type: docker
-      program: nginx
+    #- namespace: ingress-nginx
+    #  podName: ingress-nginx-controller-*
+    #  program: nginx
   resources:
     limits:
       memory: 100Mi

@@ -4,10 +4,11 @@ metadata:
   name: acquis-configmap
 data:
   acquis.yaml: |-
+    {{- $valid := required "You need to specify at least one pod for logs read" .Values.agent.acquisition }}
     {{- range .Values.agent.acquisition }}
     filenames:
       - /var/log/containers/{{ .podName }}_{{ .namespace }}_*.log
     labels:
-      type: {{ .type }}
+      type: docker
       program: {{ .program }}
     {{- end }}
