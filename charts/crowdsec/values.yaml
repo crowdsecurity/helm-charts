@@ -16,18 +16,12 @@ secrets:
 # lapi will deploy pod with crowdsec lapi and dashboard as deployment
 lapi:
   env:
-    - name: AGENT_NAME
-      valueFrom:
-        fieldRef:
-          fieldPath: spec.nodeName
     # environment variables from crowdsecurity/crowdsec docker image
-    - name: COLLECTIONS
-      value: "crowdsecurity/linux"
+    # by default we want to update the agent because it only the local API.
     - name: DISABLE_AGENT
       value: "true"
-    - name: DISABLE_ONLINE_API
-      value: "true"
   dashboard:
+    # By default the metabase dashboard is disabled
     enabled: false
     image:
       repository: metabase/metabase
@@ -59,17 +53,11 @@ agent:
       cpu: 150m
       memory: 100Mi
   env:
-    #- name: AGENT_NAME
-    #  valueFrom:
-    #    fieldRef:
-    #      fieldPath: spec.nodeName
     # environment variables from crowdsecurity/crowdsec docker image
-    - name: COLLECTIONS
-      value: "crowdsecurity/nginx"
+    # by default we want the docker-logs parser to be able to parse docker logs in k8s
     - name: PARSERS
       value: "crowdsecurity/docker-logs"
-    - name: DISABLE_ONLINE_API
-      value: "true"
+    # by default we want to disable local API on the agent pod
     - name: DISABLE_LOCAL_API
       value: "true"
     # - name: SCENARIOS
