@@ -55,12 +55,10 @@ spec:
           - name: lapi-prometheus
             containerPort: 6060
             protocol: TCP
+      {{ if .Values.lapi.dashboard.enabled }}
         volumeMounts:
-          - name: varlog
-            mountPath: /var/log
           - name: crowdsec-db
             mountPath: /var/lib/crowdsec/data
-      {{ if .Values.lapi.dashboard.enabled }}
       - name: dashboard
         image: "{{ .Values.lapi.dashboard.image.repository | default "metabase/metabase" }}:{{ .Values.lapi.dashboard.image.tag | default "latest" }}"
         imagePullPolicy: {{ .Values.lapi.dashboard.image.pullPolicy }}
@@ -74,17 +72,8 @@ spec:
             value: /metabase-data/metabase.db
       {{ end }}
       terminationGracePeriodSeconds: 30
-      volumes:
-      - name: acquis-config-volume
-        configMap:
-          name: acquis-configmap
-      - name: varlog
-        hostPath:
-          path: /var/log
-      - name: varlibdockercontainers
-        hostPath:
-          path: /var/lib/docker/containers
       {{ if .Values.lapi.dashboard.enabled }}
+      volumes:
       - name: shared-data
         emptyDir: {}
       - name: crowdsec-db
