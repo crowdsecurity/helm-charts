@@ -55,11 +55,7 @@ agent:
   env:
     # environment variables from crowdsecurity/crowdsec docker image
     # by default we want the docker-logs parser to be able to parse docker logs in k8s
-    - name: PARSERS
-      value: "crowdsecurity/docker-logs"
     # by default we want to disable local API on the agent pod
-    - name: DISABLE_LOCAL_API
-      value: "true"
     # - name: SCENARIOS
     #   value: "scenario/name otherScenario/name"
     # - name: PARSERS

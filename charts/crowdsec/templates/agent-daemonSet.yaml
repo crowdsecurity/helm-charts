@@ -43,6 +43,8 @@ spec:
                 key: password
           - name: LOCAL_API_URL
             value: http://crowdsec-service.crowdsec:8080
+          - name: DISABLE_LOCAL_API
+            value: "true"
           {{- toYaml . | nindent 10 }}
         {{- end }}
         resources:
