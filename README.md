@@ -1,7 +1,5 @@
 # CrowdSec community kubernetes helm charts
 
-:warning: It's still work in progress
-
 ## Usage
 
 [Helm](https://helm.sh) must be installed to use the charts.
