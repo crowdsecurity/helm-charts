@@ -4,8 +4,8 @@ on:
   push:
     branches:
       - main
-  paths:
-    - 'charts/*/values.yaml'
+    paths:
+      - 'charts/*/values.yaml'
 
 jobs:
   update-readme:
