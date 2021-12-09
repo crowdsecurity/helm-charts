@@ -8,35 +8,35 @@ A helloWorld chart for Kubernetes using ingress nginx
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
-| affinity | object | `{}` |  |
-| autoscaling.enabled | bool | `false` |  |
-| autoscaling.maxReplicas | int | `5` |  |
-| autoscaling.minReplicas | int | `1` |  |
-| autoscaling.targetCPUUtilizationPercentage | int | `80` |  |
-| fullnameOverride | string | `""` |  |
-| image.pullPolicy | string | `"IfNotPresent"` |  |
+| replicaCount | int | `1` |  |
 | image.repository | string | `"hashicorp/http-echo"` |  |
+| image.pullPolicy | string | `"IfNotPresent"` |  |
 | image.tag | string | `"0.2.3"` |  |
 | imagePullSecrets | list | `[]` |  |
-| ingress.annotations."kubernetes.io/ingress.class" | string | `"nginx"` |  |
+| nameOverride | string | `""` |  |
+| fullnameOverride | string | `""` |  |
+| serviceAccount.create | bool | `true` |  |
+| serviceAccount.annotations | object | `{}` |  |
+| serviceAccount.name | string | `"helloworld"` |  If not set and create is true, a name is generated using the fullname template |
+| podAnnotations | object | `{}` |  |
+| podSecurityContext | object | `{}` |  |
+| securityContext | object | `{}` |  |
+| service.name | string | `"helloworld"` |  |
+| service.type | string | `"ClusterIP"` |  |
+| service.port | int | `5678` |  |
 | ingress.enabled | bool | `true` |  |
+| ingress.annotations."kubernetes.io/ingress.class" | string | `"nginx"` |  |
 | ingress.hosts[0].host | string | `"helloworld.local"` |  |
 | ingress.hosts[0].paths[0].path | string | `"/"` |  |
 | ingress.tls | list | `[]` |  |
-| nameOverride | string | `""` |  |
-| nodeSelector | object | `{}` |  |
-| podAnnotations | object | `{}` |  |
-| podSecurityContext | object | `{}` |  |
-| replicaCount | int | `1` |  |
 | resources.limits | object | `{"cpu":"100m","memory":"128Mi"}` |  choice for the user. This also increases chances charts run on environments with little resources, such as Minikube. If you do want to specify resources, uncomment the following lines, adjust them as necessary, and remove the curly braces after 'resources:'. |
 | resources.requests.cpu | string | `"100m"` |  |
 | resources.requests.memory | string | `"128Mi"` |  |
-| securityContext | object | `{}` |  |
-| service.name | string | `"helloworld"` |  |
-| service.port | int | `5678` |  |
-| service.type | string | `"ClusterIP"` |  |
-| serviceAccount.annotations | object | `{}` |  |
-| serviceAccount.create | bool | `true` |  |
-| serviceAccount.name | string | `"helloworld"` |  If not set and create is true, a name is generated using the fullname template |
+| autoscaling.enabled | bool | `false` |  |
+| autoscaling.minReplicas | int | `1` |  |
+| autoscaling.maxReplicas | int | `5` |  |
+| autoscaling.targetCPUUtilizationPercentage | int | `80` |  |
+| nodeSelector | object | `{}` |  |
 | tolerations | list | `[]` |  |
+| affinity | object | `{}` |  |
 
