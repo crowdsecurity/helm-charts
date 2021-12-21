@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - 'charts/*/values.yaml'
+      - 'charts/*/Chart.yaml'
 
 jobs:
   update-readme:
