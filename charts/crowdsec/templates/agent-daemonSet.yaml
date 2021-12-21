@@ -24,7 +24,7 @@ spec:
       initContainers:
       - name: wait-for-lapi
         image: busybox:1.28
-        command: ['sh', '-c', "until nc crowdsec-service.crowdsec 8080; do echo waiting for lapi to start; sleep 5; done"]
+        command: ['sh', '-c', "until nc {{ .Release.Name }}-service.{{ Release.Namespace }} 8080; do echo waiting for lapi to start; sleep 5; done"]
       containers:
       - name: crowdsec-agent
         image: "{{ .Values.image.repository | default "crowdsecurity/crowdsec" }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
@@ -42,7 +42,7 @@ spec:
                 name: agent-credentials
                 key: password
           - name: LOCAL_API_URL
-            value: http://crowdsec-service.crowdsec:8080
+            value: http://{{ .Release.Name }}-service.{{ Release.Namespace }}:8080
           - name: DISABLE_LOCAL_API
             value: "true"
           {{- toYaml . | nindent 10 }}
