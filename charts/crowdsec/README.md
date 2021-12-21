@@ -1,6 +1,6 @@
 # crowdsec
 
-![Version: 0.1.3](https://img.shields.io/badge/Version-0.1.3-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.2.0](https://img.shields.io/badge/AppVersion-1.2.0-informational?style=flat-square)
+![Version: 0.1.4](https://img.shields.io/badge/Version-0.1.4-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.2.0](https://img.shields.io/badge/AppVersion-1.2.0-informational?style=flat-square)
 
 Crowdsec helm chart is an open-source, lightweight agent to detect and respond to bad behaviours.
 
@@ -41,11 +41,12 @@ helm delete crowdsec -n crowdsec
 | secrets | object | `{"password":"","username":""}` |  secrets can be provided be env variables |
 | secrets.username | string | `""` | agent username (default is generated randomly) |
 | secrets.password | string | `""` | agent password (default is generated randomly) |
-| lapi.env | list | `[{"name":"DISABLE_AGENT","value":"true"}]` | environment variables from crowdsecurity/crowdsec docker image |
+| lapi.env | list | `[]` | environment variables from crowdsecurity/crowdsec docker image |
+| lapi.dashboard | object | `{"assetURL":"https://crowdsec-statics-assets.s3-eu-west-1.amazonaws.com/metabase_sqlite.zip","enabled":false,"image":{"pullPolicy":"IfNotPresent","repository":"metabase/metabase","tag":"v0.41.5"}}` |   value: "true" |
 | lapi.dashboard.enabled | bool | `false` | Enable Metabase Dashboard (by default disabled) |
 | lapi.dashboard.image.repository | string | `"metabase/metabase"` | docker image repository name |
 | lapi.dashboard.image.pullPolicy | string | `"IfNotPresent"` | pullPolicy |
-| lapi.dashboard.image.tag | string | `"v0.37.5"` | docker image tag |
+| lapi.dashboard.image.tag | string | `"v0.41.5"` | docker image tag |
 | lapi.dashboard.assetURL | string | `"https://crowdsec-statics-assets.s3-eu-west-1.amazonaws.com/metabase_sqlite.zip"` | Metabase SQLite static DB containing Dashboards |
 | lapi.resources.limits.memory | string | `"100Mi"` |  |
 | lapi.resources.requests.cpu | string | `"150m"` |  |
