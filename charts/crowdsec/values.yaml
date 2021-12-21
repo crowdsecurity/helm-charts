@@ -21,10 +21,10 @@ secrets:
 # lapi will deploy pod with crowdsec lapi and dashboard as deployment
 lapi:
   # -- environment variables from crowdsecurity/crowdsec docker image
-  env:
+  env: []
     # by default disable the agent because it only the local API.
-    - name: DISABLE_AGENT
-      value: "true"
+    #- name: DISABLE_AGENT
+    #  value: "true"
   dashboard:
     # -- Enable Metabase Dashboard (by default disabled)
     enabled: false
@@ -34,7 +34,7 @@ lapi:
       # -- pullPolicy
       pullPolicy: IfNotPresent
       # -- docker image tag
-      tag: "v0.37.5"
+      tag: "v0.41.5"
     # -- Metabase SQLite static DB containing Dashboards
     assetURL: https://crowdsec-statics-assets.s3-eu-west-1.amazonaws.com/metabase_sqlite.zip
   resources:

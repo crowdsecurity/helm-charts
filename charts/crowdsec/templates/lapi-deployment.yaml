@@ -43,6 +43,8 @@ spec:
               secretKeyRef:
                 name: agent-credentials
                 key: password
+          - name: DISABLE_AGENT
+            value: "true"
         {{- with .Values.lapi.env }}
           {{- toYaml . | nindent 10 }}
         {{- end }}

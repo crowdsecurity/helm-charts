@@ -29,7 +29,6 @@ spec:
       - name: crowdsec-agent
         image: "{{ .Values.image.repository | default "crowdsecurity/crowdsec" }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
-        {{- with .Values.agent.env }}
         env:
           - name: AGENT_USERNAME
             valueFrom:
@@ -45,6 +44,7 @@ spec:
             value: http://{{ .Release.Name }}-service.{{ .Release.Namespace }}:8080
           - name: DISABLE_LOCAL_API
             value: "true"
+        {{- with .Values.agent.env }}
           {{- toYaml . | nindent 10 }}
         {{- end }}
         resources:
