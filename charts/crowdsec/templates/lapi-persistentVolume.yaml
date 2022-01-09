@@ -1,0 +1,21 @@
+{{ if .Values.lapi.persistentVolume.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Release.Name }}-db-pvc
+  {{- if .Values.lapi.persistentVolume.annotations }}
+  annotations:
+{{ toYaml .Values.lapi.persistentVolume.annotations | indent 4 }}
+  {{- end }}
+  labels:
+    k8s-app: {{ .Release.Name }}
+    type: lapi
+    version: v1
+spec:
+  accessModes:
+{{ toYaml .Values.lapi.persistentVolume.accessModes | indent 4 }}
+  storageClassName: {{ .Values.lapi.persistentVolume.storageClassName }}
+  resources:
+    requests:
+      storage: "{{ .Values.lapi.persistentVolume.size }}"
+{{ end }}

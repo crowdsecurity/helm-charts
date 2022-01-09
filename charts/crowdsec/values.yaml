@@ -43,6 +43,13 @@ lapi:
     requests:
       cpu: 150m
       memory: 100Mi
+  # -- Enable persistent volume for data folder
+  persistentVolume:
+    enabled: true
+    accessModes: 
+      - ReadWriteOnce
+    storageClassName: ""
+    size: 1Gi
 
 # agent will deploy pod on every node as daemonSet to read wanted pods logs
 agent:

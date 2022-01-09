@@ -79,5 +79,10 @@ spec:
       - name: shared-data
         emptyDir: {}
       - name: crowdsec-db
+        {{- if .Values.lapi.persistentVolume.enabled }}
+        persistentVolumeClaim:
+          claimName: {{ .Release.Name }}-db-pvc
+        {{- else }}
         emptyDir: {}
+        {{- end -}}
       {{ end }}

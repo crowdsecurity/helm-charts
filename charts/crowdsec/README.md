@@ -48,6 +48,10 @@ helm delete crowdsec -n crowdsec
 | lapi.dashboard.image.pullPolicy | string | `"IfNotPresent"` | pullPolicy |
 | lapi.dashboard.image.tag | string | `"v0.41.5"` | docker image tag |
 | lapi.dashboard.assetURL | string | `"https://crowdsec-statics-assets.s3-eu-west-1.amazonaws.com/metabase_sqlite.zip"` | Metabase SQLite static DB containing Dashboards |
+| lapi.persistentVolume.enabled | bool | `false` | Defines if persistent volume should be created |
+| lapi.persistentVolume.accessModes | list | `[ReadWriteOnce]` | Defines the access modes for the storage |
+| lapi.persistentVolume.storageClassName | string | `""` | The storage class to use |
+| lapi.persistentVolume.size | size | `1Gi` | Defines the storage size |
 | lapi.resources.limits.memory | string | `"100Mi"` |  |
 | lapi.resources.requests.cpu | string | `"150m"` |  |
 | lapi.resources.requests.memory | string | `"100Mi"` |  |
