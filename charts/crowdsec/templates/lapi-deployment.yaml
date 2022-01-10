@@ -57,10 +57,18 @@ spec:
           - name: lapi-prometheus
             containerPort: 6060
             protocol: TCP
-      {{ if .Values.lapi.dashboard.enabled }}
+        {{- if or (.Values.lapi.persistentVolume.data.enabled) (.Values.lapi.persistentVolume.config.enabled) (.Values.lapi.dashboard.enabled) }}
         volumeMounts:
+          {{- if or (.Values.lapi.persistentVolume.data.enabled) (.Values.lapi.dashboard.enabled) }}
           - name: crowdsec-db
             mountPath: /var/lib/crowdsec/data
+          {{- end }}
+          {{- if .Values.lapi.persistentVolume.config.enabled }}
+          - name: crowdsec-config
+            mountPath: /etc/crowdsec
+          {{- end }}
+        {{- end }}
+      {{- if .Values.lapi.dashboard.enabled }}
       - name: dashboard
         image: "{{ .Values.lapi.dashboard.image.repository | default "metabase/metabase" }}:{{ .Values.lapi.dashboard.image.tag | default "latest" }}"
         imagePullPolicy: {{ .Values.lapi.dashboard.image.pullPolicy }}
@@ -72,17 +80,25 @@ spec:
         env:
           - name: MB_DB_FILE
             value: /metabase-data/metabase.db
-      {{ end }}
+      {{- end }}
       terminationGracePeriodSeconds: 30
-      {{ if .Values.lapi.dashboard.enabled }}
+      {{- if or (.Values.lapi.persistentVolume.data.enabled) (.Values.lapi.persistentVolume.config.enabled) (.Values.lapi.dashboard.enabled) }}
       volumes:
+      {{- if .Values.lapi.dashboard.enabled }}
       - name: shared-data
         emptyDir: {}
+      {{- end }}
+      {{- if .Values.lapi.persistentVolume.data.enabled }}
       - name: crowdsec-db
-        {{- if .Values.lapi.persistentVolume.enabled }}
         persistentVolumeClaim:
           claimName: {{ .Release.Name }}-db-pvc
-        {{- else }}
+      {{- else if .Values.lapi.dashboard.enabled }}
+      - name: crowdsec-db
         emptyDir: {}
-        {{- end -}}
-      {{ end }}
+      {{- end }}
+      {{- if .Values.lapi.persistentVolume.config.enabled }}
+      - name: crowdsec-config
+        persistentVolumeClaim:
+          claimName: {{ .Release.Name }}-config-pvc
+      {{- end }}
+      {{- end }}

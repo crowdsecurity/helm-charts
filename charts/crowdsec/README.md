@@ -48,10 +48,14 @@ helm delete crowdsec -n crowdsec
 | lapi.dashboard.image.pullPolicy | string | `"IfNotPresent"` | pullPolicy |
 | lapi.dashboard.image.tag | string | `"v0.41.5"` | docker image tag |
 | lapi.dashboard.assetURL | string | `"https://crowdsec-statics-assets.s3-eu-west-1.amazonaws.com/metabase_sqlite.zip"` | Metabase SQLite static DB containing Dashboards |
-| lapi.persistentVolume.enabled | bool | `false` | Defines if persistent volume should be created |
-| lapi.persistentVolume.accessModes | list | `[ReadWriteOnce]` | Defines the access modes for the storage |
-| lapi.persistentVolume.storageClassName | string | `""` | The storage class to use |
-| lapi.persistentVolume.size | size | `1Gi` | Defines the storage size |
+| lapi.persistentVolume.data.enabled | bool | `true` | Defines if persistent volume for the database should be created|
+| lapi.persistentVolume.data.accessModes | list | `[ReadWriteOnce]` | Defines the access modes for the storage |
+| lapi.persistentVolume.data.storageClassName | string | `""` | The storage class to use |
+| lapi.persistentVolume.data.size | size | `1Gi` | Defines the storage size |
+| lapi.persistentVolume.config.enabled | bool | `true` | Defines if persistent volume for the configuration storage should be created (e.g. online api credentials)|
+| lapi.persistentVolume.config.accessModes | list | `[ReadWriteOnce]` | Defines the access modes for the storage |
+| lapi.persistentVolume.config.storageClassName | string | `""` | The storage class to use |
+| lapi.persistentVolume.config.size | size | `100Mi` | Defines the storage size |
 | lapi.resources.limits.memory | string | `"100Mi"` |  |
 | lapi.resources.requests.cpu | string | `"150m"` |  |
 | lapi.resources.requests.memory | string | `"100Mi"` |  |

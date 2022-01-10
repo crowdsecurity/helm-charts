@@ -43,13 +43,22 @@ lapi:
     requests:
       cpu: 150m
       memory: 100Mi
-  # -- Enable persistent volume for data folder
+  # -- Enable persistent volumes
   persistentVolume:
-    enabled: true
-    accessModes: 
-      - ReadWriteOnce
-    storageClassName: ""
-    size: 1Gi
+    # -- Persistent volume for data folder. Stores e.g. registered bouncer api keys
+    data:
+      enabled: true
+      accessModes: 
+        - ReadWriteOnce
+      storageClassName: ""
+      size: 1Gi
+    # -- Persistent volume for config folder. Stores e.g. online api credentials
+    config:
+      enabled: true
+      accessModes: 
+        - ReadWriteOnce
+      storageClassName: ""
+      size: 100Mi
 
 # agent will deploy pod on every node as daemonSet to read wanted pods logs
 agent:

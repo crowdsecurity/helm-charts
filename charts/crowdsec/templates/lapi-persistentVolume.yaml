@@ -1,11 +1,11 @@
-{{ if .Values.lapi.persistentVolume.enabled }}
+{{ if .Values.lapi.persistentVolume.data.enabled }}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: {{ .Release.Name }}-db-pvc
-  {{- if .Values.lapi.persistentVolume.annotations }}
+  {{- if .Values.lapi.persistentVolume.data.annotations }}
   annotations:
-{{ toYaml .Values.lapi.persistentVolume.annotations | indent 4 }}
+{{ toYaml .Values.lapi.persistentVolume.data.annotations | indent 4 }}
   {{- end }}
   labels:
     k8s-app: {{ .Release.Name }}
@@ -13,9 +13,31 @@ metadata:
     version: v1
 spec:
   accessModes:
-{{ toYaml .Values.lapi.persistentVolume.accessModes | indent 4 }}
-  storageClassName: {{ .Values.lapi.persistentVolume.storageClassName }}
+{{ toYaml .Values.lapi.persistentVolume.data.accessModes | indent 4 }}
+  storageClassName: {{ .Values.lapi.persistentVolume.data.storageClassName }}
   resources:
     requests:
-      storage: "{{ .Values.lapi.persistentVolume.size }}"
+      storage: "{{ .Values.lapi.persistentVolume.data.size }}"
+{{ end }}
+---
+{{ if .Values.lapi.persistentVolume.config.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Release.Name }}-config-pvc
+  {{- if .Values.lapi.persistentVolume.config.annotations }}
+  annotations:
+{{ toYaml .Values.lapi.persistentVolume.config.annotations | indent 4 }}
+  {{- end }}
+  labels:
+    k8s-app: {{ .Release.Name }}
+    type: lapi
+    version: v1
+spec:
+  accessModes:
+{{ toYaml .Values.lapi.persistentVolume.config.accessModes | indent 4 }}
+  storageClassName: {{ .Values.lapi.persistentVolume.config.storageClassName }}
+  resources:
+    requests:
+      storage: "{{ .Values.lapi.persistentVolume.config.size }}"
 {{ end }}
