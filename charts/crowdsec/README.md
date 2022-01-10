@@ -48,6 +48,12 @@ helm delete crowdsec -n crowdsec
 | lapi.dashboard.image.pullPolicy | string | `"IfNotPresent"` | pullPolicy |
 | lapi.dashboard.image.tag | string | `"v0.41.5"` | docker image tag |
 | lapi.dashboard.assetURL | string | `"https://crowdsec-statics-assets.s3-eu-west-1.amazonaws.com/metabase_sqlite.zip"` | Metabase SQLite static DB containing Dashboards |
+| lapi.dashboard.ingress.enabled | bool | `false` | Enables the ingress configuration |
+| lapi.dashboard.ingress.annotations | list | `nginx.ingress.kubernetes.io/backend-protocol: "HTTP"` | Configure ingress annotations. |
+| lapi.dashboard.ingress.labels | list | `[]` | additional labels to provide |
+| lapi.dashboard.ingress.ingressClassName | string | `"nginx"` | Defines the ingress class to use |
+| lapi.dashboard.ingress.host | string | `` | Defines the server dns name to reach, e.g. `dashboard.example.com` |
+| lapi.dashboard.ingress.tls | object | `{}` | Details for the tls certificate to use |
 | lapi.resources.limits.memory | string | `"100Mi"` |  |
 | lapi.resources.requests.cpu | string | `"150m"` |  |
 | lapi.resources.requests.memory | string | `"100Mi"` |  |
