@@ -14,7 +14,13 @@ metadata:
 spec:
   accessModes:
 {{ toYaml .Values.lapi.persistentVolume.data.accessModes | indent 4 }}
-  storageClassName: {{ .Values.lapi.persistentVolume.data.storageClassName }}
+{{- if .Values.lapi.persistentVolume.data.storageClassName }}
+{{- if (eq "-" .Values.lapi.persistentVolume.data.storageClassName) }}
+  storageClassName: ""
+{{- else }}
+  storageClassName: "{{ .Values.lapi.persistentVolume.data.storageClassName }}"
+{{- end }}
+{{- end }}
   resources:
     requests:
       storage: "{{ .Values.lapi.persistentVolume.data.size }}"
@@ -36,7 +42,13 @@ metadata:
 spec:
   accessModes:
 {{ toYaml .Values.lapi.persistentVolume.config.accessModes | indent 4 }}
-  storageClassName: {{ .Values.lapi.persistentVolume.config.storageClassName }}
+{{- if .Values.lapi.persistentVolume.config.storageClassName }}
+{{- if (eq "-" .Values.lapi.persistentVolume.config.storageClassName) }}
+  storageClassName: ""
+{{- else }}
+  storageClassName: "{{ .Values.lapi.persistentVolume.config.storageClassName }}"
+{{- end }}
+{{- end }}
   resources:
     requests:
       storage: "{{ .Values.lapi.persistentVolume.config.size }}"
