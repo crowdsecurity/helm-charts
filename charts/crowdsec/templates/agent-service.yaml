@@ -1,15 +1,19 @@
+{{- if .Values.agent.metrics.enabled }}
 apiVersion: v1
 kind: Service
 metadata:
   name: {{ .Release.Name }}-agent-service
+  labels:
+    app: {{ .Release.Name }}-agent-service
 spec:
   type: ClusterIP
   ports:
     - port: 6060
       targetPort: 6060
       protocol: TCP
-      name: agent-prometheus
+      name: metrics
   selector:
     k8s-app: {{ .Release.Name }}
     type: agent
     version: v1
+{{- end -}}

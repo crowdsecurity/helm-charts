@@ -52,6 +52,8 @@ helm delete crowdsec -n crowdsec
 | lapi.resources.limits.memory | string | `"100Mi"` |  |
 | lapi.resources.requests.cpu | string | `"150m"` |  |
 | lapi.resources.requests.memory | string | `"100Mi"` |  |
+| lapi.metrics.enabled | bool | `false` | Enables the metrics port 6060 for prometheus |
+| lapi.metrics.statusMonitor.enabled | bool | `false` | Creates a `ServiceMonitor` object for prometheus |
 | agent.acquisition[0] | object | `{"namespace":"ingress-nginx","podName":"ingress-nginx-controller-*","program":"nginx"}` | Specify each pod you want to process it logs (namespace, podName and program) |
 | agent.acquisition[0].podName | string | `"ingress-nginx-controller-*"` | to select pod logs to process |
 | agent.acquisition[0].program | string | `"nginx"` | program name related to specific parser you will use (see https://hub.crowdsec.net/author/crowdsecurity/configurations/docker-logs) |
@@ -59,4 +61,6 @@ helm delete crowdsec -n crowdsec
 | agent.resources.requests.cpu | string | `"150m"` |  |
 | agent.resources.requests.memory | string | `"100Mi"` |  |
 | agent.env | list | `[]` | environment variables from crowdsecurity/crowdsec docker image |
+| agent.metrics.enabled | bool | `false` | Enables the metrics port 6060 for prometheus |
+| agent.metrics.statusMonitor.enabled | bool | `false` | Creates a `ServiceMonitor` object for prometheus |
 
