@@ -37,6 +37,18 @@ lapi:
       tag: "v0.41.5"
     # -- Metabase SQLite static DB containing Dashboards
     assetURL: https://crowdsec-statics-assets.s3-eu-west-1.amazonaws.com/metabase_sqlite.zip
+
+    # -- Enable ingress object
+    ingress:
+      enabled: false
+      annotations: 
+        # metabase only supports http so we need this annotation
+        nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+      # labels: {}
+      ingressClassName: "nginx"
+      host: "" # metabase.example.com
+      # tls: {}
+
   resources:
     limits:
       memory: 100Mi
