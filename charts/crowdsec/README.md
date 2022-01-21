@@ -1,6 +1,6 @@
 # crowdsec
 
-![Version: 0.1.6](https://img.shields.io/badge/Version-0.1.6-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.2.0](https://img.shields.io/badge/AppVersion-1.2.0-informational?style=flat-square)
+![Version: 0.2.0](https://img.shields.io/badge/Version-0.2.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.2.0](https://img.shields.io/badge/AppVersion-1.2.0-informational?style=flat-square)
 
 Crowdsec helm chart is an open-source, lightweight agent to detect and respond to bad behaviours.
 
@@ -38,11 +38,9 @@ helm delete crowdsec -n crowdsec
 | image.repository | string | `"crowdsecurity/crowdsec"` | docker image repository name |
 | image.pullPolicy | string | `"IfNotPresent"` | pullPolicy |
 | image.tag | string | `"latest"` | docker image tag |
-| secrets | object | `{"password":"","username":""}` |  secrets can be provided be env variables |
 | secrets.username | string | `""` | agent username (default is generated randomly) |
 | secrets.password | string | `""` | agent password (default is generated randomly) |
 | lapi.env | list | `[]` | environment variables from crowdsecurity/crowdsec docker image |
-| lapi.dashboard | object | `{"assetURL":"https://crowdsec-statics-assets.s3-eu-west-1.amazonaws.com/metabase_sqlite.zip","enabled":false,"image":{"pullPolicy":"IfNotPresent","repository":"metabase/metabase","tag":"v0.41.5"},"ingress":{"annotations":{"nginx.ingress.kubernetes.io/backend-protocol":"HTTP"},"enabled":false,"host":"","ingressClassName":"nginx"}}` |   value: "true" |
 | lapi.dashboard.enabled | bool | `false` | Enable Metabase Dashboard (by default disabled) |
 | lapi.dashboard.image.repository | string | `"metabase/metabase"` | docker image repository name |
 | lapi.dashboard.image.pullPolicy | string | `"IfNotPresent"` | pullPolicy |
@@ -52,11 +50,11 @@ helm delete crowdsec -n crowdsec
 | lapi.resources.limits.memory | string | `"100Mi"` |  |
 | lapi.resources.requests.cpu | string | `"150m"` |  |
 | lapi.resources.requests.memory | string | `"100Mi"` |  |
-| lapi.metrics.enabled | bool | `false` | Enables the metrics port 6060 for prometheus |
-| lapi.metrics.statusMonitor.enabled | bool | `false` | Creates a `ServiceMonitor` object for prometheus |
 | lapi.persistentVolume | object | `{"config":{"accessModes":["ReadWriteOnce"],"enabled":true,"size":"100Mi","storageClassName":""},"data":{"accessModes":["ReadWriteOnce"],"enabled":true,"size":"1Gi","storageClassName":""}}` | Enable persistent volumes |
 | lapi.persistentVolume.data | object | `{"accessModes":["ReadWriteOnce"],"enabled":true,"size":"1Gi","storageClassName":""}` | Persistent volume for data folder. Stores e.g. registered bouncer api keys |
 | lapi.persistentVolume.config | object | `{"accessModes":["ReadWriteOnce"],"enabled":true,"size":"100Mi","storageClassName":""}` | Persistent volume for config folder. Stores e.g. online api credentials |
+| lapi.metrics | object | `{"enabled":false,"serviceMonitor":{"enabled":false}}` | Enable service monitoring (exposes "metrics" port "6060" for Prometheus) |
+| lapi.metrics.serviceMonitor | object | `{"enabled":false}` | See also: https://github.com/prometheus-community/helm-charts/issues/106#issuecomment-700847774 |
 | agent.acquisition[0] | object | `{"namespace":"ingress-nginx","podName":"ingress-nginx-controller-*","program":"nginx"}` | Specify each pod you want to process it logs (namespace, podName and program) |
 | agent.acquisition[0].podName | string | `"ingress-nginx-controller-*"` | to select pod logs to process |
 | agent.acquisition[0].program | string | `"nginx"` | program name related to specific parser you will use (see https://hub.crowdsec.net/author/crowdsecurity/configurations/docker-logs) |
@@ -64,6 +62,6 @@ helm delete crowdsec -n crowdsec
 | agent.resources.requests.cpu | string | `"150m"` |  |
 | agent.resources.requests.memory | string | `"100Mi"` |  |
 | agent.env | list | `[]` | environment variables from crowdsecurity/crowdsec docker image |
-| agent.metrics.enabled | bool | `false` | Enables the metrics port 6060 for prometheus |
-| agent.metrics.statusMonitor.enabled | bool | `false` | Creates a `ServiceMonitor` object for prometheus |
+| agent.metrics | object | `{"enabled":false,"serviceMonitor":{"enabled":false}}` | Enable service monitoring (exposes "metrics" port "6060" for Prometheus) |
+| agent.metrics.serviceMonitor | object | `{"enabled":false}` | See also: https://github.com/prometheus-community/helm-charts/issues/106#issuecomment-700847774 |
 

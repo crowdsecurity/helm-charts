@@ -17,7 +17,7 @@ A helloWorld chart for Kubernetes using ingress nginx
 | fullnameOverride | string | `""` |  |
 | serviceAccount.create | bool | `true` |  |
 | serviceAccount.annotations | object | `{}` |  |
-| serviceAccount.name | string | `"helloworld"` |  If not set and create is true, a name is generated using the fullname template |
+| serviceAccount.name | string | `"helloworld"` |  |
 | podAnnotations | object | `{}` |  |
 | podSecurityContext | object | `{}` |  |
 | securityContext | object | `{}` |  |
@@ -29,7 +29,8 @@ A helloWorld chart for Kubernetes using ingress nginx
 | ingress.hosts[0].host | string | `"helloworld.local"` |  |
 | ingress.hosts[0].paths[0].path | string | `"/"` |  |
 | ingress.tls | list | `[]` |  |
-| resources.limits | object | `{"cpu":"100m","memory":"128Mi"}` |  choice for the user. This also increases chances charts run on environments with little resources, such as Minikube. If you do want to specify resources, uncomment the following lines, adjust them as necessary, and remove the curly braces after 'resources:'. |
+| resources.limits.cpu | string | `"100m"` |  |
+| resources.limits.memory | string | `"128Mi"` |  |
 | resources.requests.cpu | string | `"100m"` |  |
 | resources.requests.memory | string | `"128Mi"` |  |
 | autoscaling.enabled | bool | `false` |  |
