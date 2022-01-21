@@ -49,10 +49,12 @@ spec:
         {{- end }}
         resources:
           {{- toYaml .Values.agent.resources | nindent 10 }}
+        {{ if .Values.agent.metrics.enabled }}
         ports:
-          - name: agent-prom
+          - name: metrics
             containerPort: 6060
             protocol: TCP
+        {{ end }}
         volumeMounts:
           - name: acquis-config-volume
             mountPath: /etc/crowdsec/acquis.yaml

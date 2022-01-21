@@ -52,6 +52,8 @@ helm delete crowdsec -n crowdsec
 | lapi.resources.limits.memory | string | `"100Mi"` |  |
 | lapi.resources.requests.cpu | string | `"150m"` |  |
 | lapi.resources.requests.memory | string | `"100Mi"` |  |
+| lapi.metrics.enabled | bool | `false` | Enables the metrics port 6060 for prometheus |
+| lapi.metrics.statusMonitor.enabled | bool | `false` | Creates a `ServiceMonitor` object for prometheus |
 | lapi.persistentVolume | object | `{"config":{"accessModes":["ReadWriteOnce"],"enabled":true,"size":"100Mi","storageClassName":""},"data":{"accessModes":["ReadWriteOnce"],"enabled":true,"size":"1Gi","storageClassName":""}}` | Enable persistent volumes |
 | lapi.persistentVolume.data | object | `{"accessModes":["ReadWriteOnce"],"enabled":true,"size":"1Gi","storageClassName":""}` | Persistent volume for data folder. Stores e.g. registered bouncer api keys |
 | lapi.persistentVolume.config | object | `{"accessModes":["ReadWriteOnce"],"enabled":true,"size":"100Mi","storageClassName":""}` | Persistent volume for config folder. Stores e.g. online api credentials |
@@ -62,4 +64,6 @@ helm delete crowdsec -n crowdsec
 | agent.resources.requests.cpu | string | `"150m"` |  |
 | agent.resources.requests.memory | string | `"100Mi"` |  |
 | agent.env | list | `[]` | environment variables from crowdsecurity/crowdsec docker image |
+| agent.metrics.enabled | bool | `false` | Enables the metrics port 6060 for prometheus |
+| agent.metrics.statusMonitor.enabled | bool | `false` | Creates a `ServiceMonitor` object for prometheus |
 

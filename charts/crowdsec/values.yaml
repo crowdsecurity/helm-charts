@@ -72,6 +72,16 @@ lapi:
       storageClassName: ""
       size: 100Mi
 
+  # -- Enable service monitoring (exposes "metrics" port "6060" for Prometheus)
+  metrics:
+    enabled: false
+    # -- Creates a ServiceMonitor so Prometheus will monitor this service
+    # -- Prometheus needs to be configured to watch on all namespaces for ServiceMonitors
+    # -- See the documentation: https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack#prometheusioscrape
+    # -- See also: https://github.com/prometheus-community/helm-charts/issues/106#issuecomment-700847774
+    serviceMonitor: 
+      enabled: false
+
 # agent will deploy pod on every node as daemonSet to read wanted pods logs
 agent:
   acquisition:
@@ -117,6 +127,16 @@ agent:
     #   value: "false"
     # - name: LEVEL_INFO
     #   value: "false"
+
+  # -- Enable service monitoring (exposes "metrics" port "6060" for Prometheus)
+  metrics:
+    enabled: false
+    # -- Creates a ServiceMonitor so Prometheus will monitor this service
+    # -- Prometheus needs to be configured to watch on all namespaces for ServiceMonitors
+    # -- See the documentation: https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack#prometheusioscrape
+    # -- See also: https://github.com/prometheus-community/helm-charts/issues/106#issuecomment-700847774
+    serviceMonitor: 
+      enabled: false
 
 #service: {}
 

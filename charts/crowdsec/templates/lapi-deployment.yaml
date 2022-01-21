@@ -54,7 +54,8 @@ spec:
           - name: lapi
             containerPort: 8080
             protocol: TCP
-          - name: lapi-prometheus
+            {{ if .Values.lapi.metrics.enabled }}
+          - name: metrics
             containerPort: 6060
             protocol: TCP
         {{- if .Values.lapi.persistentVolume.config.enabled }}
