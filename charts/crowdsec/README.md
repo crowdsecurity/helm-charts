@@ -53,6 +53,8 @@ helm delete crowdsec -n crowdsec
 | lapi.persistentVolume | object | `{"config":{"accessModes":["ReadWriteOnce"],"enabled":true,"size":"100Mi","storageClassName":""},"data":{"accessModes":["ReadWriteOnce"],"enabled":true,"size":"1Gi","storageClassName":""}}` | Enable persistent volumes |
 | lapi.persistentVolume.data | object | `{"accessModes":["ReadWriteOnce"],"enabled":true,"size":"1Gi","storageClassName":""}` | Persistent volume for data folder. Stores e.g. registered bouncer api keys |
 | lapi.persistentVolume.config | object | `{"accessModes":["ReadWriteOnce"],"enabled":true,"size":"100Mi","storageClassName":""}` | Persistent volume for config folder. Stores e.g. online api credentials |
+| lapi.nodeSelector | object | `{}` | nodeSelector for lapi |
+| lapi.tolerations | object | `{}` | tolerations for lapi |
 | lapi.metrics | object | `{"enabled":false,"serviceMonitor":{"enabled":false}}` | Enable service monitoring (exposes "metrics" port "6060" for Prometheus) |
 | lapi.metrics.serviceMonitor | object | `{"enabled":false}` | See also: https://github.com/prometheus-community/helm-charts/issues/106#issuecomment-700847774 |
 | agent.acquisition[0] | object | `{"namespace":"ingress-nginx","podName":"ingress-nginx-controller-*","program":"nginx"}` | Specify each pod you want to process it logs (namespace, podName and program) |
@@ -62,6 +64,8 @@ helm delete crowdsec -n crowdsec
 | agent.resources.requests.cpu | string | `"150m"` |  |
 | agent.resources.requests.memory | string | `"100Mi"` |  |
 | agent.env | list | `[]` | environment variables from crowdsecurity/crowdsec docker image |
+| agent.nodeSelector | object | `{}` | nodeSelector for agent |
+| agent.tolerations | object | `{}` | tolerations for agent |
 | agent.metrics | object | `{"enabled":false,"serviceMonitor":{"enabled":false}}` | Enable service monitoring (exposes "metrics" port "6060" for Prometheus) |
 | agent.metrics.serviceMonitor | object | `{"enabled":false}` | See also: https://github.com/prometheus-community/helm-charts/issues/106#issuecomment-700847774 |
 
