@@ -107,3 +107,11 @@ spec:
           claimName: {{ .Release.Name }}-config-pvc
       {{- end }}
       {{- end }}
+      {{- with .Values.lapi.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.lapi.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

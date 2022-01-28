@@ -41,7 +41,7 @@ lapi:
     # -- Enable ingress object
     ingress:
       enabled: false
-      annotations: 
+      annotations:
         # metabase only supports http so we need this annotation
         nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
       # labels: {}
@@ -60,17 +60,22 @@ lapi:
     # -- Persistent volume for data folder. Stores e.g. registered bouncer api keys
     data:
       enabled: true
-      accessModes: 
+      accessModes:
         - ReadWriteOnce
       storageClassName: ""
       size: 1Gi
     # -- Persistent volume for config folder. Stores e.g. online api credentials
     config:
       enabled: true
-      accessModes: 
+      accessModes:
         - ReadWriteOnce
       storageClassName: ""
       size: 100Mi
+
+  # -- nodeSelector for lapi
+  nodeSelector: {}
+  # -- tolerations for lapi
+  tolerations: {}
 
   # -- Enable service monitoring (exposes "metrics" port "6060" for Prometheus)
   metrics:
@@ -79,7 +84,7 @@ lapi:
     # -- Prometheus needs to be configured to watch on all namespaces for ServiceMonitors
     # -- See the documentation: https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack#prometheusioscrape
     # -- See also: https://github.com/prometheus-community/helm-charts/issues/106#issuecomment-700847774
-    serviceMonitor: 
+    serviceMonitor:
       enabled: false
 
 # agent will deploy pod on every node as daemonSet to read wanted pods logs
@@ -128,6 +133,11 @@ agent:
     # - name: LEVEL_INFO
     #   value: "false"
 
+  # -- nodeSelector for agent
+  nodeSelector: {}
+  # -- tolerations for agent
+  tolerations: {}
+
   # -- Enable service monitoring (exposes "metrics" port "6060" for Prometheus)
   metrics:
     enabled: false
@@ -135,7 +145,7 @@ agent:
     # -- Prometheus needs to be configured to watch on all namespaces for ServiceMonitors
     # -- See the documentation: https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack#prometheusioscrape
     # -- See also: https://github.com/prometheus-community/helm-charts/issues/106#issuecomment-700847774
-    serviceMonitor: 
+    serviceMonitor:
       enabled: false
 
 #service: {}
