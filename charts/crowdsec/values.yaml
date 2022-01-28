@@ -2,6 +2,9 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
+# -- for raw logs format: json or cri (docker|containerd)
+container_runtime: docker
+
 image:
   # -- docker image repository name
   repository: crowdsecurity/crowdsec
