@@ -1,8 +1,8 @@
 # crowdsec
 
-![Version: 0.2.3](https://img.shields.io/badge/Version-0.2.3-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.2.0](https://img.shields.io/badge/AppVersion-1.2.0-informational?style=flat-square)
+[Crowdsec](https://github.com/crowdsecurity/crowdsec) - the open-source and participative IDS & IPS.
 
-Crowdsec helm chart is an open-source, lightweight agent to detect and respond to bad behaviours.
+![Version: 0.2.3](https://img.shields.io/badge/Version-0.2.3-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.2.0](https://img.shields.io/badge/AppVersion-1.2.0-informational?style=flat-square)
 
 ## Get Repo Info
 
@@ -11,14 +11,44 @@ helm repo add crowdsec https://crowdsecurity.github.io/helm-charts
 helm repo update
 ```
 
-## Installing the Chart
+## Introduction
 
-Before installing the chart, you need to understand some [concepts](https://docs.crowdsec.net/docs/concepts) of Crowdsec.
-So you can configure well the chart and being able to parse logs and detect attacks inside your Kubernetes cluster.
+Before installing the chart, you might want to look at some [concepts](https://docs.crowdsec.net/docs/concepts) of Crowdsec.
+This chart deploys the agent as a [daemonSet](https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/) that will read the logs from the nodes, and a pod running the Local API to centralize decisions.
 
-Here is a [blog post](https://crowdsec.net/blog/kubernetes-crowdsec-integration/) about crowdsec in kubernetes.
+You can find a [blog post/tutorial](https://crowdsec.net/blog/kubernetes-crowdsec-integration/) about deploying Crowdsec in Kubernetes.
+Here is a [blog post](https://crowdsec.net/blog/kubernetes-crowdsec-integration/) about Crowdsec in Kubernetes.
 
+
+## Deploying Crowdsec
+
+Given the following example `crowdsec-values.yaml` :
+
+```yaml
+#container_runtime: containerd
+agent:
+  # Specify which logs we want to process (pods present in the node)
+  acquisition:
+    # We want to read logs of our nginx ingress controllers from the nginx-ingress namespace.
+    # The log file names will match the pod names in the namespace.
+    - namespace: nginx-ingress
+      podName: nginx-ingress-controller-*
+      # Specify the program name for the logs to be correctly parsed
+      program: nginx
+  # Those are ENV variables
+  env:
+#   if you are using containerd, add the crowdsecurity/cri-logs parser
+#    - name: PARSERS
+#      value: "crowdsecurity/cri-logs"
+    # As we are running Nginx, we want to install the Nginx collection
+    - name: COLLECTIONS
+      value: "crowdsecurity/nginx"
+lapi:
 ```
+
+You can deploy Crowdsec like this :
+
+```shell
 # Create namespace for crowdsec
 kubectl create ns crowdsec
 # Install helm chart with proper values.yaml config
@@ -69,4 +99,25 @@ helm delete crowdsec -n crowdsec
 | agent.tolerations | object | `{}` | tolerations for agent |
 | agent.metrics | object | `{"enabled":false,"serviceMonitor":{"enabled":false}}` | Enable service monitoring (exposes "metrics" port "6060" for Prometheus) |
 | agent.metrics.serviceMonitor | object | `{"enabled":false}` | See also: https://github.com/prometheus-community/helm-charts/issues/106#issuecomment-700847774 |
+
+
+## Next steps 
+
+### Checking behavior
+
+ - Use cscli's [alerts](https://doc.crowdsec.net/docs/cscli/cscli_alerts) and [decisions](https://doc.crowdsec.net/docs/cscli/cscli_decisions) on the LAPI pod to see current and past decisions
+ - Use [cscli hub list](https://doc.crowdsec.net/docs/cscli/cscli_hub_list) on the agent pod to see enabled parsers/scenarios etc.
+
+### Find your bouncer
+
+ - Find one of [the main bouncers](https://doc.crowdsec.net/docs/bouncers/intro) or [browse the hub](https://hub.crowdsec.net/browse/#bouncers) to the relevant ones.
+ - Use [cscli bouncers add](https://doc.crowdsec.net/docs/cscli/cscli_bouncers_add) on the LAPI pod to generate API keys for your bouncers
+
+### Use the console
+
+ - Checkout https://app.crowdsec.net to register your instance and get the most out of Crowdsec!
+
+
+
+
 
