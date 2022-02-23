@@ -23,7 +23,8 @@ spec:
         effect: NoSchedule
       initContainers:
       - name: wait-for-lapi
-        image: busybox:1.28
+        image: "{{ .Values.agent.wait_for_lapi.image.repository }}:{{ .Values.agent.wait_for_lapi.image.tag }}"
+        imagePullPolicy: {{ .Values.agent.wait_for_lapi.image.pullPolicy }}
         command: ['sh', '-c', "until nc {{ .Release.Name }}-service.{{ .Release.Namespace }} 8080; do echo waiting for lapi to start; sleep 5; done"]
       containers:
       - name: crowdsec-agent
