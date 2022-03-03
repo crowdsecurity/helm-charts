@@ -57,7 +57,7 @@ spec:
         {{ end }}
 
         {{- if .Values.agent.persistentVolume.config.enabled }}
-        command: ['sh', '-c', 'mv -n /etc/crowdsec/* /etc/crowdsec_data/ && rm -rf /etc/crowdsec && ln -s /etc/crowdsec_data /etc/crowdsec && ./docker_start.sh']
+        command: ['sh', '-c', 'mv -n /staging/etc/crowdsec/* /etc/crowdsec_data/ && rm -rf /staging/etc/crowdsec && ln -s /etc/crowdsec_data /etc/crowdsec && ./docker_start.sh']
         {{- end }}
         volumeMounts:
           {{- if .Values.agent.persistentVolume.config.enabled }}
