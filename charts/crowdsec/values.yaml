@@ -160,5 +160,15 @@ agent:
     serviceMonitor:
       enabled: false
 
+  # -- wait-for-lapi init container
+  wait_for_lapi:
+    image:
+      # -- docker image repository name
+      repository: busybox
+      # -- pullPolicy
+      pullPolicy: IfNotPresent
+      # -- docker image tag
+      tag: "1.28"
+
 #service: {}
 
