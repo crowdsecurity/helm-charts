@@ -71,4 +71,6 @@ helm delete crowdsec -n crowdsec
 | agent.tolerations | object | `{}` | tolerations for agent |
 | agent.metrics | object | `{"enabled":false,"serviceMonitor":{"enabled":false}}` | Enable service monitoring (exposes "metrics" port "6060" for Prometheus) |
 | agent.metrics.serviceMonitor | object | `{"enabled":false}` | See also: https://github.com/prometheus-community/helm-charts/issues/106#issuecomment-700847774 |
-
+| agent.wait_for_lapi.image.repository | string | `"busybox"` | `wait-for-lapi` docker image repository name |
+| agent.wait_for_lapi.image.tag | string | `"1.28"` | `wait-for-lapi` docker image tag |
+| agent.wait_for_lapi.image.pullPolicy | string | `"IfNotPresent"` | `wait-for-lapi` pullPolicy |
