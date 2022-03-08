@@ -11,6 +11,7 @@ spec:
     matchLabels:
       k8s-app: {{ .Release.Name }}
       type: lapi
+  strategy: {{- toYaml .Values.lapi.strategy | nindent 4 }}
   template:
     metadata:
       labels:

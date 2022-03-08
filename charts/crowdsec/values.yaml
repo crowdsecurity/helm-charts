@@ -90,6 +90,9 @@ lapi:
     serviceMonitor:
       enabled: false
 
+  strategy:
+    type: RollingUpdate
+
 # agent will deploy pod on every node as daemonSet to read wanted pods logs
 agent:
   acquisition:
