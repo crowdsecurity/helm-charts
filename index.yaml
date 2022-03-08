@@ -148,6 +148,16 @@ entries:
   helloworld:
   - apiVersion: v2
     appVersion: 1.16.0
+    created: "2022-03-08T11:46:31.709304346Z"
+    description: A helloWorld chart for Kubernetes using ingress nginx
+    digest: 4a4f2652f4ca1738150889461c352bc8aa49abd85ced4d4708acec44744c2911
+    name: helloworld
+    type: application
+    urls:
+    - https://github.com/crowdsecurity/helm-charts/releases/download/helloworld-0.2.0/helloworld-0.2.0.tgz
+    version: 0.2.0
+  - apiVersion: v2
+    appVersion: 1.16.0
     created: "2021-09-20T15:44:41.944894773Z"
     description: A helloWorld chart for Kubernetes using ingress nginx
     digest: 1586502ec344bc3a0f79b93796794adc7508ec43b8b0f46571167c029ad5d6f4
@@ -156,4 +166,4 @@ entries:
     urls:
     - https://github.com/crowdsecurity/helm-charts/releases/download/helloworld-0.1.0/helloworld-0.1.0.tgz
     version: 0.1.0
-generated: "2022-03-03T12:50:59.580298984Z"
+generated: "2022-03-08T11:46:31.709602648Z"
