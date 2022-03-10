@@ -33,9 +33,8 @@ spec:
         env:
           - name: AGENT_USERNAME
             valueFrom:
-              secretKeyRef:
-                name: agent-credentials
-                key: username
+              fieldRef:
+                fieldPath: spec.nodeName
           - name: AGENT_PASSWORD
             valueFrom:
               secretKeyRef:
