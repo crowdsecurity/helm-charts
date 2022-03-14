@@ -38,10 +38,10 @@ jobs:
         uses: helm/chart-testing-action@v2.2.1
 
       - name: Run chart-testing (lint)
-        run: ct lint
+        run: helm lint ./charts/crowdsec/
 
       - name: Create kind cluster
         uses: helm/kind-action@v1.2.0
 
       - name: Run chart-testing (install)
-        run: ct install
+        run: ct install --charts ./charts/crowdsec
