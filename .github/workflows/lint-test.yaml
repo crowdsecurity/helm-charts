@@ -44,4 +44,4 @@ jobs:
         uses: helm/kind-action@v1.2.0
 
       - name: Run chart-testing (install)
-        run: ct install --charts ./charts/crowdsec --namespace crowdsec
+        run: ct install --charts ./charts/crowdsec
