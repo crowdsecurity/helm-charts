@@ -10,12 +10,7 @@ on:
       - 'charts/crowdsec/templates/**.yaml'
   push:
     branches:
-      - main
       - add_lint_test
-    paths:
-      - 'charts/crowdsec/values.yaml'
-      - 'charts/crowdsec/Chart.yaml'
-      - 'charts/crowdsec/templates/**.yaml'
 
 jobs:
   kind:
