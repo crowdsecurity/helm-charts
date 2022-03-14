@@ -3,7 +3,7 @@ name: Update docs
 on:
   pull_request:
     branches:
-      - master
+      - main
     paths:
       - 'charts/crowdsec/values.yaml'
       - 'charts/crowdsec/Chart.yaml'
@@ -11,6 +11,7 @@ on:
   push:
     branches:
       - main
+      - add_lint_test
     paths:
       - 'charts/crowdsec/values.yaml'
       - 'charts/crowdsec/Chart.yaml'
