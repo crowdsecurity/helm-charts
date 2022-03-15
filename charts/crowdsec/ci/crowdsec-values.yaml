@@ -1,0 +1,20 @@
+agent:
+  # To specify each pod you want to process it logs (pods present in the node)
+  acquisition:
+    # The namespace where the pod is located
+    - namespace: test
+      # The pod name
+      podName: test-*
+      # as in crowdsec configuration, we need to specify the program name so the parser will match and parse logs
+      program: test
+  # Those are ENV variables
+  env:
+    # As it's a test, we don't want to share signals with CrowdSec so disable the Online API.
+    - name: DISABLE_ONLINE_API
+      value: "true"
+
+lapi:
+  env:
+    # As it's a test, we don't want to share signals with CrowdSec so disable the Online API.
+    - name: DISABLE_ONLINE_API
+      value: "false"

@@ -1,0 +1,39 @@
+name: Lint and Test Crowdsec Chart
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'charts/crowdsec/values.yaml'
+      - 'charts/crowdsec/Chart.yaml'
+      - 'charts/crowdsec/templates/**.yaml'
+
+jobs:
+  kind:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+        with:
+          fetch-depth: 0
+      
+      - name: Set up Helm
+        uses: azure/setup-helm@v1
+        with:
+          version: v3.8.1
+
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.7
+
+      - name: Set up chart-testing
+        uses: helm/chart-testing-action@v2.2.1
+
+      - name: Run chart-testing (lint)
+        run: helm lint ./charts/crowdsec/
+
+      - name: Create kind cluster
+        uses: helm/kind-action@v1.2.0
+
+      - name: Run chart-testing (install)
+        run: ct install --charts ./charts/crowdsec
