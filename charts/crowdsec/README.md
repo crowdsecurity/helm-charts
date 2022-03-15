@@ -1,6 +1,6 @@
 # crowdsec
 
-![Version: 0.3.0](https://img.shields.io/badge/Version-0.3.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.3.1](https://img.shields.io/badge/AppVersion-1.3.1-informational?style=flat-square)
+![Version: 0.3.0](https://img.shields.io/badge/Version-0.3.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v1.3.2](https://img.shields.io/badge/AppVersion-v1.3.2-informational?style=flat-square)
 
 Crowdsec helm chart is an open-source, lightweight agent to detect and respond to bad behaviours.
 
@@ -38,7 +38,7 @@ helm delete crowdsec -n crowdsec
 | container_runtime | string | `"docker"` | for raw logs format: json or cri (docker|containerd) |
 | image.repository | string | `"crowdsecurity/crowdsec"` | docker image repository name |
 | image.pullPolicy | string | `"IfNotPresent"` | pullPolicy |
-| image.tag | string | `"latest"` | docker image tag |
+| image.tag | string | `""` | docker image tag |
 | secrets.username | string | `""` | agent username (default is generated randomly) |
 | secrets.password | string | `""` | agent password (default is generated randomly) |
 | lapi.env | list | `[]` | environment variables from crowdsecurity/crowdsec docker image |
