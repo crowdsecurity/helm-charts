@@ -8,9 +8,6 @@ on:
       - 'charts/crowdsec/values.yaml'
       - 'charts/crowdsec/Chart.yaml'
       - 'charts/crowdsec/templates/**.yaml'
-  push:
-    branches:
-      - add_lint_test
 
 jobs:
   kind:
