@@ -58,7 +58,7 @@ helm delete crowdsec -n crowdsec
 | lapi.tolerations | object | `{}` | tolerations for lapi |
 | lapi.metrics | object | `{"enabled":false,"serviceMonitor":{"enabled":false}}` | Enable service monitoring (exposes "metrics" port "6060" for Prometheus) |
 | lapi.metrics.serviceMonitor | object | `{"enabled":false}` | See also: https://github.com/prometheus-community/helm-charts/issues/106#issuecomment-700847774 |
-| lapi.strategy | object | `{"type":"RollingUpdate"}` | Strategy used to replace old lapi pods |
+| lapi.strategy.type | string | `"RollingUpdate"` |  |
 | agent.acquisition[0] | object | `{"namespace":"ingress-nginx","podName":"ingress-nginx-controller-*","program":"nginx"}` | Specify each pod you want to process it logs (namespace, podName and program) |
 | agent.acquisition[0].podName | string | `"ingress-nginx-controller-*"` | to select pod logs to process |
 | agent.acquisition[0].program | string | `"nginx"` | program name related to specific parser you will use (see https://hub.crowdsec.net/author/crowdsecurity/configurations/docker-logs) |
