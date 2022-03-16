@@ -3,11 +3,11 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   annotations:
-    {{ toYaml .Values.lapi.dashboard.ingress.annotations | indent 1 }}
+    {{- toYaml .Values.lapi.dashboard.ingress.annotations | nindent 4 }}
   name: {{ .Release.Namespace }}-dashboard
   labels:    
     {{- if .Values.lapi.dashboard.ingress.labels }}    
-    {{ toYaml .Values.lapi.dashboard.ingress.labels | indent 1 }}
+    {{- toYaml .Values.lapi.dashboard.ingress.labels | nindent 4 }}
     {{- else }}
     k8s-app: {{ .Release.Name }}
     type: lapi-dashboard
@@ -28,6 +28,6 @@ spec:
                   number: 3000    
   {{- if .Values.lapi.dashboard.ingress.tls }}
   tls:
-    {{ tpl (toYaml .Values.lapi.dashboard.ingress.tls | indent 1) . }}
+    {{- tpl (toYaml .Values.lapi.dashboard.ingress.tls | nindent 4) . }}
   {{- end -}}
 {{- end -}}
