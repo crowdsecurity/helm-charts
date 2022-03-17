@@ -56,21 +56,10 @@ spec:
             protocol: TCP
         {{ end }}
 
-        {{- if .Values.agent.persistentVolume.config.enabled }}
-        command: ['sh', '-c', 'mv -n /staging/etc/crowdsec/* /etc/crowdsec_data/ && rm -rf /staging/etc/crowdsec && ln -s /etc/crowdsec_data /etc/crowdsec && ./docker_start.sh']
-        {{- end }}
         volumeMounts:
-          {{- if .Values.agent.persistentVolume.config.enabled }}
-          - name: crowdsec-agent-config
-            mountPath: /etc/crowdsec_data
-          - name: acquis-config-volume
-            mountPath: /etc/crowdsec_data/acquis.yaml
-            subPath: acquis.yaml
-          {{- else }}
           - name: acquis-config-volume
             mountPath: /etc/crowdsec/acquis.yaml
             subPath: acquis.yaml
-          {{- end }}
           - name: varlog
             mountPath: /var/log
           - name: varlibdockercontainers
@@ -84,11 +73,6 @@ spec:
       - name: varlog
         hostPath:
           path: /var/log
-      {{- if .Values.agent.persistentVolume.config.enabled }}
-      - name: crowdsec-agent-config
-        persistentVolumeClaim:
-          claimName: {{ .Release.Name }}-agent-config-pvc
-      {{- end }}
       - name: varlibdockercontainers
         hostPath:
           path: /var/lib/docker/containers

@@ -43,9 +43,9 @@ spec:
         image: "{{ .Values.image.repository | default "crowdsecurity/crowdsec" }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         {{- if .Values.lapi.persistentVolume.config.enabled }}
-        command: ['sh', '-euc', 'mv -n /staging/etc/crowdsec/* /etc/crowdsec_data/ && rm -rf /staging/etc/crowdsec && ln -s /etc/crowdsec_data /etc/crowdsec && cp -r /staging/etc/* /etc/ && (cat /etc/init/nodes.txt | xargs -I{} cscli -c "/etc/crowdsec/config.yaml" machines add {} --password "$(AGENT_PASSWORD)")']
+        command: ['sh', '-euc', 'mv -n /staging/etc/crowdsec/* /etc/crowdsec_data/ && rm -rf /staging/etc/crowdsec && ln -s /etc/crowdsec_data /etc/crowdsec && (cat /etc/init/nodes.txt | xargs -I{} cscli -c "/etc/crowdsec/config.yaml" machines add {} --password "$(AGENT_PASSWORD)")']
         {{- else }}
-        command: ['sh', '-euc', 'cp -r /staging/etc/* /etc/ && (cat /etc/init/nodes.txt | xargs -I{} cscli -c "/etc/crowdsec/config.yaml" machines add {} --password "$(AGENT_PASSWORD)")']
+        command: ['sh', '-euc', '(cat /etc/init/nodes.txt | xargs -I{} cscli -c "/etc/crowdsec/config.yaml" machines add {} --password "$(AGENT_PASSWORD)")']
         {{- end }}
         env:
           - name: AGENT_PASSWORD

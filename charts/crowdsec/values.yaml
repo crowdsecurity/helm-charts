@@ -105,15 +105,6 @@ agent:
     requests:
       cpu: 150m
       memory: 100Mi
-  # -- Enable persistent volumes
-  persistentVolume:
-    # -- Persistent volume for config folder. Stores local config (parsers, scenarios etc.)
-    config:
-      enabled: true
-      accessModes:
-        - ReadWriteOnce
-      storageClassName: ""
-      size: 100Mi
   # -- environment variables from crowdsecurity/crowdsec docker image
   env: []
     # by default we the docker-logs parser to be able to parse docker logs in k8s
