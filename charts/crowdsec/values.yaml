@@ -13,11 +13,9 @@ image:
   # -- docker image tag
   tag: "latest"
 
-# If you want to specify secrets that will be used for all your crowdsec-agents
-# secrets can be provided be env variables
+# If you want to specify secret that will be used for all your crowdsec-agents
+# secret can be provided be env variables
 secrets:
-  # -- agent username (default is generated randomly)
-  username: ""
   # -- agent password (default is generated randomly)
   password: ""
 
