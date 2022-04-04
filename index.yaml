@@ -145,6 +145,18 @@ entries:
     urls:
     - https://github.com/crowdsecurity/helm-charts/releases/download/crowdsec-0.1.0/crowdsec-0.1.0.tgz
     version: 0.1.0
+  crowdsec-traefik-bouncer:
+  - apiVersion: v2
+    appVersion: 0.3.5
+    created: "2022-04-04T14:19:38.844792716Z"
+    description: A http service to verify request and bounce them according to decisions
+      made by CrowdSec.
+    digest: b07061471ce4d49cbbd2743cc55d040a04d00b80a8c18518081ceadb43c46fec
+    name: crowdsec-traefik-bouncer
+    type: application
+    urls:
+    - https://github.com/crowdsecurity/helm-charts/releases/download/crowdsec-traefik-bouncer-0.1.0/crowdsec-traefik-bouncer-0.1.0.tgz
+    version: 0.1.0
   helloworld:
   - apiVersion: v2
     appVersion: 1.16.0
@@ -166,4 +178,4 @@ entries:
     urls:
     - https://github.com/crowdsecurity/helm-charts/releases/download/helloworld-0.1.0/helloworld-0.1.0.tgz
     version: 0.1.0
-generated: "2022-03-08T11:46:31.709602648Z"
+generated: "2022-04-04T14:19:38.844834833Z"
