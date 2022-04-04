@@ -1,0 +1,16 @@
+To add traefik crowdsec bouncer as a middleware. You need to add following your ingress type:
+
+**Kubernetes Ingress** :
+```
+ingress:
+  annotations:
+    traefik.ingress.kubernetes.io/router.middlewares: {{ .Release.Namespace}}-traefik-bouncer@kubernetescrd
+```
+
+**Kubernetes IngressRoute** : 
+```
+spec:
+  routes:
+    middlewares:
+      - name: {{ .Release.Namespace}}-traefik-bouncer@kubernetescrd
+```
