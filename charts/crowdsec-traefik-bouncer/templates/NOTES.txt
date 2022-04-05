@@ -1,3 +1,14 @@
+# Global configuration (middleware for all Ingress and IngressRoutes)
+
+To add traefik bouncer as middleware globally, you need to add this configuration below to your traefik helm values and upgrade.
+
+```
+additionalArguments:
+  - "--entrypoints.web.http.middlewares={{ .Release.Namespace}}-traefik-bouncer@kubernetescrd"
+  - "--entrypoints.websecure.http.middlewares={{ .Release.Namespace}}-traefik-bouncer@kubernetescrd"
+```
+
+# Configuration by Ingress or IngressRoute
 To add traefik crowdsec bouncer as a middleware. You need to add following your ingress type:
 
 **Kubernetes Ingress** :
