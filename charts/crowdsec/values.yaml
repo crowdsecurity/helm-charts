@@ -75,6 +75,14 @@ lapi:
       storageClassName: ""
       size: 100Mi
 
+  service:
+    type: ClusterIP
+    labels: {}
+    annotations: {}
+    externalIPs: []
+    loadBalancerIP: null
+    loadBalancerClass: null
+
   # -- nodeSelector for lapi
   nodeSelector: {}
   # -- tolerations for lapi
@@ -162,6 +170,14 @@ agent:
     # -- See also: https://github.com/prometheus-community/helm-charts/issues/106#issuecomment-700847774
     serviceMonitor:
       enabled: false
+
+  service:
+    type: ClusterIP
+    labels: {}
+    annotations: {}
+    externalIPs: []
+    loadBalancerIP: null
+    loadBalancerClass: null
 
   # -- wait-for-lapi init container
   wait_for_lapi:

@@ -4,25 +4,42 @@ metadata:
   name: {{ .Release.Name }}-service
   labels:
     app: {{ .Release.Name }}-service
+    {{- with .Values.lapi.service.labels }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with .Values.lapi.service.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 spec:
-  type: ClusterIP
+  type: {{ .Values.lapi.service.type }}
+  {{- with .Values.lapi.service.loadBalancerIP }}
+  loadBalancerIP: {{ . }}
+  {{- end }}
+  {{- with .Values.lapi.service.loadBalancerClass }}
+  loadBalancerClass: {{ . }}
+  {{- end }}
+  {{- with .Values.lapi.service.externalIPs }}
+  externalIPs:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   ports:
-    {{ if .Values.lapi.metrics.enabled }}
+    {{- if .Values.lapi.metrics.enabled }}
     - port: 6060
       targetPort: 6060
       protocol: TCP
       name: metrics
-    {{ end }}
+    {{- end }}
     - port: 8080
       targetPort: 8080
       protocol: TCP
       name: lapi
-    {{ if .Values.lapi.dashboard.enabled }}
+    {{- if .Values.lapi.dashboard.enabled }}
     - port: 3000
       targetPort: 3000
       protocol: TCP
       name: dashboard
-    {{ end }}
+    {{- end }}
   selector:
     k8s-app: {{ .Release.Name }}
     type: lapi
