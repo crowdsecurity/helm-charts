@@ -1,6 +1,6 @@
 # crowdsec
 
-![Version: 0.3.1](https://img.shields.io/badge/Version-0.3.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v1.3.4](https://img.shields.io/badge/AppVersion-v1.3.4-informational?style=flat-square)
+![Version: 0.4.0](https://img.shields.io/badge/Version-0.4.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v1.3.4](https://img.shields.io/badge/AppVersion-v1.3.4-informational?style=flat-square)
 
 Crowdsec helm chart is an open-source, lightweight agent to detect and respond to bad behaviours.
 
@@ -54,6 +54,12 @@ helm delete crowdsec -n crowdsec
 | lapi.persistentVolume | object | `{"config":{"accessModes":["ReadWriteOnce"],"enabled":true,"size":"100Mi","storageClassName":""},"data":{"accessModes":["ReadWriteOnce"],"enabled":true,"size":"1Gi","storageClassName":""}}` | Enable persistent volumes |
 | lapi.persistentVolume.data | object | `{"accessModes":["ReadWriteOnce"],"enabled":true,"size":"1Gi","storageClassName":""}` | Persistent volume for data folder. Stores e.g. registered bouncer api keys |
 | lapi.persistentVolume.config | object | `{"accessModes":["ReadWriteOnce"],"enabled":true,"size":"100Mi","storageClassName":""}` | Persistent volume for config folder. Stores e.g. online api credentials |
+| lapi.service.type | string | `"ClusterIP"` |  |
+| lapi.service.labels | object | `{}` |  |
+| lapi.service.annotations | object | `{}` |  |
+| lapi.service.externalIPs | list | `[]` |  |
+| lapi.service.loadBalancerIP | string | `nil` |  |
+| lapi.service.loadBalancerClass | string | `nil` |  |
 | lapi.nodeSelector | object | `{}` | nodeSelector for lapi |
 | lapi.tolerations | object | `{}` | tolerations for lapi |
 | lapi.metrics | object | `{"enabled":false,"serviceMonitor":{"enabled":false}}` | Enable service monitoring (exposes "metrics" port "6060" for Prometheus) |
@@ -72,6 +78,12 @@ helm delete crowdsec -n crowdsec
 | agent.tolerations | object | `{}` | tolerations for agent |
 | agent.metrics | object | `{"enabled":false,"serviceMonitor":{"enabled":false}}` | Enable service monitoring (exposes "metrics" port "6060" for Prometheus) |
 | agent.metrics.serviceMonitor | object | `{"enabled":false}` | See also: https://github.com/prometheus-community/helm-charts/issues/106#issuecomment-700847774 |
+| agent.service.type | string | `"ClusterIP"` |  |
+| agent.service.labels | object | `{}` |  |
+| agent.service.annotations | object | `{}` |  |
+| agent.service.externalIPs | list | `[]` |  |
+| agent.service.loadBalancerIP | string | `nil` |  |
+| agent.service.loadBalancerClass | string | `nil` |  |
 | agent.wait_for_lapi | object | `{"image":{"pullPolicy":"IfNotPresent","repository":"busybox","tag":"1.28"}}` | wait-for-lapi init container |
 | agent.wait_for_lapi.image.repository | string | `"busybox"` | docker image repository name |
 | agent.wait_for_lapi.image.pullPolicy | string | `"IfNotPresent"` | pullPolicy |
