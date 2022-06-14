@@ -7,6 +7,7 @@ data:
     {{- $valid := required "You need to specify at least one pod for logs read" .Values.agent.acquisition }}
     {{- $container_runtime := .Values.container_runtime }}
     {{- range .Values.agent.acquisition }}
+    ---
     filenames:
       - /var/log/containers/{{ .podName }}_{{ .namespace }}_*.log
     labels:
