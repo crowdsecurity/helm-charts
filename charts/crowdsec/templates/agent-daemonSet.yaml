@@ -18,9 +18,10 @@ spec:
         type: agent
         version: v1
     spec:
+      {{- with .Values.agent.tolerations }}
       tolerations:
-      - key: node-role.kubernetes.io/master
-        effect: NoSchedule
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       initContainers:
       - name: wait-for-lapi
         image: "{{ .Values.agent.wait_for_lapi.image.repository }}:{{ .Values.agent.wait_for_lapi.image.tag }}"
@@ -93,10 +94,6 @@ spec:
       - name: varlibdockercontainers
         hostPath:
           path: /var/lib/docker/containers
-      {{- with .Values.agent.tolerations }}
-      tolerations:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
       {{- with .Values.agent.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
