@@ -4,4 +4,4 @@ metadata:
   name: {{ .Release.Name }}
 spec:
   forwardAuth:
-    address: http://{{ .Release.Name }}-service/api/v1/forwardAuth
+    address: http://{{ .Release.Name }}-service.{{ .Release.Namespace }}/api/v1/forwardAuth
