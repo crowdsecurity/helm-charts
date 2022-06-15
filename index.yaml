@@ -3,6 +3,25 @@ entries:
   crowdsec:
   - apiVersion: v2
     appVersion: v1.3.4
+    created: "2022-06-15T09:03:43.225856678Z"
+    description: 'Crowdsec helm chart is an open-source, lightweight agent to detect
+      and respond to bad behaviours.  ## Get Repo Info  ``` helm repo add crowdsec
+      https://crowdsecurity.github.io/helm-charts helm repo update ```  ## Installing
+      the Chart  Before installing the chart, you need to understand some [concepts](https://docs.crowdsec.net/docs/concepts)
+      of Crowdsec. So you can configure well the chart and being able to parse logs
+      and detect attacks inside your Kubernetes cluster.  Here is a [blog post](https://crowdsec.net/blog/kubernetes-crowdsec-integration/)
+      about crowdsec in kubernetes.  ``` # Create namespace for crowdsec kubectl create
+      ns crowdsec # Install helm chart with proper values.yaml config helm install
+      crowdsec crowdsec/crowdsec -f crowdsec-values.yaml -n crowdsec ```  ## Uninstalling
+      the Chart  ``` helm delete crowdsec -n crowdsec ``` '
+    digest: b26188c6c0c0de7adc364a51c0070d7a6a869c788cef0f0524a3c252653afce3
+    name: crowdsec
+    type: application
+    urls:
+    - https://github.com/crowdsecurity/helm-charts/releases/download/crowdsec-0.4.1/crowdsec-0.4.1.tgz
+    version: 0.4.1
+  - apiVersion: v2
+    appVersion: v1.3.4
     created: "2022-06-14T15:36:33.573874429Z"
     description: 'Crowdsec helm chart is an open-source, lightweight agent to detect
       and respond to bad behaviours.  ## Get Repo Info  ``` helm repo add crowdsec
@@ -186,17 +205,6 @@ entries:
   crowdsec-traefik-bouncer:
   - apiVersion: v2
     appVersion: 0.3.5
-    created: "2022-06-15T09:03:33.758360648Z"
-    description: A http service to verify request and bounce them according to decisions
-      made by CrowdSec.
-    digest: cbc73ad248615e6c8aab7581c19db496deb9f0feec7e5262ea5e50018558590b
-    name: crowdsec-traefik-bouncer
-    type: application
-    urls:
-    - https://github.com/crowdsecurity/helm-charts/releases/download/crowdsec-traefik-bouncer-0.1.1/crowdsec-traefik-bouncer-0.1.1.tgz
-    version: 0.1.1
-  - apiVersion: v2
-    appVersion: 0.3.5
     created: "2022-04-04T14:19:38.844792716Z"
     description: A http service to verify request and bounce them according to decisions
       made by CrowdSec.
@@ -237,4 +245,4 @@ entries:
     urls:
     - https://github.com/crowdsecurity/helm-charts/releases/download/helloworld-0.1.0/helloworld-0.1.0.tgz
     version: 0.1.0
-generated: "2022-06-15T09:03:33.758396649Z"
+generated: "2022-06-15T09:03:43.22598468Z"
