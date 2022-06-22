@@ -19,8 +19,9 @@ spec:
         type: lapi
         version: v1
     spec:
-      {{ if .Values.lapi.dashboard.enabled }}
+      serviceAccountName: {{ .Release.Name }}-lapi
       initContainers:
+      {{ if .Values.lapi.dashboard.enabled }}
       - name: fetch-metabase-config
         image: busybox:1.28
         imagePullPolicy: IfNotPresent
@@ -29,21 +30,42 @@ spec:
         - name: shared-data
           mountPath: /metabase-data
       {{ end }}
-      containers:
-      - name: crowdsec-lapi
+      - name: kubectl
+        image: bitnami/kubectl
+        imagePullPolicy: IfNotPresent
+        command:
+        - sh
+        - -euxc
+        - kubectl get nodes -o jsonpath='{range .items[*]}{.metadata.name}{"\n"}{end}' --no-headers > /etc/init/nodes.txt
+        volumeMounts:
+          - name: init
+            mountPath: /etc/init
+      - name: register
         image: "{{ .Values.image.repository | default "crowdsecurity/crowdsec" }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
+        {{- if .Values.lapi.persistentVolume.config.enabled }}
+        command: ['sh', '-euc', 'mv -n /staging/etc/crowdsec/* /etc/crowdsec_data/ && rm -rf /staging/etc/crowdsec && ln -s /etc/crowdsec_data /etc/crowdsec && cp -r /staging/etc/* /etc/ && (cat /etc/init/nodes.txt | xargs -I{} cscli -c "/etc/crowdsec/config.yaml" machines add {} --password "$(AGENT_PASSWORD)")']
+        {{- else }}
+        command: ['sh', '-euc', 'cp -r /staging/etc/* /etc/ && (cat /etc/init/nodes.txt | xargs -I{} cscli -c "/etc/crowdsec/config.yaml" machines add {} --password "$(AGENT_PASSWORD)")']
+        {{- end }}
         env:
-          - name: AGENT_USERNAME
-            valueFrom:
-              secretKeyRef:
-                name: agent-credentials
-                key: username
           - name: AGENT_PASSWORD
             valueFrom:
               secretKeyRef:
                 name: agent-credentials
                 key: password
+        volumeMounts:
+          - name: init
+            mountPath: /etc/init
+          - name: crowdsec-db
+            mountPath: /var/lib/crowdsec/data
+          - name: crowdsec-config
+            mountPath: /etc/crowdsec_data
+      containers:
+      - name: crowdsec-lapi
+        image: "{{ .Values.image.repository | default "crowdsecurity/crowdsec" }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        env:
           - name: DISABLE_AGENT
             value: "true"
         {{- with .Values.lapi.env }}
@@ -63,17 +85,11 @@ spec:
         {{- if .Values.lapi.persistentVolume.config.enabled }}
         command: ['sh', '-c', 'mv -n /staging/etc/crowdsec/* /etc/crowdsec_data/ && rm -rf /staging/etc/crowdsec && ln -s /etc/crowdsec_data /etc/crowdsec && ./docker_start.sh']
         {{- end }}
-        {{- if or (.Values.lapi.persistentVolume.data.enabled) (.Values.lapi.persistentVolume.config.enabled) (.Values.lapi.dashboard.enabled) }}
         volumeMounts:
-          {{- if or (.Values.lapi.persistentVolume.data.enabled) (.Values.lapi.dashboard.enabled) }}
           - name: crowdsec-db
             mountPath: /var/lib/crowdsec/data
-          {{- end }}
-          {{- if .Values.lapi.persistentVolume.config.enabled }}
           - name: crowdsec-config
             mountPath: /etc/crowdsec_data
-          {{- end }}
-        {{- end }}
       {{- if .Values.lapi.dashboard.enabled }}
       - name: dashboard
         image: "{{ .Values.lapi.dashboard.image.repository | default "metabase/metabase" }}:{{ .Values.lapi.dashboard.image.tag | default "latest" }}"
@@ -88,8 +104,9 @@ spec:
             value: /metabase-data/metabase.db
       {{- end }}
       terminationGracePeriodSeconds: 30
-      {{- if or (.Values.lapi.persistentVolume.data.enabled) (.Values.lapi.persistentVolume.config.enabled) (.Values.lapi.dashboard.enabled) }}
       volumes:
+      - name: init
+        emptyDir: {}
       {{- if .Values.lapi.dashboard.enabled }}
       - name: shared-data
         emptyDir: {}
@@ -98,7 +115,7 @@ spec:
       - name: crowdsec-db
         persistentVolumeClaim:
           claimName: {{ .Release.Name }}-db-pvc
-      {{- else if .Values.lapi.dashboard.enabled }}
+      {{- else }}
       - name: crowdsec-db
         emptyDir: {}
       {{- end }}
@@ -106,7 +123,9 @@ spec:
       - name: crowdsec-config
         persistentVolumeClaim:
           claimName: {{ .Release.Name }}-config-pvc
-      {{- end }}
+      {{- else }}
+      - name: crowdsec-config
+        emptyDir: {}
       {{- end }}
       {{- with .Values.lapi.tolerations }}
       tolerations:
