@@ -70,8 +70,7 @@
                     "$ref": "#/definitions/Postoverflows"
                 },
                 "profiles.yaml": {
-                    "type": "string",
-                    "minLength": 1
+                    "type": "string"
                 },
                 "notifications": {
                     "$ref": "#/definitions/Notifications"
