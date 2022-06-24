@@ -1,0 +1,46 @@
+{{ if (include "parsersIsNotEmpty" .) }}
+{{- range $stage, $stageConfig := .Values.config.parsers -}}
+{{- if $stageConfig -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ printf "crowdsec-parsers-%s" $stage }}
+data:
+{{ range $fileName, $content := $stageConfig -}}
+  {{ printf "%s: |" $fileName | indent 2 }}
+{{ $content | indent 4 }}
+{{- end }}
+---
+{{- end }}
+{{ end }}
+{{ end -}}
+
+{{- if .Values.config.scenarios }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "crowdsec-scenarios"
+data:
+{{ range $fileName, $content := .Values.config.scenarios -}}
+  {{ printf "%s: |" $fileName | indent 2 }}
+{{ $content | indent 4 }}
+{{- end }}
+{{- end }}
+
+{{ if (include "postoverflowsIsNotEmpty" .) }}
+---
+{{- range $stage, $stageConfig := .Values.config.postoverflows -}}
+{{- if $stageConfig -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ printf "crowdsec-postoverflows-%s" $stage }}
+data:
+{{ range $fileName, $content := $stageConfig -}}
+  {{ printf "%s: |" $fileName | indent 2 }}
+{{ $content | indent 4 }}
+{{- end }}
+---
+{{- end }}
+{{ end }}
+{{ end -}}

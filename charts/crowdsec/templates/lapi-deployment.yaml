@@ -63,7 +63,7 @@ spec:
         {{- if .Values.lapi.persistentVolume.config.enabled }}
         command: ['sh', '-c', 'mv -n /staging/etc/crowdsec/* /etc/crowdsec_data/ && rm -rf /staging/etc/crowdsec && ln -s /etc/crowdsec_data /etc/crowdsec && ./docker_start.sh']
         {{- end }}
-        {{- if or (.Values.lapi.persistentVolume.data.enabled) (.Values.lapi.persistentVolume.config.enabled) (.Values.lapi.dashboard.enabled) }}
+        {{- if or (.Values.lapi.persistentVolume.data.enabled) (.Values.lapi.persistentVolume.config.enabled) (.Values.lapi.dashboard.enabled) (include "lapiCustomConfigIsNotEmpty" .) }}
         volumeMounts:
           {{- if or (.Values.lapi.persistentVolume.data.enabled) (.Values.lapi.dashboard.enabled) }}
           - name: crowdsec-db
@@ -72,6 +72,35 @@ spec:
           {{- if .Values.lapi.persistentVolume.config.enabled }}
           - name: crowdsec-config
             mountPath: /etc/crowdsec_data
+          {{ if index .Values.config "profiles.yaml" }}
+          - name: crowdsec-profiles-volume
+            mountPath: /etc/crowdsec_data/profiles.yaml
+            subPath: profiles.yaml
+          {{ end }}
+          {{- if (include "notificationsIsNotEmpty" .) -}}
+          {{ range $fileName, $content := .Values.config.notifications -}}
+          {{- if $content }}
+          - name: crowdsec-notifications-{{ (trimSuffix ".yaml" $fileName) }}
+            mountPath: {{ printf "/etc/crowdsec_data/notifications/%s" $fileName }}
+            subPath: {{ $fileName }}
+          {{- end }}
+          {{- end }}
+          {{- end }}
+          {{- else }}
+          {{ if index .Values.config "profiles.yaml" }}
+          - name: crowdsec-profiles-volume
+            mountPath: /etc/crowdsec/profiles.yaml
+            subPath: profiles.yaml
+          {{ end }}
+          {{- if (include "notificationsIsNotEmpty" .) -}}
+          {{ range $fileName, $content := .Values.config.notifications -}}
+          {{- if $content }}
+          - name: crowdsec-notifications-{{ (trimSuffix ".yaml" $fileName) }}
+            mountPath: {{ printf "/etc/crowdsec/notifications/%s" $fileName }}
+            subPath: {{ $fileName }}
+          {{- end }}
+          {{- end }}
+          {{- end }}
           {{- end }}
         {{- end }}
       {{- if .Values.lapi.dashboard.enabled }}
@@ -88,7 +117,7 @@ spec:
             value: /metabase-data/metabase.db
       {{- end }}
       terminationGracePeriodSeconds: 30
-      {{- if or (.Values.lapi.persistentVolume.data.enabled) (.Values.lapi.persistentVolume.config.enabled) (.Values.lapi.dashboard.enabled) }}
+      {{- if or (.Values.lapi.persistentVolume.data.enabled) (.Values.lapi.persistentVolume.config.enabled) (.Values.lapi.dashboard.enabled) (include "lapiCustomConfigIsNotEmpty" .) }}
       volumes:
       {{- if .Values.lapi.dashboard.enabled }}
       - name: shared-data
@@ -106,6 +135,23 @@ spec:
       - name: crowdsec-config
         persistentVolumeClaim:
           claimName: {{ .Release.Name }}-config-pvc
+      {{- end }}
+      {{ if index .Values.config "profiles.yaml" }}
+      - name: crowdsec-profiles-volume
+        configMap:
+          name: crowdsec-profiles
+      {{- end }}
+      {{- if (include "notificationsIsNotEmpty" .) -}}
+      {{ range $fileName, $content := .Values.config.notifications -}}
+      {{- if $content }}
+      - name: crowdsec-notifications-{{ (trimSuffix ".yaml" $fileName) }}
+        configMap:
+          name: crowdsec-notifications
+          items:
+          - key: {{ $fileName }}
+            path: {{ $fileName }}
+      {{ end }}
+      {{- end }}
       {{- end }}
       {{- end }}
       {{- with .Values.lapi.tolerations }}
