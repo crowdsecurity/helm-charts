@@ -4,7 +4,6 @@ metadata:
   name: acquis-configmap
 data:
   acquis.yaml: |-
-    {{- $valid := required "You need to specify at least one pod for logs read" .Values.agent.acquisition }}
     {{- $container_runtime := .Values.container_runtime }}
     {{- range .Values.agent.acquisition }}
     ---

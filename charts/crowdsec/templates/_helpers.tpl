@@ -30,8 +30,12 @@ Generate password if not specified in values
   notifications parameters check
 */}}
 {{ define "notificationsIsNotEmpty" }}
-{{- if or (index .Values.config.notifications "email.yaml") (index .Values.config.notifications "slack.yaml") (index .Values.config.notifications "http.yaml") (index .Values.config.notifications "splunk.yaml") }}
+{{- if .Values.config.notifications }}
+{{ range $fileName, $content := .Values.config.notifications }}
+{{- if $content }}
 true
+{{- end -}}
+{{- end -}}
 {{- end -}}
 {{- end -}}
 
@@ -57,7 +61,7 @@ true
   lapi custom config check
 */}}
 {{ define "lapiCustomConfigIsNotEmpty" }}
-{{- if or (index .Values.config "profiles.yaml") (include "notificationsIsNotEmpty" .) }}
+{{- if or (index .Values.config "profiles.yaml") ((include "notificationsIsNotEmpty" .)) }}
 true
 {{- end -}}
 {{- end -}}

@@ -52,21 +52,16 @@ config:
     #    - Alert.Remediation == true && Alert.GetScope() == "Ip"
     #  ...
   # -- notifications configuration (https://docs.crowdsec.net/docs/next/notification_plugins/intro)
-  notifications:
-    # -- email plugin, needs multi-line config using '|'
-    email.yaml: ""
-      #   |
-      # type: email
-      # name: email_default
-      # One of "trace", "debug", "info", "warn", "error", "off"
-      # log_level: info
-      # ...
-    # -- slack plugin, needs multi-line config using '|'
-    slack.yaml: ""
-    # -- http plugin, needs multi-line config using '|'
-    http.yaml: ""
-    # -- splunk plugin, needs multi-line config using '|'
-    splunk.yaml: ""
+  notifications: {}
+    # email.yaml: |
+    #   type: email
+    #   name: email_default
+    #   One of "trace", "debug", "info", "warn", "error", "off"
+    #   log_level: info
+    #   ...
+    # slack.yaml: ""
+    # http.yaml: ""
+    # splunk.yaml: ""
 
 
 # If you want to specify secrets that will be used for all your crowdsec-agents
@@ -161,11 +156,11 @@ lapi:
 agent:
   acquisition:
     # -- Specify each pod you want to process it logs (namespace, podName and program)
-    - namespace: ingress-nginx
+    - namespace: "" #ingress-nginx
       # -- to select pod logs to process
-      podName: ingress-nginx-controller-*
+      podName: "" #ingress-nginx-controller-*
       # -- program name related to specific parser you will use (see https://hub.crowdsec.net/author/crowdsecurity/configurations/docker-logs)
-      program: nginx
+      program: "" #nginx
   resources:
     limits:
       memory: 100Mi
