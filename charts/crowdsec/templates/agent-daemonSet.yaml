@@ -57,20 +57,19 @@ spec:
             containerPort: 6060
             protocol: TCP
         {{ end }}
-
         {{- if .Values.agent.persistentVolume.config.enabled }}
         command: ['sh', '-c', 'mv -n /staging/etc/crowdsec/* /etc/crowdsec_data/ && rm -rf /staging/etc/crowdsec && ln -s /etc/crowdsec_data /etc/crowdsec && ./docker_start.sh']
         {{- end }}
         volumeMounts:
-          {{- if .Values.agent.persistentVolume.config.enabled }}
+          {{- $crowdsecConfig := "/etc/crowdsec" -}}
+          {{- if .Values.agent.persistentVolume.config.enabled -}}
+          {{- $crowdsecConfig = "/etc/crowdsec_data" }}
           - name: crowdsec-agent-config
-            mountPath: /etc/crowdsec_data
-          - name: acquis-config-volume
-            mountPath: /etc/crowdsec_data/acquis.yaml
-            subPath: acquis.yaml
+            mountPath: {{ $crowdsecConfig }}
+          {{- end }}
           {{ if index .Values.config "simulation.yaml" }}
           - name: crowdsec-simulation-volume
-            mountPath: /etc/crowdsec_data/simulation.yaml
+            mountPath: {{ $crowdsecConfig }}/simulation.yaml
             subPath: simulation.yaml
           {{ end }}
           {{ if (include "parsersIsNotEmpty" .) }}
@@ -78,7 +77,7 @@ spec:
           {{- if $stageConfig -}}
           {{ range $fileName, $content := $stageConfig -}}
           - name: {{ printf "crowdsec-parsers-%s-%s" $stage (trimSuffix ".yaml" $fileName) }}
-            mountPath: {{ printf "/etc/crowdsec_data/parsers/%s/%s" $stage $fileName }}
+            mountPath: {{ printf "%s/parsers/%s/%s" $crowdsecConfig $stage $fileName }}
             subPath: {{ $fileName }}
           {{ end }}
           {{- end }}
@@ -87,7 +86,7 @@ spec:
           {{- if .Values.config.scenarios -}}
           {{ range $fileName, $content := .Values.config.scenarios -}}
           - name: {{ printf "crowdsec-scenarios-%s" (trimSuffix ".yaml" $fileName) }}
-            mountPath: {{ printf "/etc/crowdsec_data/scenarios/%s" $fileName }}
+            mountPath: {{ printf "%s/scenarios/%s" $crowdsecConfig $fileName }}
             subPath: {{ $fileName }}
           {{ end }}
           {{ end }}
@@ -96,47 +95,15 @@ spec:
           {{- if $stageConfig -}}
           {{ range $fileName, $content := $stageConfig -}}
           - name: {{ printf "crowdsec-postoverflows-%s-%s" $stage (trimSuffix ".yaml" $fileName) }}
-            mountPath: {{ printf "/etc/crowdsec_data/postoverflows/%s/%s" $stage $fileName }}
+            mountPath: {{ printf "%s/postoverflows/%s/%s" $crowdsecConfig $stage $fileName }}
             subPath: {{ $fileName }}
           {{ end }}
           {{- end }}
           {{- end }}
           {{- end }}
-          {{- else }}
           - name: acquis-config-volume
-            mountPath: /etc/crowdsec/acquis.yaml
+            mountPath: {{ $crowdsecConfig }}/acquis.yaml
             subPath: acquis.yaml
-          {{ if index .Values.config "simulation.yaml" }}
-          - name: crowdsec-simulation-volume
-            mountPath: /etc/crowdsec/simulation.yaml
-            subPath: simulation.yaml
-          {{ end }}
-          {{ if (include "parsersIsNotEmpty" .) }}
-          {{- range $stage, $stageConfig := .Values.config.parsers -}}
-          {{- if $stageConfig -}}
-          {{ range $fileName, $content := $stageConfig -}}
-          - name: {{ printf "crowdsec-parsers-%s-%s" $stage (trimSuffix ".yaml" $fileName) }}
-            mountPath: {{ printf "/etc/crowdsec_data/parsers/%s/%s" $stage $fileName }}
-            subPath: {{ $fileName }}
-          {{ end }}
-          {{- end }}
-          {{- end }}
-          {{- end }}
-          {{- if .Values.config.scenarios -}}
-          {{ range $fileName, $content := .Values.config.scenarios -}}
-          - name: {{ printf "crowdsec-scenarios-%s" (trimSuffix ".yaml" $fileName) }}
-            mountPath: {{ printf "/etc/crowdsec/scenarios/%s" $fileName }}
-            subPath: {{ $fileName }}
-          {{ end }}
-          {{ end }}
-          {{- if .Values.config.postoverflows -}}
-          {{ range $fileName, $content := .Values.config.postoverflows -}}
-          - name: {{ printf "crowdsec-postoverflows-%s" (trimSuffix ".yaml" $fileName) }}
-            mountPath: {{ printf "/etc/crowdsec/postoverflows/%s" $fileName }}
-            subPath: {{ $fileName }}
-          {{ end }}
-          {{ end }}
-          {{- end }}
           - name: varlog
             mountPath: /var/log
           - name: varlibdockercontainers
