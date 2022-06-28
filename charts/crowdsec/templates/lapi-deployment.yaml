@@ -28,7 +28,7 @@ spec:
         volumeMounts:
         - name: shared-data
           mountPath: /metabase-data
-      {{ end }}
+      {{- end }}
       containers:
       - name: crowdsec-lapi
         image: "{{ .Values.image.repository | default "crowdsecurity/crowdsec" }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
@@ -46,6 +46,10 @@ spec:
                 key: password
           - name: DISABLE_AGENT
             value: "true"
+          {{- if .Values.lapi.dashboard.enabled }}
+          - name: GID
+            value: "1000"
+          {{- end }}
         {{- with .Values.lapi.env }}
           {{- toYaml . | nindent 10 }}
         {{- end }}
@@ -60,24 +64,46 @@ spec:
             containerPort: 6060
             protocol: TCP
             {{ end }}
-        {{- if .Values.lapi.persistentVolume.config.enabled }}
+        {{ if .Values.lapi.persistentVolume.config.enabled }}
         command: ['sh', '-c', 'mv -n /staging/etc/crowdsec/* /etc/crowdsec_data/ && rm -rf /staging/etc/crowdsec && ln -s /etc/crowdsec_data /etc/crowdsec && ./docker_start.sh']
-        {{- end }}
-        {{- if or (.Values.lapi.persistentVolume.data.enabled) (.Values.lapi.persistentVolume.config.enabled) (.Values.lapi.dashboard.enabled) }}
+        {{ end }}
+        {{- if or (.Values.lapi.persistentVolume.data.enabled) (.Values.lapi.persistentVolume.config.enabled) (.Values.lapi.dashboard.enabled) (include "lapiCustomConfigIsNotEmpty" .) }}
         volumeMounts:
-          {{- if or (.Values.lapi.persistentVolume.data.enabled) (.Values.lapi.dashboard.enabled) }}
+          {{ if or (.Values.lapi.persistentVolume.data.enabled) (.Values.lapi.dashboard.enabled) }}
           - name: crowdsec-db
             mountPath: /var/lib/crowdsec/data
-          {{- end }}
-          {{- if .Values.lapi.persistentVolume.config.enabled }}
+          {{ end }}
+          {{- $crowdsecConfig := "/etc/crowdsec" -}}
+          {{- if .Values.lapi.persistentVolume.config.enabled -}}
+          {{- $crowdsecConfig = "/etc/crowdsec_data" -}}
           - name: crowdsec-config
-            mountPath: /etc/crowdsec_data
+            mountPath: {{ $crowdsecConfig }}
           {{- end }}
-        {{- end }}
+          {{ if index .Values.config "profiles.yaml" }}
+          - name: crowdsec-profiles-volume
+            mountPath: {{ $crowdsecConfig }}/profiles.yaml
+            subPath: profiles.yaml
+          {{ end }}
+          {{ if index .Values.config "console.yaml" }}
+          - name: crowdsec-console-volume
+            mountPath: {{ $crowdsecConfig }}/console.yaml
+            subPath: console.yaml
+          {{ end }}
+          {{- if (include "notificationsIsNotEmpty" .) -}}
+          {{ range $fileName, $content := .Values.config.notifications -}}
+          {{- if $content }}
+          - name: crowdsec-notifications-{{ (trimSuffix ".yaml" $fileName) }}
+            mountPath: {{ printf "%s/notifications/%s" $crowdsecConfig $fileName }}
+            subPath: {{ $fileName }}
+          {{- end }}
+          {{- end }}
+          {{- end }}
+          {{- end }}
       {{- if .Values.lapi.dashboard.enabled }}
       - name: dashboard
         image: "{{ .Values.lapi.dashboard.image.repository | default "metabase/metabase" }}:{{ .Values.lapi.dashboard.image.tag | default "latest" }}"
         imagePullPolicy: {{ .Values.lapi.dashboard.image.pullPolicy }}
+        command: ['sh', '-c', 'ln -fs /var/lib/crowdsec/data/crowdsec.db /metabase-data/crowdsec.db && /app/run_metabase.sh']
         volumeMounts:
         - name: shared-data
           mountPath: /metabase-data
@@ -86,9 +112,11 @@ spec:
         env:
           - name: MB_DB_FILE
             value: /metabase-data/metabase.db
+          - name: MGID
+            value: "1000"
       {{- end }}
       terminationGracePeriodSeconds: 30
-      {{- if or (.Values.lapi.persistentVolume.data.enabled) (.Values.lapi.persistentVolume.config.enabled) (.Values.lapi.dashboard.enabled) }}
+      {{- if or (.Values.lapi.persistentVolume.data.enabled) (.Values.lapi.persistentVolume.config.enabled) (.Values.lapi.dashboard.enabled) (include "lapiCustomConfigIsNotEmpty" .) }}
       volumes:
       {{- if .Values.lapi.dashboard.enabled }}
       - name: shared-data
@@ -106,6 +134,28 @@ spec:
       - name: crowdsec-config
         persistentVolumeClaim:
           claimName: {{ .Release.Name }}-config-pvc
+      {{- end }}
+      {{ if index .Values.config "profiles.yaml" }}
+      - name: crowdsec-profiles-volume
+        configMap:
+          name: crowdsec-profiles
+      {{- end }}
+      {{ if index .Values.config "console.yaml" }}
+      - name: crowdsec-console-volume
+        configMap:
+          name: crowdsec-console
+      {{- end }}
+      {{- if (include "notificationsIsNotEmpty" .) -}}
+      {{ range $fileName, $content := .Values.config.notifications -}}
+      {{- if $content }}
+      - name: crowdsec-notifications-{{ (trimSuffix ".yaml" $fileName) }}
+        configMap:
+          name: crowdsec-notifications
+          items:
+          - key: {{ $fileName }}
+            path: {{ $fileName }}
+      {{ end }}
+      {{- end }}
       {{- end }}
       {{- end }}
       {{- with .Values.lapi.tolerations }}

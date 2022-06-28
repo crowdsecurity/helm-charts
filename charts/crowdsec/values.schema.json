@@ -1,0 +1,104 @@
+{
+    "$schema": "http://json-schema.org/draft-06/schema#",
+    "$ref": "#/definitions/values",
+    "definitions": {
+        "values": {
+            "type": "object",
+            "properties": {
+                "agent": {
+                    "$ref": "#/definitions/Agent"
+                },
+                "config": {
+                    "$ref": "#/definitions/Config"
+                }
+            },
+            "required": [
+                "agent",
+                "config"
+            ],
+            "title": "values"
+        },
+        "Agent": {
+            "type": "object",
+            "properties": {
+                "acquisition": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Acquisition"
+                    }
+                }
+            },
+            "required": [
+                "acquisition"
+            ],
+            "title": "Agent"
+        },
+        "Acquisition": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "namespace": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "podName": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "program": {
+                    "type": "string",
+                    "minLength": 1
+                }
+            },
+            "required": [
+                "namespace",
+                "podName",
+                "program"
+            ],
+            "title": "Acquisition"
+        },
+        "Config": {
+            "type": "object",
+            "properties": {
+                "parsers": {
+                    "$ref": "#/definitions/Parsers"
+                },
+                "scenarios": {
+                    "$ref": "#/definitions/Scenarios"
+                },
+                "postoverflows": {
+                    "$ref": "#/definitions/Postoverflows"
+                },
+                "profiles.yaml": {
+                    "type": "string"
+                },
+                "notifications": {
+                    "$ref": "#/definitions/Notifications"
+                },
+                "simulation.yaml": {
+                    "type": "string"
+                },
+                "console.yaml": {
+                    "type": "string"
+                }
+            },
+            "title": "Config"
+        },
+        "Notifications": {
+            "type": "object",
+            "title": "Notifications"
+        },
+        "Parsers": {
+            "type": "object",
+            "title": "Parsers"
+        },
+        "Postoverflows": {
+            "type": "object",
+            "title": "Postoverflows"
+        },
+        "Scenarios": {
+            "type": "object",
+            "title": "Scenarios"
+        }
+    }
+}

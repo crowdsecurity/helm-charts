@@ -30,7 +30,7 @@ jobs:
         uses: helm/chart-testing-action@v2.2.1
 
       - name: Run chart-testing (lint)
-        run: helm lint ./charts/crowdsec/
+        run: helm lint ./charts/crowdsec/ -f ./charts/crowdsec/ci/crowdsec-values.yaml
 
       - name: Create kind cluster
         uses: helm/kind-action@v1.2.0

@@ -13,6 +13,68 @@ image:
   # -- docker image tag
   tag: ""
 
+# Here you can specify your own custom configuration to be loaded in crowdsec agent or lapi
+# Each config needs to be a multi-line using '|' in YAML specs
+# for the agent those configs will be loaded : parsers, scenarios, postoverflows, simulation.yaml
+# for the lapi those configs will be loaded : profiles.yaml, notifications, console.yaml
+config:
+  # -- To better understand stages in parsers, you can take a look at https://docs.crowdsec.net/docs/next/parsers/intro/
+  parsers:
+    s00-raw: {}
+    s01-parse: {}
+      # example-parser.yaml: |
+      #   filter: "evt.Line.Labels.type == 'myProgram'"
+      #   onsuccess: next_stage
+      #   ....
+    s02-enrich: {}
+  # -- to better understand how to write a scenario, you can take a look at https://docs.crowdsec.net/docs/next/scenarios/intro
+  scenarios: {}
+    # myScenario.yaml: |
+    #   type: trigger
+    #    name: myName/MyScenario
+    #    description: "Detect bruteforce on myService"
+    #    filter: "evt.Meta.log_type == 'auth_bf_log'"
+    #    ...
+  # -- to better understand how to write a postoverflow, you can take a look at (https://docs.crowdsec.net/docs/next/whitelist/create/#whitelist-in-postoverflows)
+  postoverflows:
+    s00-enrich: {}
+      # rdnsEnricher.yaml: |
+      #   ...
+    s01-whitelist: {}
+      # myRdnsWhitelist.yaml: |
+      #   ...
+  # -- Simulation configuration (https://docs.crowdsec.net/docs/next/scenarios/simulation/)
+  simulation.yaml: ""
+    #  |
+    # simulation: false
+    # exclusions:
+    #  - crowdsecurity/ssh-bf
+  console.yaml: ""
+    #   |
+    # share_manual_decisions: true
+    # share_tainted: true
+    # share_custom: true
+  # -- Profiles configuration (https://docs.crowdsec.net/docs/next/profiles/format/#profile-configuration-example)
+  profiles.yaml: ""
+    #   |
+    #  name: default_ip_remediation
+    #  debug: true
+    #  filters:
+    #    - Alert.Remediation == true && Alert.GetScope() == "Ip"
+    #  ...
+  # -- notifications configuration (https://docs.crowdsec.net/docs/next/notification_plugins/intro)
+  notifications: {}
+    # email.yaml: |
+    #   type: email
+    #   name: email_default
+    #   One of "trace", "debug", "info", "warn", "error", "off"
+    #   log_level: info
+    #   ...
+    # slack.yaml: ""
+    # http.yaml: ""
+    # splunk.yaml: ""
+
+
 # If you want to specify secrets that will be used for all your crowdsec-agents
 # secrets can be provided be env variables
 secrets:
@@ -48,7 +110,7 @@ lapi:
         # metabase only supports http so we need this annotation
         nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
       # labels: {}
-      ingressClassName: "nginx"
+      ingressClassName: "" # nginx
       host: "" # metabase.example.com
       # tls: {}
 
@@ -105,11 +167,11 @@ lapi:
 agent:
   acquisition:
     # -- Specify each pod you want to process it logs (namespace, podName and program)
-    - namespace: ingress-nginx
+    - namespace: "" #ingress-nginx
       # -- to select pod logs to process
-      podName: ingress-nginx-controller-*
+      podName: "" #ingress-nginx-controller-*
       # -- program name related to specific parser you will use (see https://hub.crowdsec.net/author/crowdsecurity/configurations/docker-logs)
-      program: nginx
+      program: "" #nginx
   resources:
     limits:
       memory: 100Mi

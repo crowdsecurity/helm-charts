@@ -1,0 +1,33 @@
+{{- if index .Values.config "profiles.yaml" -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: crowdsec-profiles
+data:
+  profiles.yaml: |
+{{ printf "%+v" (index .Values.config "profiles.yaml") | indent 4 }}
+{{ end }}
+---
+{{- if index .Values.config "console.yaml" -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: crowdsec-console
+data:
+  console.yaml: |
+{{ printf "%+v" (index .Values.config "console.yaml") | indent 4 }}
+{{ end }}
+---
+{{ if (include "notificationsIsNotEmpty" .) }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "crowdsec-notifications"
+data:
+{{ range $fileName, $content := .Values.config.notifications -}}
+{{- if $content -}}
+{{ printf "%s: |" $fileName | indent 2 }}
+{{ $content | indent 4 }}
+{{- end }}
+{{- end }}
+{{- end }}
