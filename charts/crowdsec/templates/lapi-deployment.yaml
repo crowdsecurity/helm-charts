@@ -46,6 +46,10 @@ spec:
                 key: password
           - name: DISABLE_AGENT
             value: "true"
+          {{- if .Values.lapi.dashboard.enabled }}
+          - name: GID
+            value: "1000"
+          {{- end }}
         {{- with .Values.lapi.env }}
           {{- toYaml . | nindent 10 }}
         {{- end }}
@@ -117,6 +121,7 @@ spec:
       - name: dashboard
         image: "{{ .Values.lapi.dashboard.image.repository | default "metabase/metabase" }}:{{ .Values.lapi.dashboard.image.tag | default "latest" }}"
         imagePullPolicy: {{ .Values.lapi.dashboard.image.pullPolicy }}
+        command: ['sh', '-c', 'ln -fs /var/lib/crowdsec/data/crowdsec.db /metabase-data/crowdsec.db && /app/run_metabase.sh']
         volumeMounts:
         - name: shared-data
           mountPath: /metabase-data
@@ -125,6 +130,8 @@ spec:
         env:
           - name: MB_DB_FILE
             value: /metabase-data/metabase.db
+          - name: MGID
+            value: "1000"
       {{- end }}
       terminationGracePeriodSeconds: 30
       {{- if or (.Values.lapi.persistentVolume.data.enabled) (.Values.lapi.persistentVolume.config.enabled) (.Values.lapi.dashboard.enabled) (include "lapiCustomConfigIsNotEmpty" .) }}

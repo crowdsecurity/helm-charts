@@ -110,7 +110,7 @@ lapi:
         # metabase only supports http so we need this annotation
         nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
       # labels: {}
-      ingressClassName: "nginx"
+      ingressClassName: "" # nginx
       host: "" # metabase.example.com
       # tls: {}
 
