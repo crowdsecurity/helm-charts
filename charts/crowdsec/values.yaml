@@ -43,6 +43,17 @@ config:
     s01-whitelist: {}
       # myRdnsWhitelist.yaml: |
       #   ...
+  # -- Simulation configuration (https://docs.crowdsec.net/docs/next/scenarios/simulation/)
+  simulation.yaml: ""
+    #  |
+    # simulation: false
+    # exclusions:
+    #  - crowdsecurity/ssh-bf
+  console.yaml: ""
+    #   |
+    # share_manual_decisions: true
+    # share_tainted: true
+    # share_custom: true
   # -- Profiles configuration (https://docs.crowdsec.net/docs/next/profiles/format/#profile-configuration-example)
   profiles.yaml: ""
     #   |

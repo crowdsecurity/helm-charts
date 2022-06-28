@@ -68,6 +68,11 @@ spec:
           - name: acquis-config-volume
             mountPath: /etc/crowdsec_data/acquis.yaml
             subPath: acquis.yaml
+          {{ if index .Values.config "simulation.yaml" }}
+          - name: crowdsec-simulation-volume
+            mountPath: /etc/crowdsec_data/simulation.yaml
+            subPath: simulation.yaml
+          {{ end }}
           {{ if (include "parsersIsNotEmpty" .) }}
           {{- range $stage, $stageConfig := .Values.config.parsers -}}
           {{- if $stageConfig -}}
@@ -101,6 +106,11 @@ spec:
           - name: acquis-config-volume
             mountPath: /etc/crowdsec/acquis.yaml
             subPath: acquis.yaml
+          {{ if index .Values.config "simulation.yaml" }}
+          - name: crowdsec-simulation-volume
+            mountPath: /etc/crowdsec/simulation.yaml
+            subPath: simulation.yaml
+          {{ end }}
           {{ if (include "parsersIsNotEmpty" .) }}
           {{- range $stage, $stageConfig := .Values.config.parsers -}}
           {{- if $stageConfig -}}
@@ -182,6 +192,11 @@ spec:
       {{ end }}
       {{- end }}
       {{- end }}
+      {{- end }}
+      {{ if index .Values.config "simulation.yaml" }}
+      - name: crowdsec-simulation-volume
+        configMap:
+          name: crowdsec-simulation
       {{- end }}
       - name: varlibdockercontainers
         hostPath:

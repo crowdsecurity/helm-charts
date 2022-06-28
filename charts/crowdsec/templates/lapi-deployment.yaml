@@ -77,6 +77,11 @@ spec:
             mountPath: /etc/crowdsec_data/profiles.yaml
             subPath: profiles.yaml
           {{ end }}
+          {{ if index .Values.config "console.yaml" }}
+          - name: crowdsec-console-volume
+            mountPath: /etc/crowdsec_data/console.yaml
+            subPath: console.yaml
+          {{ end }}
           {{- if (include "notificationsIsNotEmpty" .) -}}
           {{ range $fileName, $content := .Values.config.notifications -}}
           {{- if $content }}
@@ -91,6 +96,11 @@ spec:
           - name: crowdsec-profiles-volume
             mountPath: /etc/crowdsec/profiles.yaml
             subPath: profiles.yaml
+          {{ end }}
+          {{ if index .Values.config "console.yaml" }}
+          - name: crowdsec-console-volume
+            mountPath: /etc/crowdsec/console.yaml
+            subPath: console.yaml
           {{ end }}
           {{- if (include "notificationsIsNotEmpty" .) -}}
           {{ range $fileName, $content := .Values.config.notifications -}}
@@ -140,6 +150,11 @@ spec:
       - name: crowdsec-profiles-volume
         configMap:
           name: crowdsec-profiles
+      {{- end }}
+      {{ if index .Values.config "console.yaml" }}
+      - name: crowdsec-console-volume
+        configMap:
+          name: crowdsec-console
       {{- end }}
       {{- if (include "notificationsIsNotEmpty" .) -}}
       {{ range $fileName, $content := .Values.config.notifications -}}

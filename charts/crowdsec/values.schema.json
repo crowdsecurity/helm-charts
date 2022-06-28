@@ -74,6 +74,12 @@
                 },
                 "notifications": {
                     "$ref": "#/definitions/Notifications"
+                },
+                "simulation.yaml": {
+                    "type": "string"
+                },
+                "console.yaml": {
+                    "type": "string"
                 }
             },
             "title": "Config"

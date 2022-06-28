@@ -1,3 +1,13 @@
+{{- if index .Values.config "simulation.yaml" -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: crowdsec-simulation
+data:
+  simulation.yaml: |
+{{ printf "%+v" (index .Values.config "simulation.yaml") | indent 4 }}
+{{ end }}
+---
 {{ if (include "parsersIsNotEmpty" .) }}
 {{- range $stage, $stageConfig := .Values.config.parsers -}}
 {{- if $stageConfig -}}
