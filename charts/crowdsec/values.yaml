@@ -15,8 +15,8 @@ image:
 
 # Here you can specify your own custom configuration to be loaded in crowdsec agent or lapi
 # Each config needs to be a multi-line using '|' in YAML specs
-# for the agent those configs will be loaded : parsers, scenarios, postoverflows
-# for the lapi those configs will be loaded : profiles.yaml, notifications
+# for the agent those configs will be loaded : parsers, scenarios, postoverflows, simulation.yaml
+# for the lapi those configs will be loaded : profiles.yaml, notifications, console.yaml
 config:
   # -- To better understand stages in parsers, you can take a look at https://docs.crowdsec.net/docs/next/parsers/intro/
   parsers:
