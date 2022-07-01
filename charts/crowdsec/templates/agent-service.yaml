@@ -24,6 +24,9 @@ spec:
   externalIPs:
     {{- toYaml . | nindent 4 }}
   {{- end }}
+  {{- if or (eq .Values.agent.service.type "LoadBalancer") (eq .Values.agent.service.type "NodePort") }}
+  externalTrafficPolicy: {{ .Values.agent.service.externalTrafficPolicy | quote }}
+  {{- end }}
   ports:
     - port: 6060
       targetPort: 6060

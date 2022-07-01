@@ -23,6 +23,9 @@ spec:
   externalIPs:
     {{- toYaml . | nindent 4 }}
   {{- end }}
+  {{- if or (eq .Values.lapi.service.type "LoadBalancer") (eq .Values.lapi.service.type "NodePort") }}
+  externalTrafficPolicy: {{ .Values.lapi.service.externalTrafficPolicy | quote }}
+  {{- end }}
   ports:
     {{- if .Values.lapi.metrics.enabled }}
     - port: 6060

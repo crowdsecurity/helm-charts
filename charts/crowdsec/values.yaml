@@ -144,6 +144,7 @@ lapi:
     externalIPs: []
     loadBalancerIP: null
     loadBalancerClass: null
+    externalTrafficPolicy: Cluster
 
   # -- nodeSelector for lapi
   nodeSelector: {}
@@ -240,6 +241,7 @@ agent:
     externalIPs: []
     loadBalancerIP: null
     loadBalancerClass: null
+    externalTrafficPolicy: Cluster
 
   # -- wait-for-lapi init container
   wait_for_lapi:
