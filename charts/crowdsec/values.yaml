@@ -90,6 +90,17 @@ lapi:
     # by default disable the agent because it only the local API.
     #- name: DISABLE_AGENT
     #  value: "true"
+  # -- Enable ingress lapi object
+  ingress:
+    enabled: false
+    annotations:
+      # we only want http to the backend so we need this annotation
+      nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+    # labels: {}
+    ingressClassName: "" # nginx
+    host: "" # crowdsec-api.example.com
+    # tls: {}
+
   dashboard:
     # -- Enable Metabase Dashboard (by default disabled)
     enabled: false
