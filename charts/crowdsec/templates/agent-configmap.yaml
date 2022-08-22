@@ -19,7 +19,7 @@ data:
 {{ range $fileName, $content := $stageConfig -}}
   {{ printf "%s: |" $fileName | indent 2 }}
 {{ $content | indent 4 }}
-{{- end }}
+{{ end }}
 ---
 {{- end }}
 {{ end }}
@@ -34,7 +34,7 @@ data:
 {{ range $fileName, $content := .Values.config.scenarios -}}
   {{ printf "%s: |" $fileName | indent 2 }}
 {{ $content | indent 4 }}
-{{- end }}
+{{ end }}
 {{- end }}
 
 {{ if (include "postoverflowsIsNotEmpty" .) }}
@@ -49,7 +49,7 @@ data:
 {{ range $fileName, $content := $stageConfig -}}
   {{ printf "%s: |" $fileName | indent 2 }}
 {{ $content | indent 4 }}
-{{- end }}
+{{ end }}
 ---
 {{- end }}
 {{ end }}
