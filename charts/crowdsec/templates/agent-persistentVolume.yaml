@@ -1,4 +1,4 @@
-{{ if .Values.agent.persistentVolume.config.enabled }}
+{{ if and (.Values.agent.persistentVolume.config.enabled) (.Values.agent.persistentVolume.config.storageClassName) }}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:

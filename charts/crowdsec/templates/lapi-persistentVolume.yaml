@@ -1,4 +1,4 @@
-{{ if .Values.lapi.persistentVolume.data.enabled }}
+{{ if and (.Values.lapi.persistentVolume.data.enabled) (.Values.lapi.persistentVolume.data.storageClassName) }}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -26,7 +26,7 @@ spec:
       storage: "{{ .Values.lapi.persistentVolume.data.size }}"
 {{ end }}
 ---
-{{ if .Values.lapi.persistentVolume.config.enabled }}
+{{ if and (.Values.lapi.persistentVolume.config.enabled) (.Values.lapi.persistentVolume.config.storageClassName) }}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
