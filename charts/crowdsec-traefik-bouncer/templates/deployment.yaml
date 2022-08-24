@@ -37,7 +37,7 @@ spec:
               value: {{ required "A valid .Values.bouncer.crowdsec_agent_host entry required!" .Values.bouncer.crowdsec_agent_host }}
             {{ if eq .Values.bouncer.crowdsec_bouncer_gin_mode "release" }}
             - name: GIN_MODE
-              value: {{ .Values.bouncer.crowdsec_bouncer_gin_mode }}
+              value: {{ .Values.bouncer.crowdsec_bouncer_gin_mode | quote }}
             {{ end }}
           ports:
             - name: http

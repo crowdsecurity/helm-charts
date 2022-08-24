@@ -10,7 +10,7 @@ A http service to verify request and bounce them according to decisions made by 
 |-----|------|---------|-------------|
 | bouncer.crowdsec_bouncer_api_key | string | `""` | bouncer api key (need to be generated from crowdsec agent) |
 | bouncer.crowdsec_agent_host | string | `""` | crowdsec lapi host (ie: crowdsec-service.crowdsec.svc.cluster.local:8080) |
-| bouncer.crowdsec_bouncer_gin_mode | string | `""` | bouncer gin mode |
+| bouncer.crowdsec_bouncer_gin_mode | string | `"debug"` | bouncer gin mode |
 | replicaCount | int | `1` |  |
 | image.repository | string | `"fbonalair/traefik-crowdsec-bouncer"` |  |
 | image.pullPolicy | string | `"IfNotPresent"` |  |
