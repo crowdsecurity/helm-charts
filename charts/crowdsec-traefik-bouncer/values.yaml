@@ -8,6 +8,7 @@ bouncer:
   crowdsec_bouncer_api_key: ""
   # -- crowdsec lapi host (ie: crowdsec-service.crowdsec.svc.cluster.local:8080)
   crowdsec_agent_host: ""
+  crowdsec_bouncer_gin_mode: "debug"
 
 replicaCount: 1
 
