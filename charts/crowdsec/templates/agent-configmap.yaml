@@ -37,8 +37,8 @@ data:
 {{ end }}
 {{- end }}
 
-{{ if (include "postoverflowsIsNotEmpty" .) }}
 ---
+{{ if (include "postoverflowsIsNotEmpty" .) }}
 {{- range $stage, $stageConfig := .Values.config.postoverflows -}}
 {{- if $stageConfig -}}
 apiVersion: v1
