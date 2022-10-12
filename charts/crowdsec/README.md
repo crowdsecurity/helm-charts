@@ -2,6 +2,7 @@
 
 ![Version: 0.7.0](https://img.shields.io/badge/Version-0.7.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v1.4.1](https://img.shields.io/badge/AppVersion-v1.4.1-informational?style=flat-square)
 
+
 Crowdsec helm chart is an open-source, lightweight agent to detect and respond to bad behaviours.
 
 ## Get Repo Info
@@ -49,6 +50,7 @@ helm delete crowdsec -n crowdsec
 | secrets.username | string | `""` | agent username (default is generated randomly) |
 | secrets.password | string | `""` | agent password (default is generated randomly) |
 | lapi.env | list | `[]` | environment variables from crowdsecurity/crowdsec docker image |
+| lapi.ingress | object | `{"annotations":{"nginx.ingress.kubernetes.io/backend-protocol":"HTTP"},"enabled":false,"host":"","ingressClassName":""}` | Enable ingress lapi object |
 | lapi.dashboard.enabled | bool | `false` | Enable Metabase Dashboard (by default disabled) |
 | lapi.dashboard.image.repository | string | `"metabase/metabase"` | docker image repository name |
 | lapi.dashboard.image.pullPolicy | string | `"IfNotPresent"` | pullPolicy |
@@ -67,6 +69,7 @@ helm delete crowdsec -n crowdsec
 | lapi.service.externalIPs | list | `[]` |  |
 | lapi.service.loadBalancerIP | string | `nil` |  |
 | lapi.service.loadBalancerClass | string | `nil` |  |
+| lapi.service.externalTrafficPolicy | string | `"Cluster"` |  |
 | lapi.nodeSelector | object | `{}` | nodeSelector for lapi |
 | lapi.tolerations | object | `{}` | tolerations for lapi |
 | lapi.metrics | object | `{"enabled":false,"serviceMonitor":{"enabled":false}}` | Enable service monitoring (exposes "metrics" port "6060" for Prometheus) |
@@ -91,6 +94,7 @@ helm delete crowdsec -n crowdsec
 | agent.service.externalIPs | list | `[]` |  |
 | agent.service.loadBalancerIP | string | `nil` |  |
 | agent.service.loadBalancerClass | string | `nil` |  |
+| agent.service.externalTrafficPolicy | string | `"Cluster"` |  |
 | agent.wait_for_lapi | object | `{"image":{"pullPolicy":"IfNotPresent","repository":"busybox","tag":"1.28"}}` | wait-for-lapi init container |
 | agent.wait_for_lapi.image.repository | string | `"busybox"` | docker image repository name |
 | agent.wait_for_lapi.image.pullPolicy | string | `"IfNotPresent"` | pullPolicy |

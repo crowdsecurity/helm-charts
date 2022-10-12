@@ -28,6 +28,6 @@ data:
 {{- if $content -}}
 {{ printf "%s: |" $fileName | indent 2 }}
 {{ $content | indent 4 }}
-{{- end }}
+{{ end }}
 {{- end }}
 {{- end }}

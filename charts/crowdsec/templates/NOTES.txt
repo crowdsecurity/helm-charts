@@ -1,7 +1,11 @@
 Thank you for installing {{ .Chart.Name }}.
 
 ## Local API URL
+{{- if .Values.lapi.ingress.enabled }}
+http://{{ .Values.lapi.ingress.host }}
+{{- else }}
 http://{{ .Release.Name }}-service:8080
+{{- end }}
 
 {{ if .Values.lapi.dashboard.enabled }}
 ## Dashboard information
