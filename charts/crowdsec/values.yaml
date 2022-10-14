@@ -139,6 +139,7 @@ lapi:
       accessModes:
         - ReadWriteOnce
       storageClassName: ""
+      existingClaim: ""
       size: 1Gi
     # -- Persistent volume for config folder. Stores e.g. online api credentials
     config:
@@ -146,6 +147,7 @@ lapi:
       accessModes:
         - ReadWriteOnce
       storageClassName: ""
+      existingClaim: ""
       size: 100Mi
 
   service:
@@ -198,6 +200,7 @@ agent:
       accessModes:
         - ReadWriteOnce
       storageClassName: ""
+      existingClaim: ""
       size: 100Mi
   # -- environment variables from crowdsecurity/crowdsec docker image
   env: []
