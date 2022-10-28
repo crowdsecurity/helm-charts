@@ -83,6 +83,55 @@ secrets:
   # -- agent password (default is generated randomly)
   password: ""
 
+
+dashboard:
+  # -- Enable Metabase Dashboard (by default disabled)
+  enabled: false
+  image:
+    # -- docker image repository name
+    repository: metabase/metabase
+    # -- pullPolicy
+    pullPolicy: IfNotPresent
+    # -- docker image tag
+    tag: "v0.41.5"
+  # -- Metabase SQLite static DB containing Dashboards
+  assetURL: https://crowdsec-statics-assets.s3-eu-west-1.amazonaws.com/metabase_sqlite.zip
+  persistentVolume:
+    enabled: true
+    accessModes:
+      - ReadWriteOnce
+    storageClassName: ""
+    existingClaim: ""
+    size: 100Mi
+  service:
+    type: ClusterIP
+    labels: {}
+    annotations: {}
+    externalIPs: []
+    loadBalancerIP: null
+    loadBalancerClass: null
+    externalTrafficPolicy: Cluster
+  resources: {}
+  # -- Enable ingress object
+  ingress:
+    enabled: false
+    annotations:
+      # metabase only supports http so we need this annotation
+      nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+    # labels: {}
+    ingressClassName: "" # nginx
+    host: "" # metabase.example.com
+    # tls: {}
+    affinity:
+      podAffinity:
+        preferredDuringSchedulingIgnoredDuringExecution:
+        - labelSelector:
+            matchExpressions:
+            - key: type
+              operator: In
+              values:
+              - lapi
+          topologyKey: "kubernetes.io/hostname"
 # lapi will deploy pod with crowdsec lapi and dashboard as deployment
 lapi:
   # -- environment variables from crowdsecurity/crowdsec docker image
@@ -100,31 +149,6 @@ lapi:
     ingressClassName: "" # nginx
     host: "" # crowdsec-api.example.com
     # tls: {}
-
-  dashboard:
-    # -- Enable Metabase Dashboard (by default disabled)
-    enabled: false
-    image:
-      # -- docker image repository name
-      repository: metabase/metabase
-      # -- pullPolicy
-      pullPolicy: IfNotPresent
-      # -- docker image tag
-      tag: "v0.41.5"
-    # -- Metabase SQLite static DB containing Dashboards
-    assetURL: https://crowdsec-statics-assets.s3-eu-west-1.amazonaws.com/metabase_sqlite.zip
-
-    # -- Enable ingress object
-    ingress:
-      enabled: false
-      annotations:
-        # metabase only supports http so we need this annotation
-        nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
-      # labels: {}
-      ingressClassName: "" # nginx
-      host: "" # metabase.example.com
-      # tls: {}
-
   resources:
     limits:
       memory: 100Mi

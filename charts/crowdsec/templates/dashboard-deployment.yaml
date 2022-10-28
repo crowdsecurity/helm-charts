@@ -1,0 +1,94 @@
+{{- if .Values.dashboard.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-dashboard
+  labels:
+    k8s-app: {{ .Release.Name }}
+    type: dashboard
+    version: v1
+spec:
+  selector:
+    matchLabels:
+      k8s-app: {{ .Release.Name }}
+      type: dashboard
+      version: v1
+  strategy: {{- toYaml .Values.dashboard.strategy | nindent 4 }}
+  template:
+    metadata:
+      labels:
+        k8s-app: {{ .Release.Name }}
+        type: dashboard
+        version: v1
+    spec:
+      initContainers:
+        - name: fetch-metabase-config
+          image: busybox:1.28
+          imagePullPolicy: IfNotPresent
+          command: ['sh', '-c', 'wget {{ .Values.dashboard.assetURL }} && unzip metabase_sqlite.zip -n -d /metabase-data/']
+          volumeMounts:
+          - name: shared-data
+            mountPath: /metabase-data
+      containers:
+        - name: dashboard
+          image: metabase/metabase:v0.41.5
+          command:
+            - sh
+            - '-c'
+            - >-
+              ln -fs /var/lib/crowdsec/data/crowdsec.db /metabase-data/crowdsec.db
+              && /app/run_metabase.sh
+          env:
+            - name: MB_DB_FILE
+              value: /metabase-data/metabase.db
+            - name: MGID
+              value: '1000'
+            - name: GID
+              value: '1000'
+          resources: {{- toYaml .Values.dashboard.resources | nindent 12 }}
+          volumeMounts:
+            - name: shared-data
+              mountPath: /metabase-data
+            - name: crowdsec-db
+              mountPath: /var/lib/crowdsec/data
+          ports:
+          - containerPort: 3000
+            name: dashboard
+            protocol: TCP
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          imagePullPolicy: IfNotPresent
+      volumes:
+      - name: shared-data
+        {{- if .Values.dashboard.persistentVolume.enabled }}
+        persistentVolumeClaim:
+            {{ if .Values.dashboard.persistentVolume.existingClaim }}
+            claimName: {{ .Values.dashboard.persistentVolume.existingClaim }}
+            {{ else }}
+            claimName: {{ .Release.Name }}-dashboard-pvc
+            {{ end }}
+        {{ else }}
+        emptyDir: {}
+        {{ end }}
+      - name: crowdsec-db
+        persistentVolumeClaim:
+          {{ if .Values.lapi.persistentVolume.data.existingClaim }}
+          claimName: {{ .Values.lapi.persistentVolume.data.existingClaim }}
+          {{ else }}
+          claimName: {{ .Release.Name }}-db-pvc
+          {{ end }}
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      {{- with .Values.dashboard.tolerations }}
+      tolerations:
+          {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.dashboard.nodeSelector }}
+      nodeSelector:
+          {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.dashboard.affinity }}
+      affinity:
+          {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}

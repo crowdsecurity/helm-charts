@@ -7,19 +7,19 @@ http://{{ .Values.lapi.ingress.host }}
 http://{{ .Release.Name }}-service:8080
 {{- end }}
 
-{{ if .Values.lapi.dashboard.enabled }}
+{{ if .Values.dashboard.enabled }}
 ## Dashboard information
 
 You can access to the dashboard using : 
-{{- if .Values.lapi.dashboard.ingress.enabled }}
-    {{- if .Values.lapi.dashboard.ingress.tls }}
-    {{- with (index .Values.lapi.dashboard.ingress.tls 0) }}
+{{- if .Values.dashboard.ingress.enabled }}
+    {{- if .Values.dashboard.ingress.tls }}
+    {{- with (index .Values.dashboard.ingress.tls 0) }}
     {{- range .hosts }}
 https://{{- . }}
     {{- end }}
     {{- end }}
     {{- else }}
-http://{{- .Values.lapi.dashboard.ingress.host }}
+http://{{- .Values.dashboard.ingress.host }}
     {{end}}
 {{- else }}
 http://{{ .Release.Name }}-service

@@ -1,0 +1,27 @@
+{{- if and (.Values.dashboard.enabled) (.Values.dashboard.persistentVolume.enabled) }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Release.Name }}-dashboard-pvc
+  {{- if .Values.dashboard.persistentVolume.annotations }}
+  annotations:
+{{ toYaml .Values.dashboard.persistentVolume.annotations | indent 4 }}
+  {{- end }}
+  labels:
+    k8s-app: {{ .Release.Name }}
+    type: agent
+    version: v1
+spec:
+  accessModes:
+{{ toYaml .Values.dashboard.persistentVolume.accessModes | indent 4 }}
+{{- if .Values.dashboard.persistentVolume.storageClassName }}
+{{- if (eq "-" .Values.dashboard.persistentVolume.storageClassName) }}
+  storageClassName: ""
+{{- else }}
+  storageClassName: "{{ .Values.dashboard.persistentVolume.storageClassName }}"
+{{- end }}
+{{- end }}
+  resources:
+    requests:
+      storage: "{{ .Values.dashboard.persistentVolume.size }}"
+{{ end }}
