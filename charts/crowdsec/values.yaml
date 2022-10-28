@@ -134,6 +134,7 @@ dashboard:
           topologyKey: "kubernetes.io/hostname"
 # lapi will deploy pod with crowdsec lapi and dashboard as deployment
 lapi:
+  replicas: 1
   # -- environment variables from crowdsecurity/crowdsec docker image
   env: []
     # by default disable the agent because it only the local API.
