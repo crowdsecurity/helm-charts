@@ -1,3 +1,6 @@
+# vim: set ft=gotmpl:
+---
+
 apiVersion: v1
 kind: ConfigMap
 metadata:

@@ -1,3 +1,6 @@
+# vim: set ft=gotmpl:
+---
+
 {{- if .Values.autoscaling.enabled }}
 apiVersion: autoscaling/v2beta1
 kind: HorizontalPodAutoscaler
