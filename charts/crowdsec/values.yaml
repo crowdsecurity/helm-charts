@@ -204,7 +204,7 @@ agent:
       size: 100Mi
   # -- environment variables from crowdsecurity/crowdsec docker image
   env: []
-    # by default we the docker-logs parser to be able to parse docker logs in k8s
+    # by default we configure the docker-logs parser to be able to parse docker logs in k8s
     # by default we disable local API on the agent pod
     # - name: SCENARIOS
     #   value: "scenario/name otherScenario/name"

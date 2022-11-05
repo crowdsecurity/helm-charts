@@ -1,3 +1,6 @@
+# vim: set ft=gotmpl:
+---
+
 {{- if .Values.ingress.enabled -}}
 {{- $fullName := include "helloworld.fullname" . -}}
 {{- $svcPort := .Values.service.port -}}
