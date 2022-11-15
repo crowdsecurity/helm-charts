@@ -1,0 +1,12 @@
+# vim: set ft=gotmpl:
+---
+{{ if and (.Values.tls.enabled) (.Values.tls.certManager.enabled) }}
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: crowdsec-ca-issuer
+  namespace: {{ .Release.Namespace }}
+spec:
+  ca:
+    secretName: {{ .Release.Name }}-root-secret
+{{ end }}

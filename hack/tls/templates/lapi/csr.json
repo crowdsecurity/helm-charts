@@ -1,0 +1,11 @@
+{
+    "CN": "CrowdSec LAPI",
+    "hosts": [
+        "${LAPI_DNS}",
+        "${LAPI_CLUSTER_IP}"
+    ],
+    "key": {
+        "algo": "ecdsa",
+        "size": 256
+    }
+}

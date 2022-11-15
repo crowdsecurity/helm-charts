@@ -1,0 +1,25 @@
+#!/bin/sh
+
+set -eu
+
+if kubectl get csr "$NAME_BOUNCER_CSR" >/dev/null 2>&1; then
+    echo The bouncer CSR already exists.
+    echo You can remove it with:
+    echo 
+    echo kubectl delete csr "$NAME_BOUNCER_CSR"
+    exit 1
+fi
+
+# create local bouncer.csr
+
+envsubst <./templates/bouncer/csr.json | cfssl genkey - | cfssljson -bare ./tmp/bouncer
+
+# upload bouncer.csr
+
+BOUNCER_CSR="$(base64 -w0 ./tmp/bouncer.csr)"
+export BOUNCER_CSR
+envsubst <./templates/bouncer/csr.yaml | kubectl apply -f -
+
+# approve the csr
+
+kubectl certificate approve "$NAME_BOUNCER_CSR"

@@ -1,0 +1,11 @@
+apiVersion: certificates.k8s.io/v1
+kind: CertificateSigningRequest
+metadata:
+  name: ${NAME_LAPI_CSR}
+spec:
+  request: ${LAPI_CSR}
+  signerName: ${SIGNER_NAME}
+  usages:
+  - digital signature
+  - key encipherment
+  - server auth

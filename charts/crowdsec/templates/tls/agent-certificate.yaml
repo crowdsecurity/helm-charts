@@ -1,0 +1,24 @@
+# vim: set ft=gotmpl:
+---
+{{ if and (.Values.tls.enabled) (.Values.tls.certManager.enabled) }}
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ .Release.Name }}-agent
+  namespace: {{ .Release.Namespace }}
+spec:
+  commonName: CrowdSec Agent
+  secretName: {{ .Release.Name }}-agent-tls
+  secretTemplate:
+    annotations:
+      {{ if .Values.tls.agent.reflector.namespaces }}
+      reflector.v1.k8s.emberstack.com/reflection-allowed: "true"
+      reflector.v1.k8s.emberstack.com/reflection-allowed-namespaces: {{ join "," .Values.tls.agent.reflector.namespaces }}
+      reflector.v1.k8s.emberstack.com/reflection-auto-enabled: "true"
+      {{ end }}
+  issuerRef:
+    name: {{ .Release.Name }}-ca-issuer
+  subject:
+    organizationalUnits:
+      - agent-ou
+{{ end }}

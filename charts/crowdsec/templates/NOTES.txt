@@ -30,4 +30,4 @@ The default credentials are :
 login : crowdsec@crowdsec.net
 password : !!Cr0wdS3c_M3t4b4s3??
 
-Please update the password when you will connect to metabase for the first time.
+Please update the password when you connect to metabase for the first time.

@@ -1,0 +1,12 @@
+#!/bin/sh
+
+set -eu
+
+#shellcheck disable=SC1091
+. ./environment.sh
+
+kubectl delete -n "$NAMESPACE" secrets "$NAME_AGENT_SECRET" || true
+kubectl delete csr "$NAME_AGENT_CSR" || true
+kubectl delete -n "$NAMESPACE" secrets "$NAME_LAPI_SECRET" || true
+kubectl delete csr "$NAME_LAPI_CSR" || true
+kubectl delete -n "$NAMESPACE" configmap "$NAME_CA" || true
