@@ -1,0 +1,39 @@
+#!/bin/sh
+
+say() {
+    tput setaf 2
+    echo "$@"
+    tput setaf 7
+}
+
+set -eu
+
+#shellcheck disable=SC1091
+. ./environment.sh
+
+./bin/ca-create
+say "CA created"
+
+# LAPI
+
+./bin/cert-lapi-create
+say "LAPI certificate created"
+
+./bin/cert-lapi-upload
+say "LAPI certificate uploaded"
+
+./bin/secret-lapi-upload
+say "LAPI secret uploaded"
+
+# Agent
+
+./bin/cert-agent-create
+say "Agent certificate created"
+
+./bin/cert-agent-upload
+say "Agent certificate uploaded"
+
+./bin/secret-agent-upload
+say "Agent secret uploaded"
+
+say "All done!"

@@ -74,6 +74,12 @@ config:
     # http.yaml: ""
     # splunk.yaml: ""
 
+tls:
+  enabled: false
+  agent:
+    secret: "{{ .Release.Name }}-agent-tls"
+  lapi:
+    secret: "{{ .Release.Name }}-lapi-tls"
 
 # If you want to specify secrets that will be used for all your crowdsec-agents
 # secrets can be provided be env variables

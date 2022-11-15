@@ -6,7 +6,7 @@ kind: ConfigMap
 metadata:
   name: acquis-configmap
 data:
-  acquis.yaml: |-
+  k8s.yaml: |-
     {{- $container_runtime := .Values.container_runtime }}
     {{- range .Values.agent.acquisition }}
     ---

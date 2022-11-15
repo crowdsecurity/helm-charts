@@ -1,0 +1,28 @@
+#!/bin/sh
+
+set -eu
+
+if kubectl get csr "$NAME_LAPI_CSR" >/dev/null 2>&1; then
+    echo The LAPI CSR already exists.
+    echo You can remove it with:
+    echo 
+    echo kubectl delete csr "$NAME_LAPI_CSR"
+    exit 1
+fi
+
+# create local lapi.csr
+
+LAPI_CLUSTER_IP="$(kubectl -n "$NAMESPACE" get service "$NAME_LAPI_SERVICE" -o jsonpath='{.spec.clusterIP}')"
+export LAPI_CLUSTER_IP
+
+envsubst <./templates/lapi/csr.json | cfssl genkey - | cfssljson -bare ./files/lapi
+
+# upload lapi.csr
+
+LAPI_CSR="$(base64 -w0 ./files/lapi.csr)"
+export LAPI_CSR
+envsubst <./templates/lapi/csr.yaml | kubectl apply -f -
+
+# approve the csr
+
+kubectl certificate approve "$NAME_LAPI_CSR"

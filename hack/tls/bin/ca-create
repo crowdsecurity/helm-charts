@@ -1,0 +1,19 @@
+#!/bin/sh
+
+set -eu
+
+if kubectl -n "$NAMESPACE" get configmap "$NAME_CA" >/dev/null 2>&1; then
+    echo The CA already exists.
+    echo You can remove it with:
+    echo
+    echo kubectl -n "$NAMESPACE" delete configmap "$NAME_CA"
+    exit 1
+fi
+
+# create local ca.pem
+
+cfssl gencert -initca ./templates/ca.json | cfssljson -bare files/ca
+
+# upload ca.pem
+
+kubectl -n "$NAMESPACE" create configmap "$NAME_CA" --from-file ca.crt=./files/ca.pem

@@ -35,6 +35,23 @@ spec:
         image: "{{ .Values.image.repository | default "crowdsecurity/crowdsec" }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         env:
+          - name: DISABLE_LOCAL_API
+            value: "true"
+
+          # agent - lapi authentication, with TLS or password
+
+          {{- if .Values.tls.enabled }}
+          - name: USE_TLS
+            value: "true"
+          - name: CERT_FILE
+            value: /etc/ssl/crowdsec/tls.crt
+          - name: KEY_FILE
+            value: /etc/ssl/crowdsec/tls.key
+          - name: CA_CERT_PATH
+            value: /etc/ssl/crowdsec-ca/ca.crt
+          - name: LOCAL_API_URL
+            value: https://{{ .Release.Name }}-service.{{ .Release.Namespace }}:8080
+          {{- else }}
           - name: AGENT_USERNAME
             valueFrom:
               secretKeyRef:
@@ -47,8 +64,8 @@ spec:
                 key: password
           - name: LOCAL_API_URL
             value: http://{{ .Release.Name }}-service.{{ .Release.Namespace }}:8080
-          - name: DISABLE_LOCAL_API
-            value: "true"
+          {{- end }}
+
         {{- with .Values.agent.env }}
           {{- toYaml . | nindent 10 }}
         {{- end }}
@@ -105,13 +122,18 @@ spec:
           {{- end }}
           {{- end }}
           - name: acquis-config-volume
-            mountPath: {{ $crowdsecConfig }}/acquis.yaml
-            subPath: acquis.yaml
+            mountPath: {{ $crowdsecConfig }}/acquis.d
           - name: varlog
             mountPath: /var/log
           - name: varlibdockercontainers
             mountPath: /var/lib/docker/containers
             readOnly: true
+          {{- if .Values.tls.enabled }}
+          - name: crowdsec-tls
+            mountPath: /etc/ssl/crowdsec
+          - name: crowdsec-ca
+            mountPath: /etc/ssl/crowdsec-ca
+          {{- end }}
       terminationGracePeriodSeconds: 30
       volumes:
       - name: acquis-config-volume
@@ -175,6 +197,14 @@ spec:
       - name: varlibdockercontainers
         hostPath:
           path: /var/lib/docker/containers
+      {{- if .Values.tls.enabled }}
+      - name: crowdsec-tls
+        secret:
+          secretName: {{ .Release.Name }}-agent-tls
+      - name: crowdsec-ca
+        configMap:
+          name: {{ .Release.Name }}-ca
+      {{- end }}
       {{- with .Values.agent.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

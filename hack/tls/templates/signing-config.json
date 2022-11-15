@@ -1,0 +1,26 @@
+{
+    "signing": {
+        "agent": {
+            "usages": [
+                "digital signature",
+                "key encipherment",
+                "client auth"
+            ],
+            "expiry": "876000h",
+            "ca_constraint": {
+                "is_ca": false
+            }
+        },
+        "lapi": {
+            "usages": [
+                "digital signature",
+                "key encipherment",
+                "server auth"
+            ],
+            "expiry": "876000h",
+            "ca_constraint": {
+                "is_ca": false
+            }
+        }
+    }
+}
