@@ -15,12 +15,12 @@ fi
 
 kubectl get csr "$NAME_AGENT_CSR" -o jsonpath='{.spec.request}' | \
   base64 --decode | \
-  cfssl sign -ca ./files/ca.pem -ca-key ./files/ca-key.pem -config ./templates/signing-config.json -profile agent - | \
-  cfssljson -bare ./files/ca-signed-agent
+  cfssl sign -ca ./tmp/ca.pem -ca-key ./tmp/ca-key.pem -config ./templates/signing-config.json -profile agent - | \
+  cfssljson -bare ./tmp/ca-signed-agent
 
 # upload ca-signed-agent.pem
 
-SIGNED_CERT=$(base64 -w0 ./files/ca-signed-agent.pem)
+SIGNED_CERT=$(base64 -w0 ./tmp/ca-signed-agent.pem)
 
 kubectl get csr "$NAME_AGENT_CSR" -o json | \
   jq '.status.certificate = "'"$SIGNED_CERT"'"' | \

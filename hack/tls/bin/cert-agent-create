@@ -12,11 +12,11 @@ fi
 
 # create local agent.csr
 
-envsubst <./templates/agent/csr.json | cfssl genkey - | cfssljson -bare ./files/agent
+envsubst <./templates/agent/csr.json | cfssl genkey - | cfssljson -bare ./tmp/agent
 
 # upload agent.csr
 
-AGENT_CSR="$(base64 -w0 ./files/agent.csr)"
+AGENT_CSR="$(base64 -w0 ./tmp/agent.csr)"
 export AGENT_CSR
 envsubst <./templates/agent/csr.yaml | kubectl apply -f -
 

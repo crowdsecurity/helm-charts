@@ -15,11 +15,11 @@ fi
 LAPI_CLUSTER_IP="$(kubectl -n "$NAMESPACE" get service "$NAME_LAPI_SERVICE" -o jsonpath='{.spec.clusterIP}')"
 export LAPI_CLUSTER_IP
 
-envsubst <./templates/lapi/csr.json | cfssl genkey - | cfssljson -bare ./files/lapi
+envsubst <./templates/lapi/csr.json | cfssl genkey - | cfssljson -bare ./tmp/lapi
 
 # upload lapi.csr
 
-LAPI_CSR="$(base64 -w0 ./files/lapi.csr)"
+LAPI_CSR="$(base64 -w0 ./tmp/lapi.csr)"
 export LAPI_CSR
 envsubst <./templates/lapi/csr.yaml | kubectl apply -f -
 

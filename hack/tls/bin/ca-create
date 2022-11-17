@@ -12,8 +12,8 @@ fi
 
 # create local ca.pem
 
-cfssl gencert -initca ./templates/ca.json | cfssljson -bare files/ca
+cfssl gencert -initca ./templates/ca.json | cfssljson -bare ./tmp/ca
 
 # upload ca.pem
 
-kubectl -n "$NAMESPACE" create configmap "$NAME_CA" --from-file ca.crt=./files/ca.pem
+kubectl -n "$NAMESPACE" create configmap "$NAME_CA" --from-file ca.crt=./tmp/ca.pem
