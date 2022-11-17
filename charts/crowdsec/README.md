@@ -48,6 +48,7 @@ helm delete crowdsec -n crowdsec
 | config.notifications | object | `{}` | notifications configuration (https://docs.crowdsec.net/docs/next/notification_plugins/intro) |
 | secrets.username | string | `""` | agent username (default is generated randomly) |
 | secrets.password | string | `""` | agent password (default is generated randomly) |
+| tls.enabled | bool | `false` | Enable TLS between LAPI, agents and bouncers (see below) |
 | lapi.env | list | `[]` | environment variables from crowdsecurity/crowdsec docker image |
 | lapi.ingress | object | `{"annotations":{"nginx.ingress.kubernetes.io/backend-protocol":"HTTP"},"enabled":false,"host":"","ingressClassName":""}` | Enable ingress lapi object |
 | lapi.dashboard.enabled | bool | `false` | Enable Metabase Dashboard (by default disabled) |
@@ -98,4 +99,8 @@ helm delete crowdsec -n crowdsec
 | agent.wait_for_lapi.image.repository | string | `"busybox"` | docker image repository name |
 | agent.wait_for_lapi.image.pullPolicy | string | `"IfNotPresent"` | pullPolicy |
 | agent.wait_for_lapi.image.tag | string | `"1.28"` | docker image tag |
+
+## TLS
+
+Please refer to `https://github.com/crowdsecurity/helm-charts/tree/main/hack/tls`.
 
