@@ -1,15 +1,22 @@
 
-# TLS
+# TLS (manual setup)
 
-To configure certificate authentication and encrypted communication with the LAPI server, you need to set
-`tls.enabled=true` in the Helm values. When the chart is installed, the creation of the agent/LAPI pods will hang while looking for
-the following resources in the "crowdsec" namespace:
+If you don't want to use cert-manager, we provide some scripts to show how to
+set up encrypted authentication and communication between agents, LAPI and
+bouncers. Keep in mind that in this case, the certificate rotation when they
+expire is your responsibility.
+
+You need to set `tls.enabled=true` and `tls.certManager.enabled=false` in the
+Helm values. When the chart is installed, the creation of the agent/LAPI pods
+will hang while looking for the following resources in the "crowdsec"
+namespace:
 
  - crowdsec-ca: config map containing a Certificate Authority file (ca.crt)
  - crowdsec-agent-tls: secret containing the client certificate and key files (tls.crt, tls.key)
  - crowdsec-lapi-tls: secret containing the server certificate and key files (tls.crt, tls.key)
 
-If you have installed the chart with a release name other than "crowdsec", the resource names are `{{release}}-ca` and so on.
+If you have installed the chart with a release name other than "crowdsec", the
+resource names are `{{release}}-ca` and so on.
 
 To create these, you can use the scripts in this folder.
 

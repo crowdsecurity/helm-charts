@@ -48,7 +48,7 @@ spec:
           - name: KEY_FILE
             value: /etc/ssl/crowdsec/tls.key
           - name: CA_CERT_PATH
-            value: /etc/ssl/crowdsec-ca/ca.crt
+            value: /etc/ssl/crowdsec/ca.crt
           - name: LOCAL_API_URL
             value: https://{{ .Release.Name }}-service.{{ .Release.Namespace }}:8080
           {{- else }}
@@ -131,8 +131,6 @@ spec:
           {{- if .Values.tls.enabled }}
           - name: crowdsec-tls
             mountPath: /etc/ssl/crowdsec
-          - name: crowdsec-ca
-            mountPath: /etc/ssl/crowdsec-ca
           {{- end }}
       terminationGracePeriodSeconds: 30
       volumes:
@@ -201,9 +199,6 @@ spec:
       - name: crowdsec-tls
         secret:
           secretName: {{ .Release.Name }}-agent-tls
-      - name: crowdsec-ca
-        configMap:
-          name: {{ .Release.Name }}-ca
       {{- end }}
       {{- with .Values.agent.nodeSelector }}
       nodeSelector:

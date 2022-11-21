@@ -2,7 +2,7 @@
 
 ![Version: 0.7.0](https://img.shields.io/badge/Version-0.7.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v1.4.1](https://img.shields.io/badge/AppVersion-v1.4.1-informational?style=flat-square)
 
-Crowdsec helm chart is an open-source, lightweight agent to detect and respond to bad behaviours.
+Crowdsec helm chart is an open-source, lightweight agent to detect and respond to bad behaviors.
 
 ## Get Repo Info
 
@@ -19,11 +19,28 @@ So you can configure well the chart and being able to parse logs and detect atta
 Here is a [blog post](https://crowdsec.net/blog/kubernetes-crowdsec-integration/) about crowdsec in kubernetes.
 
 ```
-# Create namespace for crowdsec
-kubectl create ns crowdsec
 # Install helm chart with proper values.yaml config
-helm install crowdsec crowdsec/crowdsec -f crowdsec-values.yaml -n crowdsec
+helm install crowdsec crowdsec/crowdsec -f crowdsec-values.yaml -n crowdsec --create-namespace
 ```
+
+To enable TLS between LAPI/agents/bouncers, run this instead:
+
+```
+# install cert-manager
+helm repo add jetstack https://charts.jetstack.io
+helm repo update
+helm install \
+  cert-manager jetstack/cert-manager \
+  --namespace cert-manager \
+  --create-namespace \
+  --version v1.10.0 \
+  --set installCRDs=true
+# install crowdsec
+helm install crowdsec crowdsec/crowdsec -f crowdsec-values.yaml --set tls.enabled=true -n crowdsec --create-namespace
+```
+
+Note that TLS is not yet supported with the traefik bouncer.
+
 
 ## Uninstalling the Chart
 
@@ -49,6 +66,7 @@ helm delete crowdsec -n crowdsec
 | secrets.username | string | `""` | agent username (default is generated randomly) |
 | secrets.password | string | `""` | agent password (default is generated randomly) |
 | tls.enabled | bool | `false` | Enable TLS between LAPI, agents and bouncers (see below) |
+| tls.certManager.enabled | bool | `true` | Create TLS certificates with cert-manager (must be installed) |
 | lapi.env | list | `[]` | environment variables from crowdsecurity/crowdsec docker image |
 | lapi.ingress | object | `{"annotations":{"nginx.ingress.kubernetes.io/backend-protocol":"HTTP"},"enabled":false,"host":"","ingressClassName":""}` | Enable ingress lapi object |
 | lapi.dashboard.enabled | bool | `false` | Enable Metabase Dashboard (by default disabled) |

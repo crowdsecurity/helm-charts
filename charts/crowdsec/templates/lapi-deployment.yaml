@@ -63,7 +63,7 @@ spec:
           - name: KEY_FILE
             value: /etc/ssl/crowdsec/tls.key
           - name: CA_CERT_PATH
-            value: /etc/ssl/crowdsec-ca/ca.crt
+            value: /etc/ssl/crowdsec/ca.crt
           {{- end }}
         {{- with .Values.lapi.env }}
           {{- toYaml . | nindent 10 }}
@@ -117,8 +117,6 @@ spec:
           {{- if .Values.tls.enabled }}
           - name: crowdsec-tls
             mountPath: /etc/ssl/crowdsec
-          - name: crowdsec-ca
-            mountPath: /etc/ssl/crowdsec-ca
           {{- end }}
       {{- if .Values.lapi.dashboard.enabled }}
       - name: dashboard
@@ -191,9 +189,6 @@ spec:
       - name: crowdsec-tls
         secret:
           secretName: {{ .Release.Name }}-lapi-tls
-      - name: crowdsec-ca
-        configMap:
-          name: {{ .Release.Name }}-ca
       {{- end }}
       {{- with .Values.lapi.tolerations }}
       tolerations:

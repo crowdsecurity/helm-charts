@@ -76,6 +76,8 @@ config:
 
 tls:
   enabled: false
+  certManager:
+    enabled: true
   agent:
     secret: "{{ .Release.Name }}-agent-tls"
   lapi:
