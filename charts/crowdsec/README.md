@@ -40,7 +40,7 @@ There are three secrets: $RELEASE-agent-tls, $RELEASE-bouncer-tls, and $RELEASE-
 Each secret contains three files: `tls.crt`, `tls.key` and `ca.crt`.
 
 If you can't use cert-manager, you can provide an alternate mechanism to create them (see the directory hack/tls for an example),
-and you'll have to set `tls.certManager.enabled=false'.
+and you'll have to set `tls.certManager.enabled=false`.
 
 When using TLS, agents don't need username/password, and bouncers don't need an API key.
 
