@@ -1,3 +1,6 @@
+# vim: set ft=gotmpl:
+---
+
 {{ if .Values.lapi.persistentVolume.data.enabled }}
 apiVersion: v1
 kind: PersistentVolumeClaim

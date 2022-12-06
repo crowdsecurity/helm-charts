@@ -1,3 +1,6 @@
+# vim: set ft=gotmpl:
+---
+
 {{/*
 Generate username if not specified in values
 */}}

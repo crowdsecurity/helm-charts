@@ -1,3 +1,6 @@
+# vim: set ft=gotmpl:
+---
+
 {{- if and (.Values.agent.metrics.enabled) (.Values.agent.metrics.serviceMonitor.enabled) }}
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor

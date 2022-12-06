@@ -1,0 +1,10 @@
+# vim: set ft=gotmpl:
+---
+{{ if and (.Values.tls.enabled) (.Values.tls.certManager.enabled) }}
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: {{ .Release.Name }}-root-issuer
+spec:
+  selfSigned: {}
+{{ end }}

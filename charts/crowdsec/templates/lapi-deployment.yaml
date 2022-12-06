@@ -1,3 +1,6 @@
+# vim: set ft=gotmpl:
+---
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -34,6 +37,7 @@ spec:
         image: "{{ .Values.image.repository | default "crowdsecurity/crowdsec" }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         env:
+          {{- if not .Values.tls.enabled }}
           - name: AGENT_USERNAME
             valueFrom:
               secretKeyRef:
@@ -44,11 +48,24 @@ spec:
               secretKeyRef:
                 name: agent-credentials
                 key: password
+          {{- end }}
           - name: DISABLE_AGENT
             value: "true"
           {{- if .Values.lapi.dashboard.enabled }}
           - name: GID
             value: "1000"
+          {{- end }}
+          {{- if .Values.tls.enabled }}
+          - name: USE_TLS
+            value: "true"
+          - name: CERT_FILE
+            value: /etc/ssl/crowdsec/tls.crt
+          - name: KEY_FILE
+            value: /etc/ssl/crowdsec/tls.key
+          {{- if .Values.tls.caBundle }}
+          - name: CACERT_FILE
+            value: /etc/ssl/crowdsec/ca.crt
+          {{- end }}
           {{- end }}
         {{- with .Values.lapi.env }}
           {{- toYaml . | nindent 10 }}
@@ -98,6 +115,10 @@ spec:
           {{- end }}
           {{- end }}
           {{- end }}
+          {{- end }}
+          {{- if .Values.tls.enabled }}
+          - name: crowdsec-tls
+            mountPath: /etc/ssl/crowdsec
           {{- end }}
       {{- if .Values.lapi.dashboard.enabled }}
       - name: dashboard
@@ -165,6 +186,11 @@ spec:
       {{ end }}
       {{- end }}
       {{- end }}
+      {{- end }}
+      {{- if .Values.tls.enabled }}
+      - name: crowdsec-tls
+        secret:
+          secretName: {{ .Release.Name }}-lapi-tls
       {{- end }}
       {{- with .Values.lapi.tolerations }}
       tolerations:

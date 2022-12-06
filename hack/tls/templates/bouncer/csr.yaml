@@ -1,0 +1,10 @@
+apiVersion: certificates.k8s.io/v1
+kind: CertificateSigningRequest
+metadata:
+  name: ${NAME_BOUNCER_CSR}
+spec:
+  request: ${BOUNCER_CSR}
+  signerName: ${SIGNER_NAME}
+  usages:
+    - digital signature
+    - client auth

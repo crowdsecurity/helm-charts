@@ -74,9 +74,24 @@ config:
     # http.yaml: ""
     # splunk.yaml: ""
 
+tls:
+  enabled: false
+  caBundle: true
+  certManager:
+    enabled: true
+  bouncer:
+    secret: "{{ .Release.Name }}-bouncer-tls"
+    reflector:
+      namespaces: []
+  agent:
+    secret: "{{ .Release.Name }}-agent-tls"
+    reflector:
+      namespaces: []
+  lapi:
+    secret: "{{ .Release.Name }}-lapi-tls"
 
 # If you want to specify secrets that will be used for all your crowdsec-agents
-# secrets can be provided be env variables
+# secrets can be provided as env variables
 secrets:
   # -- agent username (default is generated randomly)
   username: ""
@@ -87,7 +102,7 @@ secrets:
 lapi:
   # -- environment variables from crowdsecurity/crowdsec docker image
   env: []
-    # by default disable the agent because it only the local API.
+    # by default disable the agent because it only needs the local API.
     #- name: DISABLE_AGENT
     #  value: "true"
   # -- Enable ingress lapi object
@@ -204,7 +219,7 @@ agent:
       size: 100Mi
   # -- environment variables from crowdsecurity/crowdsec docker image
   env: []
-    # by default we the docker-logs parser to be able to parse docker logs in k8s
+    # by default we configure the docker-logs parser to be able to parse docker logs in k8s
     # by default we disable local API on the agent pod
     # - name: SCENARIOS
     #   value: "scenario/name otherScenario/name"

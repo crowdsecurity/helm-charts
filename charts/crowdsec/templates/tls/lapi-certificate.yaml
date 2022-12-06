@@ -1,0 +1,15 @@
+# vim: set ft=gotmpl:
+---
+{{ if and (.Values.tls.enabled) (.Values.tls.certManager.enabled) }}
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ .Release.Name }}-lapi
+  namespace: {{ .Release.Namespace }}
+spec:
+  dnsNames:
+    - {{ .Release.Name }}-service.{{ .Release.Namespace }}
+  secretName: {{ .Release.Name }}-lapi-tls
+  issuerRef:
+    name: {{ .Release.Name }}-ca-issuer
+{{ end }}

@@ -1,0 +1,27 @@
+#!/bin/sh
+
+set -eu
+
+if [ -n "$(kubectl get csr "$NAME_LAPI_CSR" -o jsonpath='{.status.certificate}')" ]; then
+    echo The certificate is already signed. You can delete it and sign again with:
+    echo
+    echo kubectl delete csr "$NAME_LAPI_CSR"
+    echo ./bin/cert-lapi-create
+    echo "$0"
+    exit 1
+fi
+
+# sign the LAPI certificate
+
+kubectl get csr "$NAME_LAPI_CSR" -o jsonpath='{.spec.request}' | \
+  base64 --decode | \
+  cfssl sign -ca ./tmp/ca.pem -ca-key ./tmp/ca-key.pem -config ./templates/signing-config.json -profile lapi - | \
+  cfssljson -bare ./tmp/ca-signed-lapi
+
+# upload ca-signed-lapi.pem
+
+SIGNED_CERT=$(base64 -w0 ./tmp/ca-signed-lapi.pem)
+
+kubectl get csr "$NAME_LAPI_CSR" -o json | \
+  jq '.status.certificate = "'"$SIGNED_CERT"'"' | \
+  kubectl replace --raw "/apis/certificates.k8s.io/v1/certificatesigningrequests/$NAME_LAPI_CSR/status" name -f - >/dev/null

@@ -1,0 +1,7 @@
+{
+    "CN": "Private CrowdSec CA",
+    "key": {
+        "algo": "rsa",
+        "size": 2048
+    }
+}

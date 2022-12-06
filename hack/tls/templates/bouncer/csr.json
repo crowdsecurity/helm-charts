@@ -1,0 +1,16 @@
+{
+    "CN": "CrowdSec bouncer",
+    "key": {
+        "algo": "ecdsa",
+        "size": 256
+    },
+    "names": [
+        {
+            "C": "FR",
+            "L": "Paris",
+            "O": "Crowdsec",
+            "OU": "bouncer-ou",
+            "ST": "France"
+        }
+    ]
+}
