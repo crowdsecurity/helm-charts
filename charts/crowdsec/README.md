@@ -2,7 +2,7 @@
 
 ![Version: 0.7.0](https://img.shields.io/badge/Version-0.7.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v1.4.1](https://img.shields.io/badge/AppVersion-v1.4.1-informational?style=flat-square)
 
-Crowdsec helm chart is an open-source, lightweight agent to detect and respond to bad behaviors.
+Crowdsec helm chart is an open-source, lightweight agent to detect and respond to malicious behaviors.
 
 ## Get Repo Info
 
@@ -13,30 +13,36 @@ helm repo update
 
 ## Installing the Chart
 
-Before installing the chart, you need to understand some [concepts](https://docs.crowdsec.net/docs/concepts) of Crowdsec.
-So you can configure well the chart and being able to parse logs and detect attacks inside your Kubernetes cluster.
+Before installing the chart, it is important to understand some key
+[concepts](https://docs.crowdsec.net/docs/concepts) of CrowdSec. It will ensure
+you can properly configure the chart and effectively parse logs to detect
+attacks within your Kubernetes cluster.
 
-Here is a [blog post](https://crowdsec.net/blog/kubernetes-crowdsec-integration/) about crowdsec in kubernetes.
+Here are some blog posts about CrowdSec in Kubernetes:
+
+ - [Kubernetes CrowdSec Integration – Part 1: Detection](https://www.crowdsec.net/blog/kubernetes-crowdsec-integration)
+ - [Kubernetes CrowdSec Integration – Part 2: Remediation](https://www.crowdsec.net/blog/kubernetes-crowdsec-integration-remediation)
+ - [How to mitigate security threats with CrowdSec in Kubernetes using Traefik](https://www.crowdsec.net/blog/how-to-mitigate-security-threats-with-crowdsec-and-traefik)
+
 
 ```
 # Install helm chart with proper values.yaml config
 helm install crowdsec crowdsec/crowdsec -f crowdsec-values.yaml -n crowdsec --create-namespace
 ```
 
-
 ## TLS authentication/encryption
 
-By enabling TLS, all communication between agents, bouncers and LAPI is protected by certificates.
+By enabling TLS all communication between agents, bouncers, and LAPI is protected by certificates.
 
 By default, cert-manager and reflector are used to create, distribute and refresh certificate secrets.
 
-There are three secrets: $RELEASE-agent-tls, $RELEASE-bouncer-tls and $RELEASE-lapi-tls.
-Each contains three files: `tls.crt`, `tls.key` and `ca.crt`.
+There are three secrets: $RELEASE-agent-tls, $RELEASE-bouncer-tls, and $RELEASE-lapi-tls.
+Each secret contains three files: `tls.crt`, `tls.key` and `ca.crt`.
 
-If you can't use cert-manager, you can provide you alternate mechanism to create them (see the directory hack/tls for an example)
+If you can't use cert-manager, you can provide an alternate mechanism to create them (see the directory hack/tls for an example),
 and you'll have to set `tls.certManager.enabled=false'.
 
-When using TLS, agents don't need username/password and bouncers don't need an API key.
+When using TLS, agents don't need username/password, and bouncers don't need an API key.
 
 
 ## Uninstalling the Chart
