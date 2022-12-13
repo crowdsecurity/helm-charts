@@ -37,6 +37,8 @@ spec:
         env:
           - name: DISABLE_LOCAL_API
             value: "true"
+          - name: DISABLE_ONLINE_API
+            value: "true"
 
           # agent - lapi authentication, with TLS or password
 
