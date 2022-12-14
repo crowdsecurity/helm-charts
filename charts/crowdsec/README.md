@@ -1,8 +1,8 @@
 # crowdsec
 
-![Version: 0.8.1](https://img.shields.io/badge/Version-0.8.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v1.4.4-rc1](https://img.shields.io/badge/AppVersion-v1.4.4-rc1-informational?style=flat-square)
+![Version: 0.8.0](https://img.shields.io/badge/Version-0.8.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v1.4.4-rc1](https://img.shields.io/badge/AppVersion-v1.4.4--rc1-informational?style=flat-square)
 
-Crowdsec helm chart is an open-source, lightweight agent to detect and respond to malicious behaviors.
+Crowdsec helm chart is an open-source, lightweight agent to detect and respond to bad behaviours.
 
 ## Get Repo Info
 
@@ -13,37 +13,17 @@ helm repo update
 
 ## Installing the Chart
 
-Before installing the chart, it is important to understand some key
-[concepts](https://docs.crowdsec.net/docs/concepts) of CrowdSec. It will ensure
-you can properly configure the chart and effectively parse logs to detect
-attacks within your Kubernetes cluster.
+Before installing the chart, you need to understand some [concepts](https://docs.crowdsec.net/docs/concepts) of Crowdsec.
+So you can configure well the chart and being able to parse logs and detect attacks inside your Kubernetes cluster.
 
-Here are some blog posts about CrowdSec in Kubernetes:
-
- - [Kubernetes CrowdSec Integration – Part 1: Detection](https://www.crowdsec.net/blog/kubernetes-crowdsec-integration)
- - [Kubernetes CrowdSec Integration – Part 2: Remediation](https://www.crowdsec.net/blog/kubernetes-crowdsec-integration-remediation)
- - [How to mitigate security threats with CrowdSec in Kubernetes using Traefik](https://www.crowdsec.net/blog/how-to-mitigate-security-threats-with-crowdsec-and-traefik)
-
+Here is a [blog post](https://crowdsec.net/blog/kubernetes-crowdsec-integration/) about crowdsec in kubernetes.
 
 ```
+# Create namespace for crowdsec
+kubectl create ns crowdsec
 # Install helm chart with proper values.yaml config
-helm install crowdsec crowdsec/crowdsec -f crowdsec-values.yaml -n crowdsec --create-namespace
+helm install crowdsec crowdsec/crowdsec -f crowdsec-values.yaml -n crowdsec
 ```
-
-## TLS authentication/encryption
-
-By enabling TLS all communication between agents, bouncers, and LAPI is protected by certificates.
-
-By default, cert-manager and reflector are used to create, distribute and refresh certificate secrets.
-
-There are three secrets: $RELEASE-agent-tls, $RELEASE-bouncer-tls, and $RELEASE-lapi-tls.
-Each secret contains three files: `tls.crt`, `tls.key` and `ca.crt`.
-
-If you can't use cert-manager, you can provide an alternate mechanism to create them (see the directory hack/tls for an example),
-and you'll have to set `tls.certManager.enabled=false`.
-
-When using TLS, agents don't need username/password, and bouncers don't need an API key.
-
 
 ## Uninstalling the Chart
 
@@ -66,16 +46,16 @@ helm delete crowdsec -n crowdsec
 | config."console.yaml" | string | `""` |  |
 | config."profiles.yaml" | string | `""` | Profiles configuration (https://docs.crowdsec.net/docs/next/profiles/format/#profile-configuration-example) |
 | config.notifications | object | `{}` | notifications configuration (https://docs.crowdsec.net/docs/next/notification_plugins/intro) |
+| tls.enabled | bool | `false` |  |
+| tls.caBundle | bool | `true` |  |
+| tls.certManager.enabled | bool | `true` |  |
+| tls.bouncer.secret | string | `"{{ .Release.Name }}-bouncer-tls"` |  |
+| tls.bouncer.reflector.namespaces | list | `[]` |  |
+| tls.agent.secret | string | `"{{ .Release.Name }}-agent-tls"` |  |
+| tls.agent.reflector.namespaces | list | `[]` |  |
+| tls.lapi.secret | string | `"{{ .Release.Name }}-lapi-tls"` |  |
 | secrets.username | string | `""` | agent username (default is generated randomly) |
 | secrets.password | string | `""` | agent password (default is generated randomly) |
-| tls.enabled | bool | `false` | Enable TLS between LAPI, agents and bouncers (see below) |
-| tls.caBundle | bool | `true` | Certificate secrets also contain a `ca.crt` file |
-| tls.certManager.enabled | bool | `true` | Create TLS certificates with cert-manager (must be installed) |
-| tls.bouncer.secret | string | {{ .Release.Name }}-bouncer-tls | Name of the bouncer certificate secret |
-| tls.bouncer.reflector.namespaces | list | `[]` | List of namespaces where bouncers are deployed |
-| tls.agent.secret | string | {{ .Release.Name }}-agent-tls | Name of the agent certificate secret |
-| tls.agent.reflector.namespaces | list | `[]` | List of namespaces where agents are deployed |
-| tls.lapi.secret | string | {{ .Release.Name }}-lapi-tls | Name of the lapi certificate secret |
 | lapi.env | list | `[]` | environment variables from crowdsecurity/crowdsec docker image |
 | lapi.ingress | object | `{"annotations":{"nginx.ingress.kubernetes.io/backend-protocol":"HTTP"},"enabled":false,"host":"","ingressClassName":""}` | Enable ingress lapi object |
 | lapi.dashboard.enabled | bool | `false` | Enable Metabase Dashboard (by default disabled) |
