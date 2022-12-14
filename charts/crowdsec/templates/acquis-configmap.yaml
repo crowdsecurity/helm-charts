@@ -12,6 +12,7 @@ data:
     ---
     filenames:
       - /var/log/containers/{{ .podName }}_{{ .namespace }}_*.log
+    force_inotify: true
     labels:
       type: {{ $container_runtime }}
       program: {{ .program }}
