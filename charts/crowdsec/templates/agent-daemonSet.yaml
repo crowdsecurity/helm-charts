@@ -51,7 +51,7 @@ spec:
             value: /etc/ssl/crowdsec/tls.crt
           - name: KEY_FILE
             value: /etc/ssl/crowdsec/tls.key
-          {{- if .Values.tls.caBundle }}
+          {{- if .Values.tls.agent.caBundle }}
           - name: CACERT_FILE
             value: /etc/ssl/crowdsec/ca.crt
           {{- end }}

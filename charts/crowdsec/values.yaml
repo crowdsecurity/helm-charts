@@ -76,19 +76,21 @@ config:
 
 tls:
   enabled: false
-  caBundle: true
   certManager:
     enabled: true
   bouncer:
     secret: "{{ .Release.Name }}-bouncer-tls"
+    caBundle: true
     reflector:
       namespaces: []
   agent:
     secret: "{{ .Release.Name }}-agent-tls"
+    caBundle: true
     reflector:
       namespaces: []
   lapi:
     secret: "{{ .Release.Name }}-lapi-tls"
+    caBundle: true
 
 # If you want to specify secrets that will be used for all your crowdsec-agents
 # secrets can be provided as env variables
