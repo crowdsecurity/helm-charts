@@ -37,6 +37,13 @@ spec:
         image: "{{ .Values.image.repository | default "crowdsecurity/crowdsec" }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         env:
+          {{- if .Values.tls.enabled }}
+          - name: LOCAL_API_URL
+            value: https://{{ .Release.Name }}-service.{{ .Release.Namespace }}:8080
+          {{- else }}
+          - name: LOCAL_API_URL
+            value: http://{{ .Release.Name }}-service.{{ .Release.Namespace }}:8080
+          {{- end }}
           {{- if not .Values.tls.enabled }}
           - name: AGENT_USERNAME
             valueFrom:
@@ -58,13 +65,19 @@ spec:
           {{- if .Values.tls.enabled }}
           - name: USE_TLS
             value: "true"
-          - name: CERT_FILE
-            value: /etc/ssl/crowdsec/tls.crt
-          - name: KEY_FILE
-            value: /etc/ssl/crowdsec/tls.key
+          - name: CLIENT_CERT_FILE
+            value: /etc/ssl/crowdsec-agent/tls.crt
+          - name: CLIENT_KEY_FILE
+            value: /etc/ssl/crowdsec-agent/tls.key
+          - name: LAPI_CERT_FILE
+            value: /etc/ssl/crowdsec-lapi/tls.crt
+          - name: LAPI_KEY_FILE
+            value: /etc/ssl/crowdsec-lapi/tls.key
           {{- if .Values.tls.lapi.caBundle }}
-          - name: CACERT_FILE
-            value: /etc/ssl/crowdsec/ca.crt
+          - name: CLIENT_CACERT_FILE
+            value: /etc/ssl/crowdsec-agent/ca.crt
+          - name: LAPI_CACERT_FILE
+            value: /etc/ssl/crowdsec-lapi/ca.crt
           {{- end }}
           {{- end }}
         {{- with .Values.lapi.env }}
@@ -117,8 +130,10 @@ spec:
           {{- end }}
           {{- end }}
           {{- if .Values.tls.enabled }}
-          - name: crowdsec-tls
-            mountPath: /etc/ssl/crowdsec
+          - name: crowdsec-lapi-tls
+            mountPath: /etc/ssl/crowdsec-lapi
+          - name: crowdsec-agent-tls
+            mountPath: /etc/ssl/crowdsec-agent
           {{- end }}
       {{- if .Values.lapi.dashboard.enabled }}
       - name: dashboard
@@ -188,9 +203,12 @@ spec:
       {{- end }}
       {{- end }}
       {{- if .Values.tls.enabled }}
-      - name: crowdsec-tls
+      - name: crowdsec-lapi-tls
         secret:
           secretName: {{ .Release.Name }}-lapi-tls
+      - name: crowdsec-agent-tls
+        secret:
+          secretName: {{ .Release.Name }}-agent-tls
       {{- end }}
       {{- with .Values.lapi.tolerations }}
       tolerations:
