@@ -47,15 +47,13 @@ helm delete crowdsec -n crowdsec
 | config."profiles.yaml" | string | `""` | Profiles configuration (https://docs.crowdsec.net/docs/next/profiles/format/#profile-configuration-example) |
 | config.notifications | object | `{}` | notifications configuration (https://docs.crowdsec.net/docs/next/notification_plugins/intro) |
 | tls.enabled | bool | `false` |  |
+| tls.caBundle | bool | `true` |  | whether the tls secrets contain a ca.crt file
 | tls.certManager.enabled | bool | `true` |  |
 | tls.agent.secret | string | `"{{ .Release.Name }}-agent-tls"` |  |
 | tls.agent.reflector.namespaces | list | `[]` |  |
-| tls.agent.caBundle | bool | `true` |  | whether the agent-tls secret contains a ca.crt file
 | tls.bouncer.secret | string | `"{{ .Release.Name }}-bouncer-tls"` |  |
 | tls.bouncer.reflector.namespaces | list | `[]` |  |
-| tls.bouncer.caBundle | bool | `true` |  | whether the bouncer-tls secret contains a ca.crt file
 | tls.lapi.secret | string | `"{{ .Release.Name }}-lapi-tls"` |  |
-| tls.lapi.caBundle | bool | `true` |  | whether the lapi-tls secret contains a ca.crt file
 | secrets.username | string | `""` | agent username (default is generated randomly) |
 | secrets.password | string | `""` | agent password (default is generated randomly) |
 | lapi.env | list | `[]` | environment variables from crowdsecurity/crowdsec docker image |

@@ -1,3 +1,5 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/crowdsecurity/helm-charts/main/charts/crowdsec/values.schema.json
+
 # Default values for crowdsec-chart.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
@@ -76,21 +78,19 @@ config:
 
 tls:
   enabled: false
+  caBundle: true
   certManager:
     enabled: true
   bouncer:
     secret: "{{ .Release.Name }}-bouncer-tls"
-    caBundle: true
     reflector:
       namespaces: []
   agent:
     secret: "{{ .Release.Name }}-agent-tls"
-    caBundle: true
     reflector:
       namespaces: []
   lapi:
     secret: "{{ .Release.Name }}-lapi-tls"
-    caBundle: true
 
 # If you want to specify secrets that will be used for all your crowdsec-agents
 # secrets can be provided as env variables
