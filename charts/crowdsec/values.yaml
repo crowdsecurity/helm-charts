@@ -211,7 +211,7 @@ agent:
   persistentVolume:
     # -- Persistent volume for config folder. Stores local config (parsers, scenarios etc.)
     config:
-      enabled: true
+      enabled: false
       accessModes:
         - ReadWriteOnce
       storageClassName: ""
