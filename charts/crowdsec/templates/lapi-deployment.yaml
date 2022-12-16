@@ -76,16 +76,20 @@ spec:
           - name: lapi
             containerPort: 8080
             protocol: TCP
-            {{ if .Values.lapi.metrics.enabled }}
+          {{- if .Values.lapi.metrics.enabled -}}
           - name: metrics
             containerPort: 6060
             protocol: TCP
-            {{ end }}
+          {{- end }}
         {{ if .Values.lapi.persistentVolume.config.enabled }}
         command: ['sh', '-c', 'mv -n /staging/etc/crowdsec/* /etc/crowdsec_data/ && rm -rf /staging/etc/crowdsec && ln -s /etc/crowdsec_data /etc/crowdsec && ./docker_start.sh']
         {{ end }}
-        {{- if or (.Values.lapi.persistentVolume.data.enabled) (.Values.lapi.persistentVolume.config.enabled) (.Values.lapi.dashboard.enabled) (include "lapiCustomConfigIsNotEmpty" .) }}
+        {{- if or (.Values.tls.enabled) (.Values.lapi.persistentVolume.data.enabled) (.Values.lapi.persistentVolume.config.enabled) (.Values.lapi.dashboard.enabled) (include "lapiCustomConfigIsNotEmpty" .) }}
         volumeMounts:
+          {{- if .Values.tls.enabled }}
+          - name: crowdsec-tls
+            mountPath: /etc/ssl/crowdsec
+          {{- end }}
           {{ if or (.Values.lapi.persistentVolume.data.enabled) (.Values.lapi.dashboard.enabled) }}
           - name: crowdsec-db
             mountPath: /var/lib/crowdsec/data
@@ -116,10 +120,6 @@ spec:
           {{- end }}
           {{- end }}
           {{- end }}
-          {{- if .Values.tls.enabled }}
-          - name: crowdsec-tls
-            mountPath: /etc/ssl/crowdsec
-          {{- end }}
       {{- if .Values.lapi.dashboard.enabled }}
       - name: dashboard
         image: "{{ .Values.lapi.dashboard.image.repository | default "metabase/metabase" }}:{{ .Values.lapi.dashboard.image.tag | default "latest" }}"
@@ -137,7 +137,7 @@ spec:
             value: "1000"
       {{- end }}
       terminationGracePeriodSeconds: 30
-      {{- if or (.Values.lapi.persistentVolume.data.enabled) (.Values.lapi.persistentVolume.config.enabled) (.Values.lapi.dashboard.enabled) (include "lapiCustomConfigIsNotEmpty" .) }}
+      {{- if or (.Values.tls.enabled) (.Values.lapi.persistentVolume.data.enabled) (.Values.lapi.persistentVolume.config.enabled) (.Values.lapi.dashboard.enabled) (include "lapiCustomConfigIsNotEmpty" .) }}
       volumes:
       {{- if .Values.lapi.dashboard.enabled }}
       - name: shared-data
@@ -186,11 +186,11 @@ spec:
       {{ end }}
       {{- end }}
       {{- end }}
-      {{- end }}
       {{- if .Values.tls.enabled }}
       - name: crowdsec-tls
         secret:
           secretName: {{ .Release.Name }}-lapi-tls
+      {{- end }}
       {{- end }}
       {{- with .Values.lapi.tolerations }}
       tolerations:
