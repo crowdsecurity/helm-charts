@@ -76,7 +76,7 @@ spec:
           - name: lapi
             containerPort: 8080
             protocol: TCP
-          {{- if .Values.lapi.metrics.enabled -}}
+          {{- if .Values.lapi.metrics.enabled }}
           - name: metrics
             containerPort: 6060
             protocol: TCP
