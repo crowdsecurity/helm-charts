@@ -196,11 +196,11 @@ lapi:
 agent:
   acquisition:
     # -- Specify each pod you want to process it logs (namespace, podName and program)
-    - namespace: "" #ingress-nginx
+    - namespace: "" # ingress-nginx
       # -- to select pod logs to process
-      podName: "" #ingress-nginx-controller-*
+      podName: "" # ingress-nginx-controller-*
       # -- program name related to specific parser you will use (see https://hub.crowdsec.net/author/crowdsecurity/configurations/docker-logs)
-      program: "" #nginx
+      program: "" # nginx
   resources:
     limits:
       memory: 100Mi
@@ -282,5 +282,4 @@ agent:
       # -- docker image tag
       tag: "1.28"
 
-#service: {}
-
+# service: {}
