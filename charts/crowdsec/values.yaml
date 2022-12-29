@@ -79,6 +79,7 @@ config:
 tls:
   enabled: false
   caBundle: true
+  insecureSkipVerify: false
   certManager:
     enabled: true
   bouncer:
@@ -86,6 +87,7 @@ tls:
     reflector:
       namespaces: []
   agent:
+    tlsAuth: true
     secret: "{{ .Release.Name }}-agent-tls"
     reflector:
       namespaces: []

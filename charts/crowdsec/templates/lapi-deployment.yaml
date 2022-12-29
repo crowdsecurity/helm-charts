@@ -44,7 +44,7 @@ spec:
           - name: LOCAL_API_URL
             value: http://{{ .Release.Name }}-service.{{ .Release.Namespace }}:8080
           {{- end }}
-          {{- if not .Values.tls.enabled }}
+          {{- if or (not .Values.tls.enabled) (not .Values.tls.agent.tlsAuth) }}
           - name: AGENT_USERNAME
             valueFrom:
               secretKeyRef:
@@ -65,21 +65,24 @@ spec:
           {{- if .Values.tls.enabled }}
           - name: USE_TLS
             value: "true"
-          - name: CLIENT_CERT_FILE
-            value: /etc/ssl/crowdsec-agent/tls.crt
-          - name: CLIENT_KEY_FILE
-            value: /etc/ssl/crowdsec-agent/tls.key
           - name: LAPI_CERT_FILE
             value: /etc/ssl/crowdsec-lapi/tls.crt
           - name: LAPI_KEY_FILE
             value: /etc/ssl/crowdsec-lapi/tls.key
+          {{- if .Values.tls.agent.tlsAuth }}
+          - name: CLIENT_CERT_FILE
+            value: /etc/ssl/crowdsec-agent/tls.crt
+          - name: CLIENT_KEY_FILE
+            value: /etc/ssl/crowdsec-agent/tls.key
+          {{- end }}
           {{- if .Values.tls.caBundle }}
-          - name: CLIENT_CACERT_FILE
-            value: /etc/ssl/crowdsec-agent/ca.crt
-          - name: LAPI_CACERT_FILE
+          - name: CACERT_FILE
             value: /etc/ssl/crowdsec-lapi/ca.crt
           {{- end }}
           {{- end }}
+          - name: INSECURE_SKIP_VERIFY
+            value: {{ quote .Values.tls.insecureSkipVerify }}
+
         {{- with .Values.lapi.env }}
           {{- toYaml . | nindent 10 }}
         {{- end }}
