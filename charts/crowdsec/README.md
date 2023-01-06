@@ -51,7 +51,7 @@ helm delete crowdsec -n crowdsec
 | tls.certManager.enabled | bool | `true` |  |
 | tls.agent.secret | string | `"{{ .Release.Name }}-agent-tls"` |  |
 | tls.agent.reflector.namespaces | list | `[]` |  |
-| tls.agent.tlsAuth | bool | `true` | authenticate with client certificate (no username/password) |
+| tls.agent.tlsClientAuth | bool | `true` | authenticate with client certificate (no username/password) |
 | tls.agent.insecureSkipVerify | bool | `false` | skip lapi certificate validation |
 | tls.bouncer.secret | string | `"{{ .Release.Name }}-bouncer-tls"` |  |
 | tls.bouncer.reflector.namespaces | list | `[]` |  |

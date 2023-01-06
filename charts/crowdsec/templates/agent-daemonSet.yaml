@@ -47,7 +47,7 @@ spec:
             value: https://{{ .Release.Name }}-service.{{ .Release.Namespace }}:8080
           - name: USE_TLS
             value: "true"
-          {{- if .Values.tls.agent.tlsAuth }}
+          {{- if .Values.tls.agent.tlsClientAuth }}
           - name: CLIENT_CERT_FILE
             value: /etc/ssl/crowdsec-agent/tls.crt
           - name: CLIENT_KEY_FILE
@@ -61,7 +61,7 @@ spec:
           - name: LOCAL_API_URL
             value: http://{{ .Release.Name }}-service.{{ .Release.Namespace }}:8080
           {{- end }}
-          {{- if or (not .Values.tls.enabled) (not .Values.tls.agent.tlsAuth) }}
+          {{- if or (not .Values.tls.enabled) (not .Values.tls.agent.tlsClientAuth) }}
           - name: AGENT_USERNAME
             valueFrom:
               secretKeyRef:

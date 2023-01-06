@@ -87,7 +87,7 @@ tls:
     reflector:
       namespaces: []
   agent:
-    tlsAuth: true
+    tlsClientAuth: true
     secret: "{{ .Release.Name }}-agent-tls"
     reflector:
       namespaces: []
