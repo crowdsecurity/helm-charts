@@ -47,17 +47,21 @@ spec:
             value: https://{{ .Release.Name }}-service.{{ .Release.Namespace }}:8080
           - name: USE_TLS
             value: "true"
-          - name: CERT_FILE
-            value: /etc/ssl/crowdsec/tls.crt
-          - name: KEY_FILE
-            value: /etc/ssl/crowdsec/tls.key
+          {{- if .Values.tls.agent.tlsClientAuth }}
+          - name: CLIENT_CERT_FILE
+            value: /etc/ssl/crowdsec-agent/tls.crt
+          - name: CLIENT_KEY_FILE
+            value: /etc/ssl/crowdsec-agent/tls.key
+          {{- end }}
           {{- if .Values.tls.caBundle }}
           - name: CACERT_FILE
-            value: /etc/ssl/crowdsec/ca.crt
+            value: /etc/ssl/crowdsec-agent/ca.crt
           {{- end }}
           {{- else }}
           - name: LOCAL_API_URL
             value: http://{{ .Release.Name }}-service.{{ .Release.Namespace }}:8080
+          {{- end }}
+          {{- if or (not .Values.tls.enabled) (not .Values.tls.agent.tlsClientAuth) }}
           - name: AGENT_USERNAME
             valueFrom:
               secretKeyRef:
@@ -68,6 +72,10 @@ spec:
               secretKeyRef:
                 name: agent-credentials
                 key: password
+          {{- end }}
+          {{- if .Values.tls.insecureSkipVerify }}
+          - name: INSECURE_SKIP_VERIFY
+            value: {{ quote .Values.tls.insecureSkipVerify }}
           {{- end }}
 
         {{- with .Values.agent.env }}
@@ -134,8 +142,8 @@ spec:
             mountPath: /var/lib/docker/containers
             readOnly: true
           {{- if .Values.tls.enabled }}
-          - name: crowdsec-tls
-            mountPath: /etc/ssl/crowdsec
+          - name: crowdsec-agent-tls
+            mountPath: /etc/ssl/crowdsec-agent
           {{- end }}
       terminationGracePeriodSeconds: 30
       volumes:
@@ -201,7 +209,7 @@ spec:
         hostPath:
           path: /var/lib/docker/containers
       {{- if .Values.tls.enabled }}
-      - name: crowdsec-tls
+      - name: crowdsec-agent-tls
         secret:
           secretName: {{ .Release.Name }}-agent-tls
       {{- end }}

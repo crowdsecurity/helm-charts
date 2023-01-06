@@ -7,7 +7,7 @@ metadata:
     "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
 spec:
   containers:
-  - name: {{ .Release.Name }}-test-agent
+  - name: "{{ .Release.Name }}-test-agent"
     image: curlimages/curl
     env:
       - name: AGENT_USERNAME

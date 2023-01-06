@@ -37,7 +37,14 @@ spec:
         image: "{{ .Values.image.repository | default "crowdsecurity/crowdsec" }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         env:
-          {{- if not .Values.tls.enabled }}
+          {{- if .Values.tls.enabled }}
+          - name: LOCAL_API_URL
+            value: https://{{ .Release.Name }}-service.{{ .Release.Namespace }}:8080
+          {{- else }}
+          - name: LOCAL_API_URL
+            value: http://{{ .Release.Name }}-service.{{ .Release.Namespace }}:8080
+          {{- end }}
+          {{- if or (not .Values.tls.enabled) (not .Values.tls.agent.tlsClientAuth) }}
           - name: AGENT_USERNAME
             valueFrom:
               secretKeyRef:
@@ -58,15 +65,24 @@ spec:
           {{- if .Values.tls.enabled }}
           - name: USE_TLS
             value: "true"
-          - name: CERT_FILE
-            value: /etc/ssl/crowdsec/tls.crt
-          - name: KEY_FILE
-            value: /etc/ssl/crowdsec/tls.key
+          - name: LAPI_CERT_FILE
+            value: /etc/ssl/crowdsec-lapi/tls.crt
+          - name: LAPI_KEY_FILE
+            value: /etc/ssl/crowdsec-lapi/tls.key
+          {{- if .Values.tls.agent.tlsClientAuth }}
+          - name: CLIENT_CERT_FILE
+            value: /etc/ssl/crowdsec-agent/tls.crt
+          - name: CLIENT_KEY_FILE
+            value: /etc/ssl/crowdsec-agent/tls.key
+          {{- end }}
           {{- if .Values.tls.caBundle }}
           - name: CACERT_FILE
-            value: /etc/ssl/crowdsec/ca.crt
+            value: /etc/ssl/crowdsec-lapi/ca.crt
           {{- end }}
           {{- end }}
+          - name: INSECURE_SKIP_VERIFY
+            value: {{ quote .Values.tls.insecureSkipVerify }}
+
         {{- with .Values.lapi.env }}
           {{- toYaml . | nindent 10 }}
         {{- end }}
@@ -87,8 +103,10 @@ spec:
         {{- if or (.Values.tls.enabled) (.Values.lapi.persistentVolume.data.enabled) (.Values.lapi.persistentVolume.config.enabled) (.Values.lapi.dashboard.enabled) (include "lapiCustomConfigIsNotEmpty" .) }}
         volumeMounts:
           {{- if .Values.tls.enabled }}
-          - name: crowdsec-tls
-            mountPath: /etc/ssl/crowdsec
+          - name: crowdsec-lapi-tls
+            mountPath: /etc/ssl/crowdsec-lapi
+          - name: crowdsec-agent-tls
+            mountPath: /etc/ssl/crowdsec-agent
           {{- end }}
           {{ if or (.Values.lapi.persistentVolume.data.enabled) (.Values.lapi.dashboard.enabled) }}
           - name: crowdsec-db
@@ -187,9 +205,12 @@ spec:
       {{- end }}
       {{- end }}
       {{- if .Values.tls.enabled }}
-      - name: crowdsec-tls
+      - name: crowdsec-lapi-tls
         secret:
           secretName: {{ .Release.Name }}-lapi-tls
+      - name: crowdsec-agent-tls
+        secret:
+          secretName: {{ .Release.Name }}-agent-tls
       {{- end }}
       {{- end }}
       {{- with .Values.lapi.tolerations }}
