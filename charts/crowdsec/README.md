@@ -47,12 +47,12 @@ helm delete crowdsec -n crowdsec
 | config."profiles.yaml" | string | `""` | Profiles configuration (https://docs.crowdsec.net/docs/next/profiles/format/#profile-configuration-example) |
 | config.notifications | object | `{}` | notifications configuration (https://docs.crowdsec.net/docs/next/notification_plugins/intro) |
 | tls.enabled | bool | `false` |  |
-| tls.caBundle | bool | `true` |  |
-| tls.insecureSkipVerify | bool | `false` |  |
+| tls.caBundle | bool | `true` |  | whether the tls secrets contain a ca.crt file
+| tls.insecureSkipVerify | bool | `false` |  | skip lapi certificate validation
 | tls.certManager.enabled | bool | `true` |  |
 | tls.bouncer.secret | string | `"{{ .Release.Name }}-bouncer-tls"` |  |
 | tls.bouncer.reflector.namespaces | list | `[]` |  |
-| tls.agent.tlsClientAuth | bool | `true` |  |
+| tls.agent.tlsClientAuth | bool | `true` |  | authenticate with client certificate (no username/password)
 | tls.agent.secret | string | `"{{ .Release.Name }}-agent-tls"` |  |
 | tls.agent.reflector.namespaces | list | `[]` |  |
 | tls.lapi.secret | string | `"{{ .Release.Name }}-lapi-tls"` |  |
