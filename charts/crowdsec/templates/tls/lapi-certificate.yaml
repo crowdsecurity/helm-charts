@@ -9,6 +9,8 @@ metadata:
 spec:
   dnsNames:
     - {{ .Release.Name }}-service.{{ .Release.Namespace }}
+    - {{ .Release.Name }}-service.{{ .Release.Namespace }}.svc.cluster.local
+    - localhost
   secretName: {{ .Release.Name }}-lapi-tls
   issuerRef:
     name: {{ .Release.Name }}-ca-issuer

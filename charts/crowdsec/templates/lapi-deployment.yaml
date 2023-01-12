@@ -39,10 +39,10 @@ spec:
         env:
           {{- if .Values.tls.enabled }}
           - name: LOCAL_API_URL
-            value: https://{{ .Release.Name }}-service.{{ .Release.Namespace }}:8080
+            value: https://localhost:8080
           {{- else }}
           - name: LOCAL_API_URL
-            value: http://{{ .Release.Name }}-service.{{ .Release.Namespace }}:8080
+            value: http://localhost:8080
           {{- end }}
           {{- if or (not .Values.tls.enabled) (not .Values.tls.agent.tlsClientAuth) }}
           - name: AGENT_USERNAME
