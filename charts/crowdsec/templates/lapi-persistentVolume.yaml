@@ -1,7 +1,7 @@
 # vim: set ft=gotmpl:
 ---
 
-{{ if .Values.lapi.persistentVolume.data.enabled }}
+{{- if and .Values.lapi.persistentVolume.data.enabled (not .Values.lapi.persistentVolume.data.existingClaim)}}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -29,7 +29,7 @@ spec:
       storage: "{{ .Values.lapi.persistentVolume.data.size }}"
 {{ end }}
 ---
-{{ if .Values.lapi.persistentVolume.config.enabled }}
+{{- if and .Values.lapi.persistentVolume.config.enabled (not .Values.lapi.persistentVolume.config.existingClaim)}}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
