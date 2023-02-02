@@ -152,9 +152,11 @@ spec:
             subPath: acquis.yaml
           - name: varlog
             mountPath: /var/log
+          {{- if (eq "docker" .Values.container_runtime) }}
           - name: varlibdockercontainers
             mountPath: /var/lib/docker/containers
             readOnly: true
+          {{- end }}
           {{- if .Values.tls.enabled }}
           - name: crowdsec-agent-tls
             mountPath: /etc/ssl/crowdsec-agent
@@ -219,9 +221,11 @@ spec:
         configMap:
           name: crowdsec-simulation
       {{- end }}
+      {{- if (eq "docker" .Values.container_runtime) }}
       - name: varlibdockercontainers
         hostPath:
           path: /var/lib/docker/containers
+      {{- end }}
       {{- if .Values.tls.enabled }}
       - name: crowdsec-agent-tls
         secret:
