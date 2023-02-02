@@ -30,6 +30,15 @@ spec:
         image: "{{ .Values.agent.wait_for_lapi.image.repository }}:{{ .Values.agent.wait_for_lapi.image.tag }}"
         imagePullPolicy: {{ .Values.agent.wait_for_lapi.image.pullPolicy }}
         command: ['sh', '-c', "until nc {{ .Release.Name }}-service.{{ .Release.Namespace }} 8080; do echo waiting for lapi to start; sleep 5; done"]
+        resources:
+          limits:
+            memory: 50Mi
+          requests:
+            cpu: 1m
+            memory: 10Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          privileged: false
       containers:
       - name: crowdsec-agent
         image: "{{ .Values.image.repository | default "crowdsecurity/crowdsec" }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
@@ -88,6 +97,11 @@ spec:
           - name: metrics
             containerPort: 6060
             protocol: TCP
+
+        securityContext:
+          allowPrivilegeEscalation: false
+          privileged: false
+
         {{ end }}
         {{- if .Values.agent.persistentVolume.config.enabled }}
         command: ['sh', '-c', 'mv -n /staging/etc/crowdsec/* /etc/crowdsec_data/ && rm -rf /staging/etc/crowdsec && ln -s /etc/crowdsec_data /etc/crowdsec && ./docker_start.sh']
