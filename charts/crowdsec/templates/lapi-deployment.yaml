@@ -88,7 +88,7 @@ spec:
         {{- end }}
         resources:
           {{- toYaml .Values.lapi.resources | nindent 10 }}
-        
+
         livenessProbe:
           failureThreshold: 3
           periodSeconds: 10
@@ -110,7 +110,7 @@ spec:
           tcpSocket:
             port: lapi
           timeoutSeconds: 1
-        
+
         securityContext:
           allowPrivilegeEscalation: false
           privileged: false
@@ -218,8 +218,10 @@ spec:
           allowPrivilegeEscalation: false
           privileged: false
 
+        {{- with .Values.lapi.dashboard.resources }}
         resources:
-          {{- toYaml .Values.lapi.dashboard.resources | nindent 10 }}
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
 
       {{- end }}
       terminationGracePeriodSeconds: 30
