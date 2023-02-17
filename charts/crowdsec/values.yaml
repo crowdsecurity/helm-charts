@@ -198,6 +198,12 @@ lapi:
 
 # agent will deploy pod on every node as daemonSet to read wanted pods logs
 agent:
+  # manualAcquisition:
+  #   - filenames:
+  #       - /var/log/auth.log
+  #     labels:
+  #       type: syslog
+  #       program: sshd
   acquisition:
     # -- Specify each pod you want to process it logs (namespace, podName and program)
     - namespace: "" #ingress-nginx

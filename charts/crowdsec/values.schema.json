@@ -26,12 +26,49 @@
                     "items": {
                         "$ref": "#/definitions/Acquisition"
                     }
+                },
+                "manualAcquisition": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ManualAcquisition"
+                    }
                 }
             },
             "required": [
                 "acquisition"
             ],
             "title": "Agent"
+        },
+        "ManualAcquisition": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "filenames": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "force_inotify": {
+                    "type": "boolean"
+                },
+                "labels": {
+                    "type": "object",
+                    "patternProperties": {
+                        "^.*$": {
+                            "anyOf": [
+                                {"type": "string"}
+                            ]
+                        }
+                    },
+                    "additionalProperties": false
+                }
+            },
+            "required": [
+                "filenames",
+                "labels"
+            ],
+            "title": "ManualAcquisition"
         },
         "Acquisition": {
             "type": "object",
