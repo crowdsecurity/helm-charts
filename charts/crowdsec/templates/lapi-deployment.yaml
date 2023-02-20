@@ -88,6 +88,33 @@ spec:
         {{- end }}
         resources:
           {{- toYaml .Values.lapi.resources | nindent 10 }}
+
+        livenessProbe:
+          failureThreshold: 3
+          periodSeconds: 10
+          successThreshold: 1
+          tcpSocket:
+            port: lapi
+          timeoutSeconds: 1
+        readinessProbe:
+          failureThreshold: 3
+          periodSeconds: 10
+          successThreshold: 1
+          tcpSocket:
+            port: lapi
+          timeoutSeconds: 1
+        startupProbe:
+          failureThreshold: 30
+          periodSeconds: 10
+          successThreshold: 1
+          tcpSocket:
+            port: lapi
+          timeoutSeconds: 1
+
+        securityContext:
+          allowPrivilegeEscalation: false
+          privileged: false
+
         ports:
           - name: lapi
             containerPort: 8080
@@ -153,6 +180,49 @@ spec:
             value: /metabase-data/metabase.db
           - name: MGID
             value: "1000"
+
+        ports:
+        - containerPort: 3000
+          name: http
+          protocol: TCP
+
+        livenessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /
+            port: http
+            scheme: HTTP
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /
+            port: http
+            scheme: HTTP
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        startupProbe:
+          failureThreshold: 30
+          httpGet:
+            path: /
+            port: http
+            scheme: HTTP
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+
+        securityContext:
+          allowPrivilegeEscalation: false
+          privileged: false
+
+        {{- with .Values.lapi.dashboard.resources }}
+        resources:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+
       {{- end }}
       terminationGracePeriodSeconds: 30
       {{- if or (.Values.tls.enabled) (.Values.lapi.persistentVolume.data.enabled) (.Values.lapi.persistentVolume.config.enabled) (.Values.lapi.dashboard.enabled) (include "lapiCustomConfigIsNotEmpty" .) }}

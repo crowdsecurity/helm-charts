@@ -133,6 +133,15 @@ lapi:
     # -- Metabase SQLite static DB containing Dashboards
     assetURL: https://crowdsec-statics-assets.s3-eu-west-1.amazonaws.com/metabase_sqlite.zip
 
+    ## Ref: http://kubernetes.io/docs/user-guide/compute-resources/
+    ##
+    resources: {}
+      # limits:
+      #   memory: 2Gi
+      # requests:
+      #   cpu: 150m
+      #   memory: 1700Mi
+
     # -- Enable ingress object
     ingress:
       enabled: false
