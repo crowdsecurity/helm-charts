@@ -198,6 +198,7 @@ lapi:
 
 # agent will deploy pod on every node as daemonSet to read wanted pods logs
 agent:
+  # -- To add custom acquisitions using available datasources (https://docs.crowdsec.net/docs/next/data_sources/intro)
   additionalAcquisition: []
     # - source: kinesis
     #   stream_name: my-stream
