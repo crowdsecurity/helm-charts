@@ -85,6 +85,7 @@ helm delete crowdsec -n crowdsec
 | lapi.metrics | object | `{"enabled":false,"serviceMonitor":{"enabled":false}}` | Enable service monitoring (exposes "metrics" port "6060" for Prometheus) |
 | lapi.metrics.serviceMonitor | object | `{"enabled":false}` | See also: https://github.com/prometheus-community/helm-charts/issues/106#issuecomment-700847774 |
 | lapi.strategy.type | string | `"RollingUpdate"` |  |
+| agent.additionalAcquisition | list | `[]` | To add custom acquisitions using available datasources (https://docs.crowdsec.net/docs/next/data_sources/intro) |
 | agent.acquisition[0] | object | `{"namespace":"","podName":"","program":""}` | Specify each pod you want to process it logs (namespace, podName and program) |
 | agent.acquisition[0].podName | string | `""` | to select pod logs to process |
 | agent.acquisition[0].program | string | `""` | program name related to specific parser you will use (see https://hub.crowdsec.net/author/crowdsecurity/configurations/docker-logs) |
