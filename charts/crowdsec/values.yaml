@@ -207,6 +207,17 @@ lapi:
 
 # agent will deploy pod on every node as daemonSet to read wanted pods logs
 agent:
+  # -- To add custom acquisitions using available datasources (https://docs.crowdsec.net/docs/next/data_sources/intro)
+  additionalAcquisition: []
+    # - source: kinesis
+    #   stream_name: my-stream
+    #   labels:
+    #     type: mytype
+    # - source: syslog
+    #   listen_addr: 127.0.0.1
+    #   listen_port: 4242
+    #   labels:
+    #     type: syslog
   acquisition:
     # -- Specify each pod you want to process it logs (namespace, podName and program)
     - namespace: "" #ingress-nginx

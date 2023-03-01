@@ -17,3 +17,7 @@ data:
       type: {{ $container_runtime }}
       program: {{ .program }}
     {{- end }}
+    {{- range .Values.agent.additionalAcquisition }}
+    ---
+    {{- toYaml . | nindent 4 }}
+    {{- end }}

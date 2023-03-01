@@ -18,6 +18,10 @@
             ],
             "title": "values"
         },
+        "nonEmptyString": {
+            "type": "string",
+            "minLength": 1
+        },
         "Agent": {
             "type": "object",
             "properties": {
@@ -25,6 +29,37 @@
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/Acquisition"
+                    }
+                },
+                "additionalAcquisition": {
+                    "type": "array",
+                    "items": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/definitions/FileSource"
+                            },
+                            {
+                                "$ref": "#/definitions/JournaldSource"
+                            },
+                            {
+                                "$ref": "#/definitions/CloudwatchSource"
+                            },
+                            {
+                                "$ref": "#/definitions/KinesisSource"
+                            },
+                            {
+                                "$ref": "#/definitions/SyslogSource"
+                            },
+                            {
+                                "$ref": "#/definitions/DockerSource"
+                            },
+                            {
+                                "$ref": "#/definitions/KafkaSource"
+                            },
+                            {
+                                "$ref": "#/definitions/WinEventLogSource"
+                            }
+                        ]
                     }
                 }
             },
@@ -99,6 +134,519 @@
         "Scenarios": {
             "type": "object",
             "title": "Scenarios"
+        },
+        "Labels": {
+            "type": "object",
+            "description": "Object of labels to apply",
+            "patternProperties": {
+                "^.*$": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        }
+                    ]
+                }
+            },
+            "additionalProperties": false
+        },
+        "FileSource": {
+            "type": "object",
+            "description": "https://docs.crowdsec.net/docs/next/data_sources/file/",
+            "additionalProperties": false,
+            "properties": {
+                "source": {
+                    "const": "file"
+                },
+                "labels": {
+                    "$ref": "#/definitions/Labels"
+                },
+                "force_inotify": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "If set to true, force an inotify watch on the log files folder, even if there is no log in it."
+                },
+                "filenames": {
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "description": "A list of path to files to tail. Globbing is supported. Required if filename is not provided."
+                    }
+                },
+                "filename": {
+                    "type": "string",
+                    "description": "A single path to a file to tail. Globbing is supported. Required if filenames is not provided."
+                }
+            },
+            "oneOf": [
+                {
+                    "required": [
+                        "filename"
+                    ]
+                },
+                {
+                    "required": [
+                        "filenames"
+                    ]
+                }
+            ],
+            "required": [
+                "source"
+            ]
+        },
+        "JournaldSource": {
+            "type": "object",
+            "description": "https://docs.crowdsec.net/docs/next/data_sources/journald/",
+            "additionalProperties": false,
+            "properties": {
+                "source": {
+                    "const": "journalctl"
+                },
+                "labels": {
+                    "$ref": "#/definitions/Labels"
+                },
+                "journalctl_filter": {
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "description": "A list of journalctl filters. This is mandatory."
+                    }
+                }
+            },
+            "required": [
+                "source",
+                "journalctl_filter"
+            ]
+        },
+        "CloudwatchSource": {
+            "type": "object",
+            "description": "https://docs.crowdsec.net/docs/next/data_sources/cloudwatch/",
+            "additionalProperties": false,
+            "properties": {
+                "source": {
+                    "const": "cloudwatch"
+                },
+                "labels": {
+                    "$ref": "#/definitions/Labels"
+                },
+                "group_name": {
+                    "type": "string",
+                    "description": "Name of the group to monitor, exact match."
+                },
+                "stream_regexp": {
+                    "type": "string",
+                    "description": "A RE2 expression that will restrict streams within the group that will be monitored."
+                },
+                "stream_name": {
+                    "type": "string",
+                    "description": "Name of stream to monitor, exact match."
+                },
+                "prepend_cloudwatch_timestamp": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "When set to true (default: false), prepend the cloudwatch event timestamp to the generated log string. This is intended for cases where you log itself wouldn't contain timestamp."
+                },
+                "aws_profile": {
+                    "type": "string",
+                    "description": "The aws profile to use to poll cloudwatch, relies on your ~/.aws/config/."
+                },
+                "aws_config_dir": {
+                    "type": "string",
+                    "default": "/root/.aws",
+                    "description": "The path to your ~/.aws/, defaults to /root/.aws"
+                }
+            },
+            "patternProperties": {
+                "^.+_limit$": {
+                    "type": "number",
+                    "description": "https://docs.crowdsec.net/docs/next/data_sources/cloudwatch/#_limit"
+                },
+                "^.+_interval$": {
+                    "type": "string",
+                    "description": "https://docs.crowdsec.net/docs/next/data_sources/cloudwatch/#_interval"
+                }
+            },
+            "anyOf": [
+                {
+                    "required": [
+                        "source",
+                        "group_name",
+                        "stream_regexp"
+                    ]
+                },
+                {
+                    "required": [
+                        "source",
+                        "group_name",
+                        "stream_name"
+                    ]
+                }
+            ]
+        },
+        "DockerSource": {
+            "type": "object",
+            "description": "https://docs.crowdsec.net/docs/next/data_sources/docker/",
+            "additionalProperties": false,
+            "properties": {
+                "source": {
+                    "const": "docker"
+                },
+                "labels": {
+                    "$ref": "#/definitions/Labels"
+                },
+                "container_name": {
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "description": "List of containers names to monitor."
+                    }
+                },
+                "container_id": {
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "description": "List of containers IDs to monitor."
+                    }
+                },
+                "container_name_regexp": {
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "description": "List of regexp matching containers names to monitor."
+                    }
+                },
+                "container_id_regexp": {
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "description": "List of regexp matching containers ID to monitor."
+                    }
+                },
+                "docker_host": {
+                    "type": "string",
+                    "default": "unix:///var/run/docker.sock",
+                    "description": "Docker host."
+                },
+                "until": {
+                    "type": "string",
+                    "description": "Read logs until timestamp (e.g. 2013-01-02T13:23:37Z) or relative (e.g. 42m for 42 minutes)."
+                },
+                "since": {
+                    "type": "string",
+                    "description": "Read logs since timestamp (e.g. 2013-01-02T13:23:37Z) or relative (e.g. 42m for 42 minutes)."
+                },
+                "check_interval": {
+                    "type": "string",
+                    "default": "1s",
+                    "description": "Relative interval (e.g. 5s for 5 seconds) to check for new containers matching the configuration."
+                },
+                "follow_stdout": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Follow stdout containers logs."
+                },
+                "follow_stderr": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Follow stderr containers logs."
+                }
+            },
+            "anyOf": [
+                {
+                    "required": [
+                        "source",
+                        "container_name"
+                    ]
+                },
+                {
+                    "required": [
+                        "source",
+                        "container_id"
+                    ]
+                },
+                {
+                    "required": [
+                        "source",
+                        "container_name_regexp"
+                    ]
+                },
+                {
+                    "required": [
+                        "source",
+                        "container_id_regexp"
+                    ]
+                }
+            ]
+        },
+        "KinesisSource": {
+            "type": "object",
+            "description": "https://docs.crowdsec.net/docs/next/data_sources/kinesis/",
+            "additionalProperties": false,
+            "allOf": [
+                {
+                    "if": {
+                        "properties": {
+                            "use_enhanced_fanout": {
+                                "const": false
+                            }
+                        }
+                    },
+                    "then": {
+                        "required": [
+                            "stream_name"
+                        ]
+                    }
+                },
+                {
+                    "if": {
+                        "properties": {
+                            "use_enhanced_fanout": {
+                                "const": false
+                            }
+                        }
+                    },
+                    "then": {
+                        "required": [
+                            "stream_name"
+                        ]
+                    }
+                },
+                {
+                    "if": {
+                        "properties": {
+                            "use_enhanced_fanout": {
+                                "const": true
+                            }
+                        }
+                    },
+                    "then": {
+                        "required": [
+                            "consumer_name",
+                            "stream_arn"
+                        ]
+                    }
+                }
+            ],
+            "properties": {
+                "source": {
+                    "const": "kinesis"
+                },
+                "labels": {
+                    "$ref": "#/definitions/Labels"
+                },
+                "stream_name": {
+                    "type": "string",
+                    "description": "The name of the kinesis stream you want to read logs from."
+                },
+                "stream_arn": {
+                    "type": "string",
+                    "description": "The ARN of the kinesis stream you want to read logs from."
+                },
+                "use_enhanced_fanout": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Whether to use enhanced fan-out (dedicated throughput for a consumer) or not. This option will incur additional AWS costs."
+                },
+                "consumer_name": {
+                    "type": "string",
+                    "description": "Name of the consumer. Required when enhanced_fan_out is true."
+                },
+                "from_subscription": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Whether the logs are coming from a Cloudwatch subscription filter or not. When Cloudwatch writes logs to a kinesis stream, they are base64-encoded and gzipped, and the actual log message is part of a JSON object."
+                },
+                "aws_profile": {
+                    "type": "string",
+                    "description": "The aws profile to use to poll cloudwatch, relies on your ~/.aws/config/."
+                },
+                "aws_config_dir": {
+                    "type": "string",
+                    "default": "/root/.aws",
+                    "description": "The path to your ~/.aws/, defaults to /root/.aws"
+                },
+                "aws_region": {
+                    "type": "string",
+                    "description": "Optional, the data source will automatically the standard AWS env vars if present."
+                }
+            },
+            "required": [
+                "source"
+            ]
+        },
+        "SyslogSource": {
+            "type": "object",
+            "description": "https://docs.crowdsec.net/docs/next/data_sources/syslog/",
+            "additionalProperties": false,
+            "properties": {
+                "source": {
+                    "const": "syslog"
+                },
+                "labels": {
+                    "$ref": "#/definitions/Labels"
+                },
+                "listen_addr": {
+                    "type": "string",
+                    "default": "127.0.0.1",
+                    "description": "Address on which the syslog will listen."
+                },
+                "listen_port": {
+                    "type": "number",
+                    "default": 514,
+                    "description": "UDP port used by the syslog server."
+                },
+                "max_message_len": {
+                    "type": "number",
+                    "default": 2048,
+                    "description": "Maximum length of a syslog message (including priority and facility)."
+                }
+            },
+            "required": [
+                "source"
+            ]
+        },
+        "KafkaSource": {
+            "type": "object",
+            "description": "https://docs.crowdsec.net/docs/next/data_sources/kafka/",
+            "additionalProperties": false,
+            "properties": {
+                "source": {
+                    "const": "kafka"
+                },
+                "labels": {
+                    "$ref": "#/definitions/Labels"
+                },
+                "brokers": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "description": "The name of the kafka brockers to connect to."
+                },
+                "topic": {
+                    "type": "string",
+                    "description": "The topic name you want to read logs from."
+                },
+                "timeout": {
+                    "type": "number"
+                },
+                "tls": {
+                    "type": "object",
+                    "properties": {
+                        "insecure_skip_verify": {
+                            "type": "boolean",
+                            "default": false,
+                            "description": "To disable security checks on the certificate."
+                        },
+                        "client_cert": {
+                            "type": "string",
+                            "description": "Th eclient certificate path. Optional, when you want to enable TLS with client certificate."
+                        },
+                        "client_key": {
+                            "type": "string",
+                            "description": "The client key path. Optional, when you want to enable TLS with client certificate."
+                        },
+                        "ca_cert": {
+                            "type": "string",
+                            "description": "The CA certificate path. Optional, when you want to enable TLS with client certificate."
+                        }
+                    }
+                }
+            },
+            "required": [
+                "source",
+                "brokers"
+            ]
+        },
+        "WinEventLogSource": {
+            "type": "object",
+            "description": "https://docs.crowdsec.net/docs/next/data_sources/windows_evt_log/",
+            "additionalProperties": false,
+            "allOf": [
+                {
+                    "if": {
+                        "not": {
+                            "properties": {
+                                "xpath_query": {
+                                    "type": "#/definitions/nonEmptyString"
+                                }
+                            }
+                        }
+                    },
+                    "then": {
+                        "required": [
+                            "event_channel"
+                        ]
+                    }
+                },
+                {
+                    "if": {
+                        "properties": {
+                            "event_channel": {
+                                "type": "#/definitions/nonEmptyString"
+                            }
+                        }
+                    },
+                    "then": {
+                        "required": [
+                            "event_level",
+                            "event_ids"
+                        ]
+                    }
+                },
+                {
+                    "if": {
+                        "not": {
+                            "properties": {
+                                "event_channel": {
+                                    "type": "#/definitions/nonEmptyString"
+                                }
+                            }
+                        }
+                    },
+                    "then": {
+                        "required": [
+                            "xpath_query"
+                        ]
+                    }
+                }
+            ],
+            "properties": {
+                "source": {
+                    "const": "wineventlog"
+                },
+                "labels": {
+                    "$ref": "#/definitions/Labels"
+                },
+                "event_channel": {
+                    "type": "string",
+                    "description": "The name of the channel to read events from."
+                },
+                "event_level": {
+                    "enum": [
+                        "VERBOSE",
+                        "INFORMATION",
+                        "WARNING",
+                        "ERROR",
+                        "CRITICAL"
+                    ],
+                    "description": "The log level of the events to read."
+                },
+                "event_ids": {
+                    "type": "string",
+                    "description": "List of event IDs you want to match."
+                },
+                "xpath_query": {
+                    "type": "string",
+                    "description": "A custom XPath query to read events. You can refer to the Windows documentation for more information: https://docs.microsoft.com/en-us/windows/win32/wes/consuming-events"
+                },
+                "pretty_name": {
+                    "type": "string",
+                    "description": "Pretty name to use for the datasource in the metrics (cscli metrics). This parameter is optional, but strongly recommanded, as by default the full xpath query will be displayed in the metrics, which can be hard to read."
+                }
+            },
+            "required": [
+                "source"
+            ]
         }
     }
 }
