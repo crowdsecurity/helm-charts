@@ -10,7 +10,7 @@ metadata:
 spec:
   containers:
   - name: "{{ .Release.Name }}-test-agent"
-    image: curlimages/curl
+    image: curlimages/curl:7.88.1
     env:
       - name: AGENT_USERNAME
         valueFrom:

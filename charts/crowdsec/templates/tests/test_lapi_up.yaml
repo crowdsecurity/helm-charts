@@ -10,7 +10,7 @@ metadata:
 spec:
   containers:
   - name: {{ .Release.Name }}-test-lapi-up
-    image: curlimages/curl
+    image: curlimages/curl:7.88.1
     command:
       - /bin/sh
       - -ec
