@@ -177,11 +177,6 @@ spec:
           capabilities:
             add:
             - CHOWN
-            - FOWNER
-            - FSETID
-            - KILL
-            - SETGID
-            - SETUID
             drop:
             - ALL
           privileged: false
