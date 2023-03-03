@@ -43,15 +43,18 @@ spec:
       {{ if .Values.lapi.dashboard.enabled }}
       initContainers:
       - name: fetch-metabase-config
-        image: busybox:1.28
+        image: busybox:1.36.0
         imagePullPolicy: IfNotPresent
-        command: ['sh', '-c', 'wget {{ .Values.lapi.dashboard.assetURL }} && unzip metabase_sqlite.zip -d /metabase-data/']
+        command: ['sh', '-c', 'cd /metabase-data && wget {{ .Values.lapi.dashboard.assetURL }} && unzip metabase_sqlite.zip -d /metabase-data/']
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
             drop:
             - ALL
           privileged: false
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          runAsUser: {{ .Values.securityContext.runAsUser | default "10000" }}
           runAsGroup: {{ .Values.securityContext.runAsGroup | default "10000" }}
           seccompProfile:
             type: RuntimeDefault
