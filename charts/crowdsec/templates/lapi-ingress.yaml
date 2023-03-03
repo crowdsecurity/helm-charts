@@ -8,6 +8,7 @@ metadata:
   annotations:
     {{- toYaml .Values.lapi.ingress.annotations | nindent 4 }}
   name: {{ .Release.Namespace }}-lapi
+  namespace: {{ .Release.Namespace }}
   labels:    
     {{- if .Values.lapi.ingress.labels }}    
     {{- toYaml .Values.lapi.ingress.labels | nindent 4 }}
