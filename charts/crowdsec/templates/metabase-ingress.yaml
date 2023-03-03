@@ -8,6 +8,7 @@ metadata:
   annotations:
     {{- toYaml .Values.lapi.dashboard.ingress.annotations | nindent 4 }}
   name: {{ .Release.Namespace }}-dashboard
+  namespace: {{ .Release.Namespace }}
   labels:    
     {{- if .Values.lapi.dashboard.ingress.labels }}    
     {{- toYaml .Values.lapi.dashboard.ingress.labels | nindent 4 }}

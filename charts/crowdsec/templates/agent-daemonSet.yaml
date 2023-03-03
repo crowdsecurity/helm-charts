@@ -5,6 +5,7 @@ apiVersion: apps/v1
 kind: DaemonSet
 metadata:
   name: {{ .Release.Name }}-agent
+  namespace: {{ .Release.Namespace }}
   labels:
     k8s-app: {{ .Release.Name }}
     type: agent
