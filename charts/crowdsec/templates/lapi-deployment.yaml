@@ -43,7 +43,7 @@ spec:
       {{ if .Values.lapi.dashboard.enabled }}
       initContainers:
       - name: fetch-metabase-config
-        image: busybox:1.36.0
+        image: "{{ .Values.agent.wait_for_lapi.image.repository }}:{{ .Values.agent.wait_for_lapi.image.tag }}"
         imagePullPolicy: IfNotPresent
         command: ['sh', '-c', 'cd /metabase-data && wget {{ .Values.lapi.dashboard.assetURL }} && unzip metabase_sqlite.zip -d /metabase-data/']
         securityContext:
