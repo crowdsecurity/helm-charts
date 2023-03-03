@@ -1,7 +1,9 @@
+---
 apiVersion: v1
 kind: Pod
 metadata:
   name: "{{ .Release.Name }}-test-agent"
+  namespace: {{ .Release.Namespace }}
   annotations:
     "helm.sh/hook": test
     "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
@@ -27,4 +29,16 @@ spec:
         http_code=$(curl -s -o /dev/null -w "%{http_code}" http://{{ .Release.Name }}-service:8080/v1/watchers/login \
         -H 'Content-Type: application/json' -d '{"machine_id": "'"$AGENT_USERNAME"'", "password":"'"$AGENT_PASSWORD"'"}'); \
         if [ "$http_code" == "200" ]; then echo 'connection to lapi succeed' && exit 0; else echo 'failed connect to lapi' && exit 1; fi
+    securityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+          - ALL
+      privileged: false
+      readOnlyRootFilesystem: true
+      runAsGroup: {{ .Values.securityContext.runAsGroup | default "10000" }}
+      runAsNonRoot: true
+      runAsUser: {{ .Values.securityContext.runAsUser | default "10000" }}
+      seccompProfile:
+        type: RuntimeDefault
   restartPolicy: Never
