@@ -127,27 +127,6 @@ spec:
         {{- with .Values.lapi.env }}
           {{- toYaml . | nindent 10 }}
         {{- end }}
-        livenessProbe:
-          failureThreshold: 3
-          periodSeconds: 10
-          successThreshold: 1
-          tcpSocket:
-            port: lapi
-          timeoutSeconds: 1
-        readinessProbe:
-          failureThreshold: 3
-          periodSeconds: 10
-          successThreshold: 1
-          tcpSocket:
-            port: lapi
-          timeoutSeconds: 1
-        startupProbe:
-          failureThreshold: 30
-          periodSeconds: 10
-          successThreshold: 1
-          tcpSocket:
-            port: lapi
-          timeoutSeconds: 1
         resources:
           {{- toYaml .Values.lapi.resources | nindent 10 }}
         livenessProbe:
@@ -336,38 +315,6 @@ spec:
         - containerPort: 3000
           name: http
           protocol: TCP
-
-        livenessProbe:
-          failureThreshold: 3
-          httpGet:
-            path: /
-            port: http
-            scheme: HTTP
-          periodSeconds: 10
-          successThreshold: 1
-          timeoutSeconds: 1
-        readinessProbe:
-          failureThreshold: 3
-          httpGet:
-            path: /
-            port: http
-            scheme: HTTP
-          periodSeconds: 10
-          successThreshold: 1
-          timeoutSeconds: 1
-        startupProbe:
-          failureThreshold: 30
-          httpGet:
-            path: /
-            port: http
-            scheme: HTTP
-          periodSeconds: 10
-          successThreshold: 1
-          timeoutSeconds: 1
-
-        securityContext:
-          allowPrivilegeEscalation: false
-          privileged: false
 
         {{- with .Values.lapi.dashboard.resources }}
         resources:
