@@ -23,7 +23,7 @@ spec:
     - host: {{ .Values.lapi.dashboard.ingress.host }}
       http:
         paths:
-          - path: /
+          - path: {{ .Values.lapi.dashboard.ingress.path | default "/" }}
             pathType: Prefix
             backend:
               service:
