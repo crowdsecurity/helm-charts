@@ -55,7 +55,16 @@ spec:
             memory: 10Mi
         securityContext:
           allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
           privileged: false
+          readOnlyRootFilesystem: true
+          runAsGroup: {{ .Values.securityContext.runAsGroup | default "10000" }}
+          runAsNonRoot: true
+          runAsUser: {{ .Values.securityContext.runAsUser | default "10000" }}
+          seccompProfile:
+            type: RuntimeDefault
       containers:
       - name: crowdsec-agent
         image: "{{ .Values.image.repository | default "crowdsecurity/crowdsec" }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
@@ -109,16 +118,41 @@ spec:
         {{- end }}
         resources:
           {{- toYaml .Values.agent.resources | nindent 10 }}
-        {{ if .Values.agent.metrics.enabled }}
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          privileged: false
+          runAsGroup: {{ .Values.securityContext.runAsGroup | default "10000" }}
+          seccompProfile:
+            type: RuntimeDefault
+        {{- if .Values.agent.metrics.enabled }}
+        livenessProbe:
+          failureThreshold: 3
+          periodSeconds: 10
+          successThreshold: 1
+          tcpSocket:
+            port: metrics
+          timeoutSeconds: 1
+        readinessProbe:
+          failureThreshold: 3
+          periodSeconds: 10
+          successThreshold: 1
+          tcpSocket:
+            port: metrics
+          timeoutSeconds: 1
+        startupProbe:
+          failureThreshold: 30
+          periodSeconds: 10
+          successThreshold: 1
+          tcpSocket:
+            port: metrics
+          timeoutSeconds: 1
         ports:
           - name: metrics
             containerPort: 6060
             protocol: TCP
-
-        securityContext:
-          allowPrivilegeEscalation: false
-          privileged: false
-
         {{ end }}
         {{- if .Values.agent.persistentVolume.config.enabled }}
         command: ['sh', '-c', 'mv -n /staging/etc/crowdsec/* /etc/crowdsec_data/ && rm -rf /staging/etc/crowdsec && ln -s /etc/crowdsec_data /etc/crowdsec && ./docker_start.sh']
@@ -180,6 +214,8 @@ spec:
             mountPath: /etc/ssl/crowdsec-agent
           {{- end }}
       terminationGracePeriodSeconds: 30
+      securityContext:
+        fsGroup: {{ .Values.securityContext.fsGroup | default "10000" }}
       volumes:
       - name: acquis-config-volume
         configMap:

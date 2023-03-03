@@ -108,6 +108,9 @@ lapi:
 | tls.lapi.secret | string | `"{{ .Release.Name }}-lapi-tls"` |  |
 | secrets.username | string | `""` | agent username (default is generated randomly) |
 | secrets.password | string | `""` | agent password (default is generated randomly) |
+| securityContext.runAsUser | string | `"10000"` | User under which certain container are run |
+| securityContext.runAsGroup | string | `"10000"` | Group under which certain container are run |
+| securityContext.fsgroup | string | `"10000"` | Group applied to files and directories saved on volumes |
 | lapi.replicas | int | `1` | replicas for local API |
 | lapi.env | list | `[]` | environment variables from crowdsecurity/crowdsec docker image |
 | lapi.envFrom | list | `[]` |  |
@@ -123,6 +126,9 @@ lapi:
 | lapi.dashboard.assetURL | string | `"https://crowdsec-statics-assets.s3-eu-west-1.amazonaws.com/metabase_sqlite.zip"` | Metabase SQLite static DB containing Dashboards |
 | lapi.dashboard.resources | object | `{}` |  |
 | lapi.dashboard.ingress | object | `{"annotations":{"nginx.ingress.kubernetes.io/backend-protocol":"HTTP"},"enabled":false,"host":"","ingressClassName":""}` | Enable ingress object |
+| lapi.dashboard.resources.limits.memory | string | `{}` |  |
+| lapi.dashboard.resources.requests.cpu | string | `{}` |  |
+| lapi.dashboard.resources.requests.memory | string | `{}` |  |
 | lapi.resources.limits.memory | string | `"100Mi"` |  |
 | lapi.resources.requests.cpu | string | `"150m"` |  |
 | lapi.resources.requests.memory | string | `"100Mi"` |  |

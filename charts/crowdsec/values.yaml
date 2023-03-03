@@ -133,6 +133,13 @@ secrets:
   # -- agent password (default is generated randomly)
   password: ""
 
+# If you want to customize the UID and GID under which most resources run
+# you can update the following values
+securityContext: {}
+  # fsGroup: "10000"
+  # runAsUser: "10000"
+  # runAsGroup: "10000"
+
 # lapi will deploy pod with crowdsec lapi and dashboard as deployment
 lapi:
   # -- replicas for local API

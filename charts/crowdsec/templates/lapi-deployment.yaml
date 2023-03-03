@@ -45,7 +45,16 @@ spec:
       - name: fetch-metabase-config
         image: busybox:1.28
         imagePullPolicy: IfNotPresent
-        command: ['sh', '-c', 'if [ -f /metabase-data/metabase.db/metabase.db.mv.db ]; then echo "Metabase database file already exists, skipping download and unzip"; else wget {{ .Values.lapi.dashboard.assetURL }} && unzip metabase_sqlite.zip -d /metabase-data/; fi']
+        command: ['sh', '-c', 'wget {{ .Values.lapi.dashboard.assetURL }} && unzip metabase_sqlite.zip -d /metabase-data/']
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          privileged: false
+          runAsGroup: {{ .Values.securityContext.runAsGroup | default "10000" }}
+          seccompProfile:
+            type: RuntimeDefault
         volumeMounts:
         - name: crowdsec-db
           mountPath: /metabase-data
@@ -118,9 +127,29 @@ spec:
         {{- with .Values.lapi.env }}
           {{- toYaml . | nindent 10 }}
         {{- end }}
+        livenessProbe:
+          failureThreshold: 3
+          periodSeconds: 10
+          successThreshold: 1
+          tcpSocket:
+            port: lapi
+          timeoutSeconds: 1
+        readinessProbe:
+          failureThreshold: 3
+          periodSeconds: 10
+          successThreshold: 1
+          tcpSocket:
+            port: lapi
+          timeoutSeconds: 1
+        startupProbe:
+          failureThreshold: 30
+          periodSeconds: 10
+          successThreshold: 1
+          tcpSocket:
+            port: lapi
+          timeoutSeconds: 1
         resources:
           {{- toYaml .Values.lapi.resources | nindent 10 }}
-
         livenessProbe:
           failureThreshold: 3
           periodSeconds: 10
@@ -163,8 +192,20 @@ spec:
 
         securityContext:
           allowPrivilegeEscalation: false
+          capabilities:
+            add:
+            - CHOWN
+            - FOWNER
+            - FSETID
+            - KILL
+            - SETGID
+            - SETUID
+            drop:
+            - ALL
           privileged: false
-
+          runAsGroup: {{ .Values.securityContext.runAsGroup | default "10000" }}
+          seccompProfile:
+            type: RuntimeDefault
         ports:
           - name: lapi
             containerPort: 8080
@@ -235,6 +276,46 @@ spec:
         image: "{{ .Values.lapi.dashboard.image.repository | default "metabase/metabase" }}:{{ .Values.lapi.dashboard.image.tag | default "latest" }}"
         imagePullPolicy: {{ .Values.lapi.dashboard.image.pullPolicy }}
         command: ['sh', '-c', 'ln -fs /var/lib/crowdsec/data/crowdsec.db /metabase-data/crowdsec.db && /app/run_metabase.sh']
+        resources:
+          {{- toYaml .Values.lapi.dashboard.resources | nindent 10 }}
+        livenessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /
+            port: http
+            scheme: HTTP
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /
+            port: http
+            scheme: HTTP
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        startupProbe:
+          failureThreshold: 30
+          httpGet:
+            path: /
+            port: http
+            scheme: HTTP
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+          privileged: false
+          runAsGroup: {{ .Values.securityContext.runAsGroup | default "10000" }}
+          runAsNonRoot: true
+          runAsUser: {{ .Values.securityContext.runAsUser | default "10000" }}
+          seccompProfile:
+            type: RuntimeDefault
         volumeMounts:
         - name: crowdsec-db
           mountPath: /metabase-data
@@ -295,6 +376,8 @@ spec:
 
       {{- end }}
       terminationGracePeriodSeconds: 30
+      securityContext:
+        fsGroup: {{ .Values.securityContext.fsGroup | default "10000" }}
       {{- if or (.Values.tls.enabled) (.Values.lapi.persistentVolume.data.enabled) (.Values.lapi.persistentVolume.config.enabled) (.Values.lapi.dashboard.enabled) (include "lapiCustomConfigIsNotEmpty" .) }}
       volumes:
       {{- if .Values.lapi.persistentVolume.data.enabled }}
