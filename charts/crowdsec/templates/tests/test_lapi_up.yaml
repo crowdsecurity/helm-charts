@@ -16,4 +16,16 @@ spec:
       - -ec
       - |
         curl -XGET http://{{ .Release.Name }}-service:8080/health
+    securityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+          - ALL
+      privileged: false
+      readOnlyRootFilesystem: true
+      runAsGroup: {{ .Values.securityContext.runAsGroup | default "10000" }}
+      runAsNonRoot: true
+      runAsUser: {{ .Values.securityContext.runAsUser | default "10000" }}
+      seccompProfile:
+        type: RuntimeDefault
   restartPolicy: Never
