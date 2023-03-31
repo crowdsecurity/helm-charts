@@ -13,6 +13,13 @@ spec:
       app: {{ .Release.Name }}-agent-service
   namespaceSelector:
     matchNames: [{{ .Release.Namespace }}]
+  attachMetadata:
+    node: true
   endpoints:
     - port: metrics
+      relabelings:
+      - action: replace
+        sourceLabels:
+        - __meta_kubernetes_pod_node_name
+        targetLabel: machine
 {{ end }}
