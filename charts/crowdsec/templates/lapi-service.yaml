@@ -46,6 +46,12 @@ spec:
       protocol: TCP
       name: dashboard
     {{- end }}
+    {{- if .Values.kubeAudit.enabled }}
+    - port: {{ .Values.kubeAudit.agentWebhook.port }}
+      targetPort: {{ .Values.kubeAudit.agentWebhook.port }}
+      protocol: TCP
+      name: k8s-audit
+    {{- end }}
   selector:
     k8s-app: {{ .Release.Name }}
     type: lapi

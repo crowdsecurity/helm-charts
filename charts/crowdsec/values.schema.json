@@ -58,6 +58,9 @@
                             },
                             {
                                 "$ref": "#/definitions/WinEventLogSource"
+                            },
+                            {
+                                "$ref": "#/definitions/K8sAuditSource"
                             }
                         ]
                     }
@@ -642,6 +645,37 @@
                 "pretty_name": {
                     "type": "string",
                     "description": "Pretty name to use for the datasource in the metrics (cscli metrics). This parameter is optional, but strongly recommanded, as by default the full xpath query will be displayed in the metrics, which can be hard to read."
+                }
+            },
+            "required": [
+                "source"
+            ]
+        },
+        "K8sAuditSource": {
+            "type": "object",
+            "description": "https://docs.crowdsec.net/docs/next/data_sources/kubernetes_audit/",
+            "additionalProperties": false,
+            "properties": {
+                "source": {
+                    "const": "k8s-audit"
+                },
+                "labels": {
+                    "$ref": "#/definitions/Labels"
+                },
+                "listen_addr": {
+                    "type": "string",
+                    "default": "127.0.0.1",
+                    "description": "Address on which the webhook will listen."
+                },
+                "listen_port": {
+                    "type": "number",
+                    "default": 6443,
+                    "description": "Port used by the webhook server."
+                },
+                "webhook_path": {
+                    "type": "string",
+                    "default": "/audit/webhook/event",
+                    "description": "Webhook http path."
                 }
             },
             "required": [

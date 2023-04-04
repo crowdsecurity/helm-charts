@@ -75,6 +75,9 @@ config:
     # slack.yaml: ""
     # http.yaml: ""
     # splunk.yaml: ""
+  feature.yaml: ""
+    #    |
+    #  - papi_client
 
 tls:
   enabled: false
@@ -93,6 +96,13 @@ tls:
       namespaces: []
   lapi:
     secret: "{{ .Release.Name }}-lapi-tls"
+
+# If you want to enable kube-audit logs analysis with crowdsec
+kubeAudit:
+  enabled: false
+  agentWebhook:
+    port: 6443
+    path: /audit/webhook/event
 
 # If you want to specify secrets that will be used for all your crowdsec-agents
 # secrets can be provided as env variables

@@ -21,3 +21,21 @@ data:
     ---
     {{- toYaml . | nindent 4 }}
     {{- end }}
+
+{{- if .Values.kubeAudit.enabled }}
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: acquis-k8s-audit-configmap
+data:
+  acquis.yaml: |-
+    ---
+    source: k8s-audit
+    listen_addr: 127.0.0.1
+    listen_port: {{ .Values.kubeAudit.agentWebhook.port }}
+    webhook_path: {{ .Values.kubeAudit.agentWebhook.path }}
+    labels:
+      type: k8s-audit
+{{- end }}
