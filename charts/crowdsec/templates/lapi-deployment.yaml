@@ -82,6 +82,10 @@ spec:
           {{- end }}
           - name: INSECURE_SKIP_VERIFY
             value: {{ quote .Values.tls.insecureSkipVerify }}
+          {{ if index .Values.config "capi_whitelists.yaml" }}
+          - name: CAPI_WHITELISTS_PATH
+            value: "/etc/crowdsec/capi_whitelists.yaml"
+          {{- end }}
 
         {{- with .Values.lapi.env }}
           {{- toYaml . | nindent 10 }}
@@ -172,6 +176,11 @@ spec:
           - name: crowdsec-console-volume
             mountPath: {{ $crowdsecConfig }}/console.yaml
             subPath: console.yaml
+          {{ end }}
+          {{ if index .Values.config "capi_whitelists.yaml" }}
+          - name: crowdsec-capi-whitelists-volume
+            mountPath: {{ $crowdsecConfig }}/capi_whitelists.yaml
+            subPath: capi_whitelists.yaml
           {{ end }}
           {{- if (include "notificationsIsNotEmpty" .) -}}
           {{ range $fileName, $content := .Values.config.notifications -}}
@@ -279,6 +288,11 @@ spec:
       - name: crowdsec-console-volume
         configMap:
           name: crowdsec-console
+      {{- end }}
+      {{ if index .Values.config "capi_whitelists.yaml" }}
+      - name: crowdsec-capi-whitelists-volume
+        configMap:
+          name: crowdsec-capi-whitelists
       {{- end }}
       {{- if (include "notificationsIsNotEmpty" .) -}}
       {{ range $fileName, $content := .Values.config.notifications -}}

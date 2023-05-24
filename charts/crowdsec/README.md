@@ -44,6 +44,7 @@ helm delete crowdsec -n crowdsec
 | config.postoverflows | object | `{"s00-enrich":{},"s01-whitelist":{}}` | to better understand how to write a postoverflow, you can take a look at (https://docs.crowdsec.net/docs/next/whitelist/create/#whitelist-in-postoverflows) |
 | config."simulation.yaml" | string | `""` | Simulation configuration (https://docs.crowdsec.net/docs/next/scenarios/simulation/) |
 | config."console.yaml" | string | `""` |  |
+| config."capi_whitelists.yaml" | string | `""` | Whitelist for community and 3rd party blocklists (https://docs.crowdsec.net/docs/configuration/crowdsec_configuration/#capi_whitelists_path) |
 | config."profiles.yaml" | string | `""` | Profiles configuration (https://docs.crowdsec.net/docs/next/profiles/format/#profile-configuration-example) |
 | config.notifications | object | `{}` | notifications configuration (https://docs.crowdsec.net/docs/next/notification_plugins/intro) |
 | tls.enabled | bool | `false` |  |

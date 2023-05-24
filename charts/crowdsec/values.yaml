@@ -56,6 +56,13 @@ config:
     # share_manual_decisions: true
     # share_tainted: true
     # share_custom: true
+  capi_whitelists.yaml: ""
+    #   |
+    # ips:
+    # - 1.2.3.4
+    # - 2.3.4.5
+    # cidrs:
+    # - 1.2.3.0/24
   # -- Profiles configuration (https://docs.crowdsec.net/docs/next/profiles/format/#profile-configuration-example)
   profiles.yaml: ""
     #   |

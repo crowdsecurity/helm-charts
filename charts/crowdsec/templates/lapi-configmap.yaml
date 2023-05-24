@@ -21,6 +21,16 @@ data:
 {{ printf "%+v" (index .Values.config "console.yaml") | indent 4 }}
 {{ end }}
 ---
+{{- if index .Values.config "capi_whitelists.yaml" -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: crowdsec-capi-whitelists
+data:
+  capi_whitelists.yaml: |
+{{ printf "%+v" (index .Values.config "capi_whitelists.yaml") | indent 4 }}
+{{ end }}
+---
 {{ if (include "notificationsIsNotEmpty" .) }}
 apiVersion: v1
 kind: ConfigMap
