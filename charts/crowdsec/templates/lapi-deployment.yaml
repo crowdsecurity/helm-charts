@@ -93,23 +93,41 @@ spec:
           failureThreshold: 3
           periodSeconds: 10
           successThreshold: 1
-          tcpSocket:
-            port: lapi
           timeoutSeconds: 1
+          httpGet:
+            path: /health
+            port: lapi
+            {{- if .Values.tls.enabled }}
+            scheme: HTTPS
+            {{- else }}
+            scheme: HTTP
+            {{- end }}
         readinessProbe:
           failureThreshold: 3
           periodSeconds: 10
           successThreshold: 1
-          tcpSocket:
-            port: lapi
           timeoutSeconds: 1
+          httpGet:
+            path: /health
+            port: lapi
+            {{- if .Values.tls.enabled }}
+            scheme: HTTPS
+            {{- else }}
+            scheme: HTTP
+            {{- end }}
         startupProbe:
           failureThreshold: 30
           periodSeconds: 10
           successThreshold: 1
-          tcpSocket:
-            port: lapi
           timeoutSeconds: 1
+          httpGet:
+            path: /health
+            port: lapi
+            {{- if .Values.tls.enabled }}
+            scheme: HTTPS
+            {{- else }}
+            scheme: HTTP
+            {{- end }}
 
         securityContext:
           allowPrivilegeEscalation: false
