@@ -31,6 +31,13 @@ helm install crowdsec crowdsec/crowdsec -f crowdsec-values.yaml -n crowdsec
 helm delete crowdsec -n crowdsec
 ```
 
+
+## Console management
+
+To enable [Console Management](https://docs.crowdsec.net/docs/next/console_management/intro/), you have to
+set `CROWDSEC_FEATURE_PAPI_CLIENT="true"` in the lapi environment, and override `console.yaml` to add `console_management: true`.
+This will disable the default options (`share_custom`, `share_tainted`) so you may want to add them explicitly.
+
 ## Values
 
 | Key | Type | Default | Description |
