@@ -1,6 +1,6 @@
 # crowdsec
 
-![Version: 0.9.5](https://img.shields.io/badge/Version-0.9.5-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v1.4.5](https://img.shields.io/badge/AppVersion-v1.4.5-informational?style=flat-square)
+![Version: 0.9.6](https://img.shields.io/badge/Version-0.9.6-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v1.4.6](https://img.shields.io/badge/AppVersion-v1.4.6-informational?style=flat-square)
 
 Crowdsec helm chart is an open-source, lightweight agent to detect and respond to bad behaviours.
 
@@ -31,13 +31,6 @@ helm install crowdsec crowdsec/crowdsec -f crowdsec-values.yaml -n crowdsec
 helm delete crowdsec -n crowdsec
 ```
 
-
-## Console management
-
-To enable [Console Management](https://docs.crowdsec.net/docs/next/console_management/intro/), you have to
-set `CROWDSEC_FEATURE_PAPI_CLIENT="true"` in the lapi environment, and override `console.yaml` to add `console_management: true`.
-This will disable the default options (`share_custom`, `share_tainted`) so you may want to add them explicitly.
-
 ## Values
 
 | Key | Type | Default | Description |
@@ -51,7 +44,7 @@ This will disable the default options (`share_custom`, `share_tainted`) so you m
 | config.postoverflows | object | `{"s00-enrich":{},"s01-whitelist":{}}` | to better understand how to write a postoverflow, you can take a look at (https://docs.crowdsec.net/docs/next/whitelist/create/#whitelist-in-postoverflows) |
 | config."simulation.yaml" | string | `""` | Simulation configuration (https://docs.crowdsec.net/docs/next/scenarios/simulation/) |
 | config."console.yaml" | string | `""` |  |
-| config."capi_whitelists.yaml" | string | `""` | Whitelist for community and 3rd party blocklists (https://docs.crowdsec.net/docs/configuration/crowdsec_configuration/#capi_whitelists_path) |
+| config."capi_whitelists.yaml" | string | `""` |  |
 | config."profiles.yaml" | string | `""` | Profiles configuration (https://docs.crowdsec.net/docs/next/profiles/format/#profile-configuration-example) |
 | config.notifications | object | `{}` | notifications configuration (https://docs.crowdsec.net/docs/next/notification_plugins/intro) |
 | tls.enabled | bool | `false` |  |
