@@ -168,6 +168,11 @@
                     "default": false,
                     "description": "If set to true, force an inotify watch on the log files folder, even if there is no log in it."
                 },
+                "poll_without_inotify": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "If set to true, will poll the files using os.Stat instead of using inotify"
+                },
                 "filenames": {
                     "type": "array",
                     "items": {
