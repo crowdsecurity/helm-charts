@@ -114,8 +114,8 @@ lapi:
   # -- environment variables from crowdsecurity/crowdsec docker image
   env: []
     # by default disable the agent because it only needs the local API.
-    #- name: DISABLE_AGENT
-    #  value: "true"
+    # - name: DISABLE_AGENT
+    #   value: "true"
   # -- Enable ingress lapi object
   ingress:
     enabled: false
@@ -123,8 +123,8 @@ lapi:
       # we only want http to the backend so we need this annotation
       nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
     # labels: {}
-    ingressClassName: "" # nginx
-    host: "" # crowdsec-api.example.com
+    ingressClassName: ""  # nginx
+    host: ""  # crowdsec-api.example.com
     # tls: {}
 
   dashboard:
@@ -156,8 +156,8 @@ lapi:
         # metabase only supports http so we need this annotation
         nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
       # labels: {}
-      ingressClassName: "" # nginx
-      host: "" # metabase.example.com
+      ingressClassName: ""  # nginx
+      host: ""  # metabase.example.com
       # tls: {}
 
   resources:
@@ -227,11 +227,11 @@ agent:
     #     type: syslog
   acquisition:
     # -- Specify each pod you want to process it logs (namespace, podName and program)
-    - namespace: "" #ingress-nginx
+    - namespace: ""  # ingress-nginx
       # -- to select pod logs to process
-      podName: "" #ingress-nginx-controller-*
+      podName: ""  # ingress-nginx-controller-*
       # -- program name related to specific parser you will use (see https://hub.crowdsec.net/author/crowdsecurity/configurations/docker-logs)
-      program: "" #nginx
+      program: ""  # nginx
   resources:
     limits:
       memory: 100Mi
@@ -313,5 +313,4 @@ agent:
       # -- docker image tag
       tag: "1.28"
 
-#service: {}
-
+# service: {}
