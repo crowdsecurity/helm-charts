@@ -13,6 +13,7 @@ data:
     filenames:
       - /var/log/containers/{{ .podName }}_{{ .namespace }}_*.log
     force_inotify: true
+    poll_without_inotify: {{ .poll_without_inotify | default "false"}}
     labels:
       type: {{ $container_runtime }}
       program: {{ .program }}
