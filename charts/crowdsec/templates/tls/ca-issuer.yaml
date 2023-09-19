@@ -4,7 +4,7 @@
 apiVersion: cert-manager.io/v1
 kind: Issuer
 metadata:
-  name: crowdsec-ca-issuer
+  name: {{ .Release.Name }}-ca-issuer
   namespace: {{ .Release.Namespace }}
 spec:
   ca:
