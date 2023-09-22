@@ -29,6 +29,16 @@ data:
   capi_whitelists.yaml: |
 {{ printf "%+v" (index .Values.config "capi_whitelists.yaml") | indent 4 }}
 {{ end }}
+{{- if index .Values.config "config-override.yaml" }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: crowdsec-config-override
+data:
+  config.yaml.local: |
+{{ printf "%+v" (index .Values.config "config-override.yaml") | indent 4 }}
+{{ end }}
 {{ if (include "notificationsIsNotEmpty" .) }}
 ---
 apiVersion: v1

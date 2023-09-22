@@ -10,6 +10,7 @@ metadata:
     type: lapi
     version: v1
 spec:
+  replicas: {{ .Values.lapi.replicas }}
   selector:
     matchLabels:
       k8s-app: {{ .Release.Name }}
@@ -103,6 +104,11 @@ spec:
           - name: CAPI_WHITELISTS_PATH
             value: "/etc/crowdsec/capi_whitelists.yaml"
           {{- end }}
+          - name: CS_LAPI_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: crowdsec-lapi-secrets
+                key: csLapiSecret
 
         {{- with .Values.lapi.env }}
           {{- toYaml . | nindent 10 }}
@@ -199,6 +205,11 @@ spec:
           - name: crowdsec-capi-whitelists-volume
             mountPath: {{ $crowdsecConfig }}/capi_whitelists.yaml
             subPath: capi_whitelists.yaml
+          {{ end }}
+          {{ if index .Values.config "config-override.yaml" }}
+          - name: crowdsec-config-override-volume
+            mountPath: {{ $crowdsecConfig }}/config.yaml.local
+            subPath: config.yaml.local
           {{ end }}
           {{- if (include "notificationsIsNotEmpty" .) -}}
           {{ range $fileName, $content := .Values.config.notifications -}}
@@ -313,6 +324,11 @@ spec:
         configMap:
           name: crowdsec-capi-whitelists
       {{- end }}
+      {{ if index .Values.config "config-override.yaml" }}
+      - name: crowdsec-config-override-volume
+        configMap:
+          name: crowdsec-config-override
+      {{- end }}
       {{- if (include "notificationsIsNotEmpty" .) -}}
       {{ range $fileName, $content := .Values.config.notifications -}}
       {{- if $content }}
@@ -348,6 +364,10 @@ spec:
       {{- end }}
       {{- with .Values.lapi.affinity }}
       affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.lapi.topologySpreadConstraints }}
+      topologySpreadConstraints:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       priorityClassName: {{ .Values.lapi.priorityClassName }}
