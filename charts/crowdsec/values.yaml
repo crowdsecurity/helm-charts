@@ -81,15 +81,16 @@ config:
     #    - Alert.Remediation == true && Alert.GetScope() == "Ip"
     #  ...
   # -- General configuration (https://docs.crowdsec.net/docs/configuration/crowdsec_configuration/#configuration-example)
-  config-override.yaml: ""
+  config.yaml.local: ""
     #   |
     # db_config:
-    #   type:     "postgresql"
-    #   user:     "crowdsec"
-    #   password: "${DB_PASSWORD}"
-    #   db_name:  "crowdsec"
-    #   host:     "192.168.0.2"
-    #   port:     "5432"
+    #   type:     postgresql
+    #   user:     crowdsec
+    #   password: ${DB_PASSWORD}
+    #   db_name:  crowdsec
+    #   host:     192.168.0.2
+    #   port:     5432
+    #   sslmode:  require
   # -- notifications configuration (https://docs.crowdsec.net/docs/next/notification_plugins/intro)
   notifications: {}
     # email.yaml: |
@@ -236,7 +237,7 @@ lapi:
   # -- affinity for lapi
   affinity: {}
   # -- topologySpreadConstraints for lapi
-  topologySpreadConstraints: {}
+  topologySpreadConstraints: []
 
   # -- Enable service monitoring (exposes "metrics" port "6060" for Prometheus)
   metrics:

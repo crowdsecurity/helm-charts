@@ -126,7 +126,7 @@
                 "capi_whitelists.yaml": {
                     "type": "string"
                 },
-                "config-override.yaml": {
+                "config.yaml.local": {
                     "type": "string"
                 }
             },

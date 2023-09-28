@@ -206,8 +206,8 @@ spec:
             mountPath: {{ $crowdsecConfig }}/capi_whitelists.yaml
             subPath: capi_whitelists.yaml
           {{ end }}
-          {{ if index .Values.config "config-override.yaml" }}
-          - name: crowdsec-config-override-volume
+          {{ if index .Values.config "config.yaml.local" }}
+          - name: crowdsec-config-local-volume
             mountPath: {{ $crowdsecConfig }}/config.yaml.local
             subPath: config.yaml.local
           {{ end }}
@@ -324,10 +324,10 @@ spec:
         configMap:
           name: crowdsec-capi-whitelists
       {{- end }}
-      {{ if index .Values.config "config-override.yaml" }}
-      - name: crowdsec-config-override-volume
+      {{ if index .Values.config "config.yaml.local" }}
+      - name: crowdsec-config-local-volume
         configMap:
-          name: crowdsec-config-override
+          name: crowdsec-config-local
       {{- end }}
       {{- if (include "notificationsIsNotEmpty" .) -}}
       {{ range $fileName, $content := .Values.config.notifications -}}

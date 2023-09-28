@@ -39,14 +39,15 @@ description: |
 
   # Configure external DB (https://docs.crowdsec.net/docs/configuration/crowdsec_configuration/#configuration-example)
   config:
-    config-override.yaml: |
+    config.yaml.local: |
       db_config:
-        type:     "postgresql"
-        user:     "crowdsec"
-        password: "${DB_PASSWORD}"
-        db_name:  "crowdsec"
-        host:     "192.168.0.2"
-        port:     "5432"
+        type:     postgresql
+        user:     crowdsec
+        password: ${DB_PASSWORD}
+        db_name:  crowdsec
+        host:     192.168.0.2
+        port:     5432
+        sslmode:  require
 
   lapi:
     # 2 or more replicas for HA
