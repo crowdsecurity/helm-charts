@@ -198,7 +198,7 @@ lapi:
   nodeSelector: {}
   # -- tolerations for lapi
   tolerations: {}
-  # -- dnsConfig for for lapi
+  # -- dnsConfig for lapi
   dnsConfig: {}
 
   # -- Enable service monitoring (exposes "metrics" port "6060" for Prometheus)
