@@ -69,3 +69,8 @@ lapi:
   env:
     - name: DISABLE_ONLINE_API
       value: "true"
+  config:
+    console.yaml: |
+      share_manual_decisions: true
+      share_tainted: true
+      share_custom: true

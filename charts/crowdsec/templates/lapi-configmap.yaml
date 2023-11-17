@@ -1,6 +1,5 @@
 # vim: set ft=gotmpl:
 ---
-
 {{- if index .Values.config "profiles.yaml" -}}
 apiVersion: v1
 kind: ConfigMap
@@ -10,8 +9,8 @@ data:
   profiles.yaml: |
 {{ printf "%+v" (index .Values.config "profiles.yaml") | indent 4 }}
 {{ end }}
----
 {{- if index .Values.config "console.yaml" -}}
+---
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -20,8 +19,8 @@ data:
   console.yaml: |
 {{ printf "%+v" (index .Values.config "console.yaml") | indent 4 }}
 {{ end }}
----
 {{- if index .Values.config "capi_whitelists.yaml" -}}
+---
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -30,8 +29,8 @@ data:
   capi_whitelists.yaml: |
 {{ printf "%+v" (index .Values.config "capi_whitelists.yaml") | indent 4 }}
 {{ end }}
----
 {{ if (include "notificationsIsNotEmpty" .) }}
+---
 apiVersion: v1
 kind: ConfigMap
 metadata:
