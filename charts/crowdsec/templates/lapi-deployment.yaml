@@ -27,7 +27,7 @@ spec:
       - name: fetch-metabase-config
         image: busybox:1.28
         imagePullPolicy: IfNotPresent
-        command: ['sh', '-c', 'wget {{ .Values.lapi.dashboard.assetURL }} && unzip metabase_sqlite.zip -d /metabase-data/']
+        command: ['sh', '-c', 'wget {{ .Values.lapi.dashboard.assetURL }} && unzip metabase_sqlite.zip -nd /metabase-data/']
         volumeMounts:
         - name: shared-data
           mountPath: /metabase-data
