@@ -29,8 +29,9 @@ spec:
         imagePullPolicy: IfNotPresent
         command: ['sh', '-c', 'wget {{ .Values.lapi.dashboard.assetURL }} && unzip metabase_sqlite.zip -d /metabase-data/']
         volumeMounts:
-        - name: shared-data
+        - name: crowdsec-db
           mountPath: /metabase-data
+          subPath: dashboard
       {{- end }}
       containers:
       - name: crowdsec-lapi
@@ -160,6 +161,7 @@ spec:
           {{ if or (.Values.lapi.persistentVolume.data.enabled) (.Values.lapi.dashboard.enabled) }}
           - name: crowdsec-db
             mountPath: /var/lib/crowdsec/data
+            subPath: crowdsec
           {{ end }}
           {{- $crowdsecConfig := "/etc/crowdsec" -}}
           {{- if .Values.lapi.persistentVolume.config.enabled -}}
@@ -198,10 +200,12 @@ spec:
         imagePullPolicy: {{ .Values.lapi.dashboard.image.pullPolicy }}
         command: ['sh', '-c', 'ln -fs /var/lib/crowdsec/data/crowdsec.db /metabase-data/crowdsec.db && /app/run_metabase.sh']
         volumeMounts:
-        - name: shared-data
+        - name: crowdsec-db
           mountPath: /metabase-data
+          subPath: dashboard
         - name: crowdsec-db
           mountPath: /var/lib/crowdsec/data
+          subPath: crowdsec
         env:
           - name: MB_DB_FILE
             value: /metabase-data/metabase.db
@@ -254,10 +258,6 @@ spec:
       terminationGracePeriodSeconds: 30
       {{- if or (.Values.tls.enabled) (.Values.lapi.persistentVolume.data.enabled) (.Values.lapi.persistentVolume.config.enabled) (.Values.lapi.dashboard.enabled) (include "lapiCustomConfigIsNotEmpty" .) }}
       volumes:
-      {{- if .Values.lapi.dashboard.enabled }}
-      - name: shared-data
-        emptyDir: {}
-      {{- end }}
       {{- if .Values.lapi.persistentVolume.data.enabled }}
       - name: crowdsec-db
         persistentVolumeClaim:
