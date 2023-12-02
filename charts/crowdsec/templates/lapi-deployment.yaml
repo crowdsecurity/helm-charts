@@ -10,6 +10,7 @@ metadata:
     type: lapi
     version: v1
 spec:
+  replicas: {{ .Values.lapi.replicaCount }}
   selector:
     matchLabels:
       k8s-app: {{ .Release.Name }}

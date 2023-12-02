@@ -111,6 +111,7 @@ secrets:
 
 # lapi will deploy pod with crowdsec lapi and dashboard as deployment
 lapi:
+  replicaCount: 1
   # -- environment variables from crowdsecurity/crowdsec docker image
   env: []
     # by default disable the agent because it only needs the local API.
@@ -172,7 +173,7 @@ lapi:
     data:
       enabled: true
       accessModes:
-        - ReadWriteOnce
+        - ReadWriteOnce # Set this to ReadWriteMany if lapi.replicaCount > 1
       storageClassName: ""
       existingClaim: ""
       size: 1Gi
@@ -180,7 +181,7 @@ lapi:
     config:
       enabled: true
       accessModes:
-        - ReadWriteOnce
+        - ReadWriteOnce # Set this to ReadWriteMany if lapi.replicaCount > 1
       storageClassName: ""
       existingClaim: ""
       size: 100Mi
