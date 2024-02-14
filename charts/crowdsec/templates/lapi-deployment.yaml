@@ -323,6 +323,10 @@ spec:
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      {{- with .Values.lapi.dnsConfig }}
+      dnsConfig:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       {{- with .Values.lapi.affinity }}
       affinity:
         {{- toYaml . | nindent 8 }}
