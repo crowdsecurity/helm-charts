@@ -25,4 +25,5 @@ A http service to verify request and bounce them according to decisions made by 
 | nodeSelector | object | `{}` |  |
 | tolerations | list | `[]` |  |
 | affinity | object | `{}` |  |
+| priorityClassName | string | `""` |  |
 
