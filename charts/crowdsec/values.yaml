@@ -201,7 +201,7 @@ lapi:
   # -- nodeSelector for lapi
   nodeSelector: {}
   # -- tolerations for lapi
-  tolerations: {}
+  tolerations: []
   # -- dnsConfig for lapi
   dnsConfig: {}
 
@@ -294,7 +294,7 @@ agent:
   # -- nodeSelector for agent
   nodeSelector: {}
   # -- tolerations for agent
-  tolerations: {}
+  tolerations: []
 
   # -- Enable service monitoring (exposes "metrics" port "6060" for Prometheus)
   metrics:
