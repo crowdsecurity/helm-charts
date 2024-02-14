@@ -127,6 +127,9 @@ lapi:
     host: "" # crowdsec-api.example.com
     # tls: {}
 
+  # -- pod priority class name
+  priorityClassName: ""
+
   dashboard:
     # -- Enable Metabase Dashboard (by default disabled)
     enabled: false
@@ -198,6 +201,8 @@ lapi:
   nodeSelector: {}
   # -- tolerations for lapi
   tolerations: []
+  # -- dnsConfig for lapi
+  dnsConfig: {}
 
   # -- Enable service monitoring (exposes "metrics" port "6060" for Prometheus)
   metrics:
@@ -234,6 +239,10 @@ agent:
       program: "" #nginx
       # -- If set to true, will poll the files using os.Stat instead of using inotify
       poll_without_inotify: false
+
+  # -- pod priority class name
+  priorityClassName: ""
+  
   resources:
     limits:
       memory: 100Mi
