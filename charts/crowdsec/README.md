@@ -83,7 +83,7 @@ helm delete crowdsec -n crowdsec
 | lapi.service.loadBalancerClass | string | `nil` |  |
 | lapi.service.externalTrafficPolicy | string | `"Cluster"` |  |
 | lapi.nodeSelector | object | `{}` | nodeSelector for lapi |
-| lapi.tolerations | object | `{}` | tolerations for lapi |
+| lapi.tolerations | list | `[]` | tolerations for lapi |
 | lapi.dnsConfig | object | `{}` | dnsConfig for lapi |
 | lapi.metrics | object | `{"enabled":false,"serviceMonitor":{"enabled":false}}` | Enable service monitoring (exposes "metrics" port "6060" for Prometheus) |
 | lapi.metrics.serviceMonitor | object | `{"enabled":false}` | See also: https://github.com/prometheus-community/helm-charts/issues/106#issuecomment-700847774 |
@@ -101,7 +101,7 @@ helm delete crowdsec -n crowdsec
 | agent.persistentVolume.config | object | `{"accessModes":["ReadWriteOnce"],"enabled":false,"existingClaim":"","size":"100Mi","storageClassName":""}` | Persistent volume for config folder. Stores local config (parsers, scenarios etc.) |
 | agent.env | list | `[]` | environment variables from crowdsecurity/crowdsec docker image |
 | agent.nodeSelector | object | `{}` | nodeSelector for agent |
-| agent.tolerations | object | `{}` | tolerations for agent |
+| agent.tolerations | list | `[]` | tolerations for agent |
 | agent.metrics | object | `{"enabled":false,"serviceMonitor":{"enabled":false}}` | Enable service monitoring (exposes "metrics" port "6060" for Prometheus) |
 | agent.metrics.serviceMonitor | object | `{"enabled":false}` | See also: https://github.com/prometheus-community/helm-charts/issues/106#issuecomment-700847774 |
 | agent.service.type | string | `"ClusterIP"` |  |
