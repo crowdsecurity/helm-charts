@@ -83,6 +83,7 @@ helm delete crowdsec -n crowdsec
 | lapi.service.externalTrafficPolicy | string | `"Cluster"` |  |
 | lapi.nodeSelector | object | `{}` | nodeSelector for lapi |
 | lapi.tolerations | object | `{}` | tolerations for lapi |
+| lapi.dnsConfig | object | `{}` | dnsConfig for lapi |
 | lapi.metrics | object | `{"enabled":false,"serviceMonitor":{"enabled":false}}` | Enable service monitoring (exposes "metrics" port "6060" for Prometheus) |
 | lapi.metrics.serviceMonitor | object | `{"enabled":false}` | See also: https://github.com/prometheus-community/helm-charts/issues/106#issuecomment-700847774 |
 | lapi.strategy.type | string | `"RollingUpdate"` |  |
