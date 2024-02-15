@@ -134,6 +134,9 @@ lapi:
   dashboard:
     # -- Enable Metabase Dashboard (by default disabled)
     enabled: false
+    # -- environment variables from metabase/metabase docker image
+    # -- see https://www.metabase.com/docs/latest/configuring-metabase/environment-variables
+    env: []
     image:
       # -- docker image repository name
       repository: metabase/metabase
