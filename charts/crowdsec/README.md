@@ -63,6 +63,7 @@ helm delete crowdsec -n crowdsec
 | lapi.ingress | object | `{"annotations":{"nginx.ingress.kubernetes.io/backend-protocol":"HTTP"},"enabled":false,"host":"","ingressClassName":""}` | Enable ingress lapi object |
 | lapi.priorityClassName | string | `""` | pod priority class name |
 | lapi.dashboard.enabled | bool | `false` | Enable Metabase Dashboard (by default disabled) |
+| lapi.dashboard.env | list | `[]` | see https://www.metabase.com/docs/latest/configuring-metabase/environment-variables |
 | lapi.dashboard.image.repository | string | `"metabase/metabase"` | docker image repository name |
 | lapi.dashboard.image.pullPolicy | string | `"IfNotPresent"` | pullPolicy |
 | lapi.dashboard.image.tag | string | `"v0.46.6.1"` | docker image tag |
