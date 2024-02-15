@@ -207,6 +207,9 @@ spec:
             value: /metabase-data/metabase.db
           - name: MGID
             value: "1000"
+        {{- with .Values.lapi.dashboard.env }}
+        {{- toYaml . | nindent 10 }}
+        {{- end }}
 
         ports:
         - containerPort: 3000
