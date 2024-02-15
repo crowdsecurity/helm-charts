@@ -140,9 +140,15 @@ lapi:
     host: "" # crowdsec-api.example.com
     # tls: {}
 
+  # -- pod priority class name
+  priorityClassName: ""
+
   dashboard:
     # -- Enable Metabase Dashboard (by default disabled)
     enabled: false
+    # -- environment variables from metabase/metabase docker image
+    # -- see https://www.metabase.com/docs/latest/configuring-metabase/environment-variables
+    env: []
     image:
       # -- docker image repository name
       repository: metabase/metabase
@@ -210,7 +216,7 @@ lapi:
   # -- nodeSelector for lapi
   nodeSelector: {}
   # -- tolerations for lapi
-  tolerations: {}
+  tolerations: []
   # -- affinity for lapi
   affinity: {}
   # -- topologySpreadConstraints for lapi
@@ -260,6 +266,10 @@ agent:
       program: "" #nginx
       # -- If set to true, will poll the files using os.Stat instead of using inotify
       poll_without_inotify: false
+
+  # -- pod priority class name
+  priorityClassName: ""
+  
   resources:
     limits:
       memory: 100Mi
@@ -310,7 +320,7 @@ agent:
   # -- nodeSelector for agent
   nodeSelector: {}
   # -- tolerations for agent
-  tolerations: {}
+  tolerations: []
 
   # -- Enable service monitoring (exposes "metrics" port "6060" for Prometheus)
   metrics:

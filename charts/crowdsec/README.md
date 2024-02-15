@@ -63,7 +63,9 @@ helm delete crowdsec -n crowdsec
 | lapi.replicas | int | `1` | replicas for local API |
 | lapi.env | list | `[]` | environment variables from crowdsecurity/crowdsec docker image |
 | lapi.ingress | object | `{"annotations":{"nginx.ingress.kubernetes.io/backend-protocol":"HTTP"},"enabled":false,"host":"","ingressClassName":""}` | Enable ingress lapi object |
+| lapi.priorityClassName | string | `""` | pod priority class name |
 | lapi.dashboard.enabled | bool | `false` | Enable Metabase Dashboard (by default disabled) |
+| lapi.dashboard.env | list | `[]` | see https://www.metabase.com/docs/latest/configuring-metabase/environment-variables |
 | lapi.dashboard.image.repository | string | `"metabase/metabase"` | docker image repository name |
 | lapi.dashboard.image.pullPolicy | string | `"IfNotPresent"` | pullPolicy |
 | lapi.dashboard.image.tag | string | `"v0.46.6.1"` | docker image tag |
@@ -84,9 +86,9 @@ helm delete crowdsec -n crowdsec
 | lapi.service.loadBalancerClass | string | `nil` |  |
 | lapi.service.externalTrafficPolicy | string | `"Cluster"` |  |
 | lapi.nodeSelector | object | `{}` | nodeSelector for lapi |
-| lapi.tolerations | object | `{}` | tolerations for lapi |
 | lapi.affinity | object | `{}` | affinity for lapi |
 | lapi.topologySpreadConstraints | object | `[]` | topologySpreadConstraints for lapi |
+| lapi.tolerations | list | `[]` | tolerations for lapi |
 | lapi.dnsConfig | object | `{}` | dnsConfig for lapi |
 | lapi.metrics | object | `{"enabled":false,"serviceMonitor":{"enabled":false}}` | Enable service monitoring (exposes "metrics" port "6060" for Prometheus) |
 | lapi.metrics.serviceMonitor | object | `{"enabled":false}` | See also: https://github.com/prometheus-community/helm-charts/issues/106#issuecomment-700847774 |
@@ -98,6 +100,7 @@ helm delete crowdsec -n crowdsec
 | agent.acquisition[0].podName | string | `""` | to select pod logs to process |
 | agent.acquisition[0].program | string | `""` | program name related to specific parser you will use (see https://hub.crowdsec.net/author/crowdsecurity/configurations/docker-logs) |
 | agent.acquisition[0].poll_without_inotify | bool | `false` | If set to true, will poll the files using os.Stat instead of using inotify |
+| agent.priorityClassName | string | `""` | pod priority class name |
 | agent.resources.limits.memory | string | `"100Mi"` |  |
 | agent.resources.requests.cpu | string | `"150m"` |  |
 | agent.resources.requests.memory | string | `"100Mi"` |  |
@@ -105,7 +108,7 @@ helm delete crowdsec -n crowdsec
 | agent.persistentVolume.config | object | `{"accessModes":["ReadWriteOnce"],"enabled":false,"existingClaim":"","size":"100Mi","storageClassName":""}` | Persistent volume for config folder. Stores local config (parsers, scenarios etc.) |
 | agent.env | list | `[]` | environment variables from crowdsecurity/crowdsec docker image |
 | agent.nodeSelector | object | `{}` | nodeSelector for agent |
-| agent.tolerations | object | `{}` | tolerations for agent |
+| agent.tolerations | list | `[]` | tolerations for agent |
 | agent.metrics | object | `{"enabled":false,"serviceMonitor":{"enabled":false}}` | Enable service monitoring (exposes "metrics" port "6060" for Prometheus) |
 | agent.metrics.serviceMonitor | object | `{"enabled":false}` | See also: https://github.com/prometheus-community/helm-charts/issues/106#issuecomment-700847774 |
 | agent.service.type | string | `"ClusterIP"` |  |
