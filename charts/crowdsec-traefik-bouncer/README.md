@@ -1,5 +1,8 @@
 # crowdsec-traefik-bouncer
 
+> [!TIP]
+> This chart is now deprecated and has been replaced by the [Crowdsec Bouncer Traefik Plugin](https://plugins.traefik.io/plugins/6335346ca4caa9ddeffda116/crowdsec-bouncer-traefik-plugin). Please note that there will be no further support for this chart moving forward.
+
 ![Version: 0.1.3](https://img.shields.io/badge/Version-0.1.3-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.5.0](https://img.shields.io/badge/AppVersion-0.5.0-informational?style=flat-square)
 
 A http service to verify request and bounce them according to decisions made by CrowdSec.
