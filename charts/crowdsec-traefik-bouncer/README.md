@@ -1,6 +1,6 @@
 # crowdsec-traefik-bouncer
 
-> [!TIP]
+> [!WARNING]
 > This chart is now deprecated and has been replaced by the [Crowdsec Bouncer Traefik Plugin](https://plugins.traefik.io/plugins/6335346ca4caa9ddeffda116/crowdsec-bouncer-traefik-plugin). Please note that there will be no further support for this chart moving forward.
 
 If you wish to continue using the chart the available values are within the Details section
