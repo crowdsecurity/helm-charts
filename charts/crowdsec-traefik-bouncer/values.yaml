@@ -8,8 +8,10 @@ bouncer:
   crowdsec_bouncer_api_key: ""
   # -- crowdsec lapi host (ie: crowdsec-service.crowdsec.svc.cluster.local:8080)
   crowdsec_agent_host: ""
-  # crowdsec_bouncer_gin_mode sets the mode of the app
+  # -- crowdsec_bouncer_gin_mode sets the mode of the app
   crowdsec_bouncer_gin_mode: "debug"
+  # -- environment variables
+  env: []
 
 replicaCount: 1
 
