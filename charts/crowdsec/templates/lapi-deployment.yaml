@@ -46,23 +46,17 @@ spec:
         image: "{{ .Values.agent.wait_for_lapi.image.repository }}:{{ .Values.agent.wait_for_lapi.image.tag }}"
         imagePullPolicy: IfNotPresent
         command: ['sh', '-c', 'cd /metabase-data && wget {{ .Values.lapi.dashboard.assetURL }} && unzip metabase_sqlite.zip -d /metabase-data/']
+
+
         securityContext:
-          allowPrivilegeEscalation: false
-          capabilities:
-            drop:
-            - ALL
-          privileged: false
-          readOnlyRootFilesystem: true
-          runAsNonRoot: true
-          runAsUser: {{ .Values.securityContext.runAsUser | default "10000" }}
-          runAsGroup: {{ .Values.securityContext.runAsGroup | default "10000" }}
-          seccompProfile:
-            type: RuntimeDefault
+        {{- toYaml .Values.agent.wait_for_lapi.securityContext | nindent 10 }}
+
         volumeMounts:
         - name: crowdsec-db
           mountPath: /metabase-data
           subPath: dashboard
       {{- end }}
+
       containers:
       - name: crowdsec-lapi
         image: "{{ .Values.image.repository | default "crowdsecurity/crowdsec" }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
@@ -173,16 +167,8 @@ spec:
             {{- end }}
 
         securityContext:
-          allowPrivilegeEscalation: false
-          capabilities:
-            add:
-            - CHOWN
-            drop:
-            - ALL
-          privileged: false
-          runAsGroup: {{ .Values.securityContext.runAsGroup | default "10000" }}
-          seccompProfile:
-            type: RuntimeDefault
+        {{- toYaml .Values.lapi.securityContext | nindent 10 }}
+
         ports:
           - name: lapi
             containerPort: 8080
@@ -282,17 +268,10 @@ spec:
           periodSeconds: 10
           successThreshold: 1
           timeoutSeconds: 1
+
         securityContext:
-          allowPrivilegeEscalation: false
-          capabilities:
-            drop:
-              - ALL
-          privileged: false
-          runAsGroup: {{ .Values.securityContext.runAsGroup | default "10000" }}
-          runAsNonRoot: true
-          runAsUser: {{ .Values.securityContext.runAsUser | default "10000" }}
-          seccompProfile:
-            type: RuntimeDefault
+        {{- toYaml .Values.lapi.dashboard.securityContext | nindent 10 }}
+
         volumeMounts:
         - name: crowdsec-db
           mountPath: /metabase-data

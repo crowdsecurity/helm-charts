@@ -200,6 +200,18 @@ lapi:
       #   cpu: 150m
       #   memory: 1700Mi
 
+    securityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+          - ALL
+      privileged: false
+      runAsNonRoot: true
+      runAsUser: 10000
+      runAsGroup: 10000
+      seccompProfile:
+        type: RuntimeDefault
+
     # -- Enable ingress object
     ingress:
       enabled: false
@@ -217,6 +229,19 @@ lapi:
     requests:
       cpu: 150m
       memory: 100Mi
+  
+  securityContext:
+    allowPrivilegeEscalation: false
+    capabilities:
+      add:
+      - CHOWN
+      drop:
+      - ALL
+    privileged: false
+    runAsGroup: 10000
+    seccompProfile:
+      type: RuntimeDefault
+
   # -- Enable persistent volumes
   persistentVolume:
     # -- Persistent volume for data folder. Stores e.g. registered bouncer api keys
@@ -321,6 +346,16 @@ agent:
     requests:
       cpu: 150m
       memory: 100Mi
+  securityContext:
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+      - ALL
+    privileged: false
+    runAsGroup: 10000
+    seccompProfile:
+      type: RuntimeDefault
+
   # -- Enable persistent volumes
   persistentVolume:
     # -- Persistent volume for config folder. Stores local config (parsers, scenarios etc.)
@@ -396,6 +431,19 @@ agent:
       # -- pullPolicy
       pullPolicy: IfNotPresent
       # -- docker image tag
-      tag: "1.36.0"
+      tag: "1.36.1"
+
+    securityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+        - ALL
+      privileged: false
+      readOnlyRootFilesystem: true
+      runAsNonRoot: true
+      runAsUser: 10000
+      runAsGroup: 10000
+      seccompProfile:
+        type: RuntimeDefault
 
 #service: {}

@@ -54,17 +54,7 @@ spec:
             cpu: 1m
             memory: 10Mi
         securityContext:
-          allowPrivilegeEscalation: false
-          capabilities:
-            drop:
-            - ALL
-          privileged: false
-          readOnlyRootFilesystem: true
-          runAsGroup: {{ .Values.securityContext.runAsGroup | default "10000" }}
-          runAsNonRoot: true
-          runAsUser: {{ .Values.securityContext.runAsUser | default "10000" }}
-          seccompProfile:
-            type: RuntimeDefault
+        {{- toYaml .Values.agent.wait_for_lapi.securityContext | nindent 10 }}
       containers:
       - name: crowdsec-agent
         image: "{{ .Values.image.repository | default "crowdsecurity/crowdsec" }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
@@ -119,14 +109,7 @@ spec:
         resources:
           {{- toYaml .Values.agent.resources | nindent 10 }}
         securityContext:
-          allowPrivilegeEscalation: false
-          capabilities:
-            drop:
-            - ALL
-          privileged: false
-          runAsGroup: {{ .Values.securityContext.runAsGroup | default "10000" }}
-          seccompProfile:
-            type: RuntimeDefault
+          {{- toYaml .Values.agent.securityContext | nindent 10 }}
         {{- if .Values.agent.metrics.enabled }}
         livenessProbe:
           failureThreshold: 3
