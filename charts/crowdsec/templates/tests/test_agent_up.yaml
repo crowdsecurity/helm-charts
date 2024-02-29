@@ -33,7 +33,7 @@ spec:
       allowPrivilegeEscalation: false
       capabilities:
         drop:
-          - ALL
+        - ALL
       privileged: false
       readOnlyRootFilesystem: true
       runAsGroup: {{ .Values.securityContext.runAsGroup | default "10000" }}
