@@ -45,7 +45,7 @@ spec:
       - name: fetch-metabase-config
         image: "{{ .Values.agent.wait_for_lapi.image.repository }}:{{ .Values.agent.wait_for_lapi.image.tag }}"
         imagePullPolicy: IfNotPresent
-        command: ['sh', '-c', 'cd /metabase-data && wget {{ .Values.lapi.dashboard.assetURL }} && unzip metabase_sqlite.zip -d /metabase-data/']
+        command: ['sh', '-c', 'if [ -f /metabase-data/metabase.db/metabase.db.mv.db ]; then echo "Metabase database file already exists, skipping download and unzip"; else wget {{ .Values.lapi.dashboard.assetURL }} && unzip metabase_sqlite.zip -d /metabase-data/; fi']
 
 
         securityContext:
