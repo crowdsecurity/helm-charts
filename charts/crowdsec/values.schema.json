@@ -659,6 +659,66 @@
             "required": [
                 "source"
             ]
+        },
+        "LokiSource": {
+            "type": "object",
+            "description": "https://docs.crowdsec.net/docs/next/data_sources/loki",
+            "properties": {
+                "source": {
+                    "const": "loki"
+                },
+                "url": {
+                    "type": "string",
+                    "format": "uri",
+                    "description": "The URL of the Loki instance"
+                },
+                "limit": {
+                    "type": "integer",
+                    "description": "The maximum number of log entries to fetch in one query"
+                },
+                "prefix": {
+                    "type": "string",
+                    "description": "Prefix for the Loki API endpoints"
+                },
+                "headers": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    },
+                    "description": "HTTP headers to include in requests to Loki"
+                },
+                "wait_for_ready": {
+                    "type": "string",
+                    "description": "The retry interval at startup before giving on loki."
+                },
+                "query": {
+                    "type": "string",
+                    "description": "https://grafana.com/docs/loki/latest/query/log_queries/"
+                },
+                "auth": {
+                    "type": "object",
+                    "properties": {
+                        "username": {
+                            "type": "string",
+                            "description": "Username for authentication with Loki"
+                        },
+                        "password": {
+                            "type": "string",
+                            "description": "Password for authentication with Loki"
+                        }
+                    },
+                    "required": ["username", "password"],
+                    "description": "Authentication credentials for Loki"
+                },
+                "max_failure_duration": {
+                    "type": "string",
+                    "description": "The maximum duration loki is allowed to be unavailable (once startup is successful) before giving up on the data source."
+                },
+                "labels": {
+                    "$ref": "#/definitions/Labels"
+                }
+            },
+            "required": ["source", "url", "query"]
         }
     }
 }
