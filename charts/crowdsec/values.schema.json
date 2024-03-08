@@ -58,6 +58,9 @@
                             },
                             {
                                 "$ref": "#/definitions/WinEventLogSource"
+                            },
+                            {
+                                "$ref": "#/definitions/LokiSource"
                             }
                         ]
                     }
