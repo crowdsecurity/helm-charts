@@ -30,6 +30,20 @@ Generate password if not specified in values
 {{- end -}}
 
 {{/*
+Generate CS_LAPI_SECRET if not specified in values
+*/}}
+{{ define "lapi.csLapiSecret" }}
+{{- if .Values.lapi.secrets.csLapiSecret }}
+  {{- .Values.lapi.secrets.csLapiSecret -}}
+{{- else if (lookup "v1" "Secret" .Release.Namespace "crowdsec-lapi-secrets").data }}
+  {{- $obj := (lookup "v1" "Secret" .Release.Namespace "crowdsec-lapi-secrets").data -}}
+  {{- index $obj "csLapiSecret" | b64dec -}}
+{{- else -}}
+  {{- randAscii 64 -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
   notifications parameters check
 */}}
 {{ define "notificationsIsNotEmpty" }}
@@ -64,7 +78,7 @@ true
   lapi custom config check
 */}}
 {{ define "lapiCustomConfigIsNotEmpty" }}
-{{- if or (index .Values.config "profiles.yaml") ((include "notificationsIsNotEmpty" .)) }}
+{{- if or (index .Values.config "profiles.yaml") (index .Values.config "config.yaml.local") ((include "notificationsIsNotEmpty" .)) }}
 true
 {{- end -}}
 {{- end -}}

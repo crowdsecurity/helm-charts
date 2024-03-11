@@ -125,6 +125,9 @@
                 },
                 "capi_whitelists.yaml": {
                     "type": "string"
+                },
+                "config.yaml.local": {
+                    "type": "string"
                 }
             },
             "title": "Config"
