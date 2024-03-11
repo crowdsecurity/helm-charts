@@ -218,7 +218,7 @@ lapi:
       enabled: false
 
   strategy:
-    type: RollingUpdate
+    type: Recreate
 
 # agent will deploy pod on every node as daemonSet to read wanted pods logs
 agent:
