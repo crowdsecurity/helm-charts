@@ -5,6 +5,7 @@ apiVersion: apps/v1
 kind: DaemonSet
 metadata:
   name: {{ .Release.Name }}-agent
+  namespace: {{ .Release.Namespace }}
   labels:
     k8s-app: {{ .Release.Name }}
     type: agent
@@ -37,8 +38,7 @@ spec:
             cpu: 1m
             memory: 10Mi
         securityContext:
-          allowPrivilegeEscalation: false
-          privileged: false
+        {{- toYaml .Values.agent.wait_for_lapi.securityContext | nindent 10 }}
       containers:
       - name: crowdsec-agent
         image: "{{ .Values.image.repository | default "crowdsecurity/crowdsec" }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
@@ -92,16 +92,34 @@ spec:
         {{- end }}
         resources:
           {{- toYaml .Values.agent.resources | nindent 10 }}
-        {{ if .Values.agent.metrics.enabled }}
+        securityContext:
+          {{- toYaml .Values.agent.securityContext | nindent 10 }}
+        {{- if .Values.agent.metrics.enabled }}
+        livenessProbe:
+          failureThreshold: 3
+          periodSeconds: 10
+          successThreshold: 1
+          tcpSocket:
+            port: metrics
+          timeoutSeconds: 1
+        readinessProbe:
+          failureThreshold: 3
+          periodSeconds: 10
+          successThreshold: 1
+          tcpSocket:
+            port: metrics
+          timeoutSeconds: 1
+        startupProbe:
+          failureThreshold: 30
+          periodSeconds: 10
+          successThreshold: 1
+          tcpSocket:
+            port: metrics
+          timeoutSeconds: 1
         ports:
           - name: metrics
             containerPort: 6060
             protocol: TCP
-
-        securityContext:
-          allowPrivilegeEscalation: false
-          privileged: false
-
         {{ end }}
         {{- if .Values.agent.persistentVolume.config.enabled }}
         command: ['sh', '-c', 'mv -n /staging/etc/crowdsec/* /etc/crowdsec_data/ && rm -rf /staging/etc/crowdsec && ln -s /etc/crowdsec_data /etc/crowdsec && ./docker_start.sh']
@@ -163,6 +181,8 @@ spec:
             mountPath: /etc/ssl/crowdsec-agent
           {{- end }}
       terminationGracePeriodSeconds: 30
+      securityContext:
+        fsGroup: {{ .Values.securityContext.fsGroup | default "10000" }}
       volumes:
       - name: acquis-config-volume
         configMap:

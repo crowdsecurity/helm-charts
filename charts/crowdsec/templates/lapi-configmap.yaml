@@ -5,6 +5,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: crowdsec-profiles
+  namespace: {{ .Release.Namespace }}
 data:
   profiles.yaml: |
 {{ printf "%+v" (index .Values.config "profiles.yaml") | indent 4 }}

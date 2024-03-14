@@ -5,6 +5,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ .Release.Name }}-lapi
+  namespace: {{ .Release.Namespace }}
   labels:
     k8s-app: {{ .Release.Name }}
     type: lapi
@@ -25,14 +26,20 @@ spec:
       {{ if .Values.lapi.dashboard.enabled }}
       initContainers:
       - name: fetch-metabase-config
-        image: busybox:1.28
+        image: "{{ .Values.agent.wait_for_lapi.image.repository }}:{{ .Values.agent.wait_for_lapi.image.tag }}"
         imagePullPolicy: IfNotPresent
         command: ['sh', '-c', 'if [ -f /metabase-data/metabase.db/metabase.db.mv.db ]; then echo "Metabase database file already exists, skipping download and unzip"; else wget {{ .Values.lapi.dashboard.assetURL }} && unzip metabase_sqlite.zip -d /metabase-data/; fi']
+
+
+        securityContext:
+        {{- toYaml .Values.agent.wait_for_lapi.securityContext | nindent 10 }}
+
         volumeMounts:
         - name: crowdsec-db
           mountPath: /metabase-data
           subPath: dashboard
       {{- end }}
+
       containers:
       - name: crowdsec-lapi
         image: "{{ .Values.image.repository | default "crowdsecurity/crowdsec" }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
@@ -93,7 +100,6 @@ spec:
         {{- end }}
         resources:
           {{- toYaml .Values.lapi.resources | nindent 10 }}
-
         livenessProbe:
           failureThreshold: 3
           periodSeconds: 10
@@ -135,8 +141,7 @@ spec:
             {{- end }}
 
         securityContext:
-          allowPrivilegeEscalation: false
-          privileged: false
+        {{- toYaml .Values.lapi.securityContext | nindent 10 }}
 
         ports:
           - name: lapi
@@ -199,27 +204,8 @@ spec:
         image: "{{ .Values.lapi.dashboard.image.repository | default "metabase/metabase" }}:{{ .Values.lapi.dashboard.image.tag | default "latest" }}"
         imagePullPolicy: {{ .Values.lapi.dashboard.image.pullPolicy }}
         command: ['sh', '-c', 'ln -fs /var/lib/crowdsec/data/crowdsec.db /metabase-data/crowdsec.db && /app/run_metabase.sh']
-        volumeMounts:
-        - name: crowdsec-db
-          mountPath: /metabase-data
-          subPath: dashboard
-        - name: crowdsec-db
-          mountPath: /var/lib/crowdsec/data
-          subPath: crowdsec
-        env:
-          - name: MB_DB_FILE
-            value: /metabase-data/metabase.db
-          - name: MGID
-            value: "1000"
-        {{- with .Values.lapi.dashboard.env }}
-        {{- toYaml . | nindent 10 }}
-        {{- end }}
-
-        ports:
-        - containerPort: 3000
-          name: http
-          protocol: TCP
-
+        resources:
+          {{- toYaml .Values.lapi.dashboard.resources | nindent 10 }}
         livenessProbe:
           failureThreshold: 3
           httpGet:
@@ -249,8 +235,28 @@ spec:
           timeoutSeconds: 1
 
         securityContext:
-          allowPrivilegeEscalation: false
-          privileged: false
+        {{- toYaml .Values.lapi.dashboard.securityContext | nindent 10 }}
+
+        volumeMounts:
+        - name: crowdsec-db
+          mountPath: /metabase-data
+          subPath: dashboard
+        - name: crowdsec-db
+          mountPath: /var/lib/crowdsec/data
+          subPath: crowdsec
+        env:
+          - name: MB_DB_FILE
+            value: /metabase-data/metabase.db
+          - name: MGID
+            value: "1000"
+        {{- with .Values.lapi.dashboard.env }}
+        {{- toYaml . | nindent 10 }}
+        {{- end }}
+
+        ports:
+        - containerPort: 3000
+          name: http
+          protocol: TCP
 
         {{- with .Values.lapi.dashboard.resources }}
         resources:
@@ -259,6 +265,8 @@ spec:
 
       {{- end }}
       terminationGracePeriodSeconds: 30
+      securityContext:
+        fsGroup: {{ .Values.securityContext.fsGroup | default "10000" }}
       {{- if or (.Values.tls.enabled) (.Values.lapi.persistentVolume.data.enabled) (.Values.lapi.persistentVolume.config.enabled) (.Values.lapi.dashboard.enabled) (include "lapiCustomConfigIsNotEmpty" .) }}
       volumes:
       {{- if .Values.lapi.persistentVolume.data.enabled }}
