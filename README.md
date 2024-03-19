@@ -23,7 +23,7 @@ helm repo add crowdsec https://crowdsecurity.github.io/helm-charts
 
 You can also refer to:
 
- - [Crowdsec's Helm Chart Quickstart guide](https://doc.crowdsec.net/....) for a step-by-step guide on setting up a [Security Engine](https://doc.crowdsec.net/docs/next/intro) and [Remediation components](https://doc.crowdsec.net/u/bouncers/intro) with Helm.
+ - [Crowdsec's Helm Chart Quickstart guide](https://doc.crowdsec.net/....) for a step-by-step guide on setting up both [Security Engine](https://doc.crowdsec.net/docs/next/intro) and [Remediation components](https://doc.crowdsec.net/u/bouncers/intro).
  - [Chart documentation](https://github.com/crowdsecurity/helm-charts/blob/main/charts/crowdsec/README.md) for a list of available options
 
 ## License
