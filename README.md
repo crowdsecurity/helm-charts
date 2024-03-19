@@ -8,11 +8,7 @@
     <img width="400px" height=auto src="https://doc.crowdsec.net/img/crowdsec_logo.png" />
 </p>
 
-[![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/crowdsec)]
-
-![Release Charts](https://github.com/crowdsecurity/helm-charts/workflows/Release%20Charts/badge.svg?branch=main)
-
-[![Releases downloads](https://img.shields.io/github/downloads/crowdsecurity/helm-charts/total.svg)](https://github.com/crowdsecurity/helm-charts/releases)
+![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/crowdsec) ![Release Charts](https://github.com/crowdsecurity/helm-charts/workflows/Release%20Charts/badge.svg?branch=main) [![Releases downloads](https://img.shields.io/github/downloads/crowdsecurity/helm-charts/total.svg)](https://github.com/crowdsecurity/helm-charts/releases)
 
 
 # Crowdsec Helm Chart
