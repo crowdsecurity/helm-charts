@@ -29,7 +29,7 @@ spec:
       - name: wait-for-lapi
         image: "{{ .Values.agent.wait_for_lapi.image.repository }}:{{ .Values.agent.wait_for_lapi.image.tag }}"
         imagePullPolicy: {{ .Values.agent.wait_for_lapi.image.pullPolicy }}
-        command: ['sh', '-c', "until nc {{ .Release.Name }}-service.{{ .Release.Namespace }} 8080; do echo waiting for lapi to start; sleep 5; done"]
+        command: ['sh', '-c', "until nc {{ .Release.Name }}-service.{{ .Release.Namespace }} 8080 -z; do echo waiting for lapi to start; sleep 5; done"]
         resources:
           limits:
             memory: 50Mi
