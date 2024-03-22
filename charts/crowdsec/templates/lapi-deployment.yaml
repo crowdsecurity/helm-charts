@@ -17,10 +17,17 @@ spec:
   strategy: {{- toYaml .Values.lapi.strategy | nindent 4 }}
   template:
     metadata:
+      {{- if .Values.podAnnotations }}
+      annotations:
+{{ toYaml .Values.podAnnotations | trim | indent 8 }}
+      {{- end }}
       labels:
         k8s-app: {{ .Release.Name }}
         type: lapi
         version: v1
+        {{- if .Values.podLabels }}
+{{ toYaml .Values.podLabels | trim | indent 8 }}
+        {{- end }}
     spec:
       {{- if .Values.image.pullSecrets }}
       imagePullSecrets:

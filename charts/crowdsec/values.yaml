@@ -18,6 +18,12 @@ image:
   # -- docker image tag
   tag: ""
 
+# Annotations to be added to pods
+podAnnotations: {}
+
+# Labels to be added to pods
+podLabels: {}
+
 # Here you can specify your own custom configuration to be loaded in crowdsec agent or lapi
 # Each config needs to be a multi-line using '|' in YAML specs
 # for the agent those configs will be loaded : parsers, scenarios, postoverflows, simulation.yaml
@@ -248,7 +254,7 @@ agent:
 
   # -- pod priority class name
   priorityClassName: ""
-  
+
   resources:
     limits:
       memory: 100Mi
@@ -331,4 +337,3 @@ agent:
       tag: "1.28"
 
 #service: {}
-
