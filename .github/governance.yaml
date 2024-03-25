@@ -2,7 +2,7 @@ version: v1
 
 issue:
   automations:
-    autoAssignAnyFrom: ['@he2ss', '@blotus', '@buixor', '@LaurenceJJones']
+    autoAssignAnyFrom: ['@he2ss', '@blotus', '@buixor', '@mmetc','@LaurenceJJones']
     autoStale:
       fromTag: 'provide more details'
       delay: '30d'
