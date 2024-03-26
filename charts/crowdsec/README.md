@@ -38,6 +38,7 @@ helm delete crowdsec -n crowdsec
 | container_runtime | string | `"docker"` | for raw logs format: json or cri (docker|containerd) |
 | image.repository | string | `"crowdsecurity/crowdsec"` | docker image repository name |
 | image.pullPolicy | string | `"IfNotPresent"` | pullPolicy |
+| image.pullSecrets | list | `[]` | pullSecrets |
 | image.tag | string | `""` | docker image tag |
 | config.parsers | object | `{"s00-raw":{},"s01-parse":{},"s02-enrich":{}}` | To better understand stages in parsers, you can take a look at https://docs.crowdsec.net/docs/next/parsers/intro/ |
 | config.scenarios | object | `{}` | to better understand how to write a scenario, you can take a look at https://docs.crowdsec.net/docs/next/scenarios/intro |
