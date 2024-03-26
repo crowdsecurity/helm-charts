@@ -12,6 +12,9 @@ image:
   repository: crowdsecurity/crowdsec
   # -- pullPolicy
   pullPolicy: IfNotPresent
+  # -- pullSecrets
+  pullSecrets: []
+    # - name: ""
   # -- docker image tag
   tag: ""
 
