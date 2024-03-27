@@ -11,6 +11,7 @@ issue:
       fromTag: 'stale'
       delay: '60d'
 
+  # Edit according to issue template
   # captures:
   #   - regex: 'version: v*(.+)-[rc*]?'
   #     github_release: true
