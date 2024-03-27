@@ -31,4 +31,4 @@ jobs:
         with:
           # You can use a PAT to post a comment/label/status so that it shows up as a user instead of github-actions
           github-token: ${{secrets.GITHUB_TOKEN}} # optional, default to '${{ github.token }}'
-          config-path: .github/governance.yml # optional, default to '.github/governance.yml'
+          config-path: .github/governance.yaml # optional, default to '.github/governance.yml'
