@@ -19,6 +19,9 @@ spec:
       {{- if .Values.podAnnotations }}
       annotations:
 {{ toYaml .Values.podAnnotations | trim | indent 8 }}
+      {{- else if .Values.agent.podAnnotations }}
+      annotations:
+{{ toYaml .Values.agent.podAnnotations | trim | indent 8 }}
       {{- end }}
       labels:
         k8s-app: {{ .Release.Name }}
@@ -26,6 +29,8 @@ spec:
         version: v1
         {{- if .Values.podLabels }}
 {{ toYaml .Values.podLabels | trim | indent 8 }}
+        {{- else if .Values.agent.podLabels }}
+{{ toYaml .Values.agent.podLabels | trim | indent 8 }}
         {{- end }}
     spec:
       {{- with .Values.agent.tolerations }}

@@ -139,6 +139,12 @@ lapi:
   # -- pod priority class name
   priorityClassName: ""
 
+  # Annotations to be added to lapi pods, if global podAnnotations are not set
+  podAnnotations: {}
+
+  # Labels to be added to lapi pods, if global podLabels are not set
+  podLabels: {}
+
   dashboard:
     # -- Enable Metabase Dashboard (by default disabled)
     enabled: false
@@ -254,6 +260,12 @@ agent:
 
   # -- pod priority class name
   priorityClassName: ""
+
+  # Annotations to be added to agent pods, if global podAnnotations are not set
+  podAnnotations: {}
+
+  # Labels to be added to agent pods, if global podLabels are not set
+  podLabels: {}
 
   resources:
     limits:
