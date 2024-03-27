@@ -18,6 +18,12 @@ image:
   # -- docker image tag
   tag: ""
 
+# Annotations to be added to pods
+podAnnotations: {}
+
+# Labels to be added to pods
+podLabels: {}
+
 # Here you can specify your own custom configuration to be loaded in crowdsec agent or lapi
 # Each config needs to be a multi-line using '|' in YAML specs
 # for the agent those configs will be loaded : parsers, scenarios, postoverflows, simulation.yaml
@@ -132,6 +138,12 @@ lapi:
 
   # -- pod priority class name
   priorityClassName: ""
+
+  # Annotations to be added to lapi pods, if global podAnnotations are not set
+  podAnnotations: {}
+
+  # Labels to be added to lapi pods, if global podLabels are not set
+  podLabels: {}
 
   dashboard:
     # -- Enable Metabase Dashboard (by default disabled)
@@ -248,7 +260,13 @@ agent:
 
   # -- pod priority class name
   priorityClassName: ""
-  
+
+  # Annotations to be added to agent pods, if global podAnnotations are not set
+  podAnnotations: {}
+
+  # Labels to be added to agent pods, if global podLabels are not set
+  podLabels: {}
+
   resources:
     limits:
       memory: 100Mi
@@ -331,4 +349,3 @@ agent:
       tag: "1.28"
 
 #service: {}
-
