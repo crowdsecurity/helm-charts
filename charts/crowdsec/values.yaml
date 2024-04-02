@@ -12,8 +12,17 @@ image:
   repository: crowdsecurity/crowdsec
   # -- pullPolicy
   pullPolicy: IfNotPresent
+  # -- pullSecrets
+  pullSecrets: []
+    # - name: ""
   # -- docker image tag
   tag: ""
+
+# Annotations to be added to pods
+podAnnotations: {}
+
+# Labels to be added to pods
+podLabels: {}
 
 # Here you can specify your own custom configuration to be loaded in crowdsec agent or lapi
 # Each config needs to be a multi-line using '|' in YAML specs
@@ -127,9 +136,21 @@ lapi:
     host: "" # crowdsec-api.example.com
     # tls: {}
 
+  # -- pod priority class name
+  priorityClassName: ""
+
+  # Annotations to be added to lapi pods, if global podAnnotations are not set
+  podAnnotations: {}
+
+  # Labels to be added to lapi pods, if global podLabels are not set
+  podLabels: {}
+
   dashboard:
     # -- Enable Metabase Dashboard (by default disabled)
     enabled: false
+    # -- environment variables from metabase/metabase docker image
+    # -- see https://www.metabase.com/docs/latest/configuring-metabase/environment-variables
+    env: []
     image:
       # -- docker image repository name
       repository: metabase/metabase
@@ -197,7 +218,9 @@ lapi:
   # -- nodeSelector for lapi
   nodeSelector: {}
   # -- tolerations for lapi
-  tolerations: {}
+  tolerations: []
+  # -- dnsConfig for lapi
+  dnsConfig: {}
 
   # -- Enable service monitoring (exposes "metrics" port "6060" for Prometheus)
   metrics:
@@ -210,7 +233,7 @@ lapi:
       enabled: false
 
   strategy:
-    type: RollingUpdate
+    type: Recreate
 
 # agent will deploy pod on every node as daemonSet to read wanted pods logs
 agent:
@@ -234,6 +257,16 @@ agent:
       program: "" #nginx
       # -- If set to true, will poll the files using os.Stat instead of using inotify
       poll_without_inotify: false
+
+  # -- pod priority class name
+  priorityClassName: ""
+
+  # Annotations to be added to agent pods, if global podAnnotations are not set
+  podAnnotations: {}
+
+  # Labels to be added to agent pods, if global podLabels are not set
+  podLabels: {}
+
   resources:
     limits:
       memory: 100Mi
@@ -284,7 +317,7 @@ agent:
   # -- nodeSelector for agent
   nodeSelector: {}
   # -- tolerations for agent
-  tolerations: {}
+  tolerations: []
 
   # -- Enable service monitoring (exposes "metrics" port "6060" for Prometheus)
   metrics:
@@ -316,4 +349,3 @@ agent:
       tag: "1.28"
 
 #service: {}
-

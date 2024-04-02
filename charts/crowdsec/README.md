@@ -38,7 +38,10 @@ helm delete crowdsec -n crowdsec
 | container_runtime | string | `"docker"` | for raw logs format: json or cri (docker|containerd) |
 | image.repository | string | `"crowdsecurity/crowdsec"` | docker image repository name |
 | image.pullPolicy | string | `"IfNotPresent"` | pullPolicy |
+| image.pullSecrets | list | `[]` | pullSecrets |
 | image.tag | string | `""` | docker image tag |
+| podAnnotations | object | `{}` |  |
+| podLabels | object | `{}` |  |
 | config.parsers | object | `{"s00-raw":{},"s01-parse":{},"s02-enrich":{}}` | To better understand stages in parsers, you can take a look at https://docs.crowdsec.net/docs/next/parsers/intro/ |
 | config.scenarios | object | `{}` | to better understand how to write a scenario, you can take a look at https://docs.crowdsec.net/docs/next/scenarios/intro |
 | config.postoverflows | object | `{"s00-enrich":{},"s01-whitelist":{}}` | to better understand how to write a postoverflow, you can take a look at (https://docs.crowdsec.net/docs/next/whitelist/create/#whitelist-in-postoverflows) |
@@ -61,7 +64,11 @@ helm delete crowdsec -n crowdsec
 | secrets.password | string | `""` | agent password (default is generated randomly) |
 | lapi.env | list | `[]` | environment variables from crowdsecurity/crowdsec docker image |
 | lapi.ingress | object | `{"annotations":{"nginx.ingress.kubernetes.io/backend-protocol":"HTTP"},"enabled":false,"host":"","ingressClassName":""}` | Enable ingress lapi object |
+| lapi.priorityClassName | string | `""` | pod priority class name |
+| lapi.podAnnotations | object | `{}` |  |
+| lapi.podLabels | object | `{}` |  |
 | lapi.dashboard.enabled | bool | `false` | Enable Metabase Dashboard (by default disabled) |
+| lapi.dashboard.env | list | `[]` | see https://www.metabase.com/docs/latest/configuring-metabase/environment-variables |
 | lapi.dashboard.image.repository | string | `"metabase/metabase"` | docker image repository name |
 | lapi.dashboard.image.pullPolicy | string | `"IfNotPresent"` | pullPolicy |
 | lapi.dashboard.image.tag | string | `"v0.46.6.1"` | docker image tag |
@@ -82,15 +89,19 @@ helm delete crowdsec -n crowdsec
 | lapi.service.loadBalancerClass | string | `nil` |  |
 | lapi.service.externalTrafficPolicy | string | `"Cluster"` |  |
 | lapi.nodeSelector | object | `{}` | nodeSelector for lapi |
-| lapi.tolerations | object | `{}` | tolerations for lapi |
+| lapi.tolerations | list | `[]` | tolerations for lapi |
+| lapi.dnsConfig | object | `{}` | dnsConfig for lapi |
 | lapi.metrics | object | `{"enabled":false,"serviceMonitor":{"enabled":false}}` | Enable service monitoring (exposes "metrics" port "6060" for Prometheus) |
 | lapi.metrics.serviceMonitor | object | `{"enabled":false}` | See also: https://github.com/prometheus-community/helm-charts/issues/106#issuecomment-700847774 |
-| lapi.strategy.type | string | `"RollingUpdate"` |  |
+| lapi.strategy.type | string | `"Recreate"` |  |
 | agent.additionalAcquisition | list | `[]` | To add custom acquisitions using available datasources (https://docs.crowdsec.net/docs/next/data_sources/intro) |
 | agent.acquisition[0] | object | `{"namespace":"","podName":"","poll_without_inotify":false,"program":""}` | Specify each pod you want to process it logs (namespace, podName and program) |
 | agent.acquisition[0].podName | string | `""` | to select pod logs to process |
 | agent.acquisition[0].program | string | `""` | program name related to specific parser you will use (see https://hub.crowdsec.net/author/crowdsecurity/configurations/docker-logs) |
 | agent.acquisition[0].poll_without_inotify | bool | `false` | If set to true, will poll the files using os.Stat instead of using inotify |
+| agent.priorityClassName | string | `""` | pod priority class name |
+| agent.podAnnotations | object | `{}` |  |
+| agent.podLabels | object | `{}` |  |
 | agent.resources.limits.memory | string | `"100Mi"` |  |
 | agent.resources.requests.cpu | string | `"150m"` |  |
 | agent.resources.requests.memory | string | `"100Mi"` |  |
@@ -98,7 +109,7 @@ helm delete crowdsec -n crowdsec
 | agent.persistentVolume.config | object | `{"accessModes":["ReadWriteOnce"],"enabled":false,"existingClaim":"","size":"100Mi","storageClassName":""}` | Persistent volume for config folder. Stores local config (parsers, scenarios etc.) |
 | agent.env | list | `[]` | environment variables from crowdsecurity/crowdsec docker image |
 | agent.nodeSelector | object | `{}` | nodeSelector for agent |
-| agent.tolerations | object | `{}` | tolerations for agent |
+| agent.tolerations | list | `[]` | tolerations for agent |
 | agent.metrics | object | `{"enabled":false,"serviceMonitor":{"enabled":false}}` | Enable service monitoring (exposes "metrics" port "6060" for Prometheus) |
 | agent.metrics.serviceMonitor | object | `{"enabled":false}` | See also: https://github.com/prometheus-community/helm-charts/issues/106#issuecomment-700847774 |
 | agent.service.type | string | `"ClusterIP"` |  |
