@@ -10,7 +10,7 @@ on:
   # Scheduled events cron // Scheduled automations are: autoStale & autoClose
   # Set to check every hour for now, could be every day at 1 : '0 1 * * *'
   schedule:
-    - cron: '0 * * * *'
+    - cron: '0 23 * * *'
 
 # You can use permissions to modify the default permissions granted to the GITHUB_TOKEN, 
 # adding or removing access as required, so that you only allow the minimum required access. 
