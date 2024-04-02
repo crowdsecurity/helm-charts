@@ -18,10 +18,10 @@ image:
   # -- docker image tag
   tag: ""
 
-# Annotations to be added to pods
+# -- Annotations to be added to pods
 podAnnotations: {}
 
-# Labels to be added to pods
+# -- Labels to be added to pods
 podLabels: {}
 
 # Here you can specify your own custom configuration to be loaded in crowdsec agent or lapi
@@ -139,10 +139,10 @@ lapi:
   # -- pod priority class name
   priorityClassName: ""
 
-  # Annotations to be added to lapi pods, if global podAnnotations are not set
+  # -- Annotations to be added to lapi pods, if global podAnnotations are not set
   podAnnotations: {}
 
-  # Labels to be added to lapi pods, if global podLabels are not set
+  # -- Labels to be added to lapi pods, if global podLabels are not set
   podLabels: {}
 
   dashboard:
@@ -221,6 +221,8 @@ lapi:
   tolerations: []
   # -- dnsConfig for lapi
   dnsConfig: {}
+  # -- affinity for lapi
+  affinity: {}
 
   # -- Enable service monitoring (exposes "metrics" port "6060" for Prometheus)
   metrics:
@@ -261,10 +263,10 @@ agent:
   # -- pod priority class name
   priorityClassName: ""
 
-  # Annotations to be added to agent pods, if global podAnnotations are not set
+  # -- Annotations to be added to agent pods, if global podAnnotations are not set
   podAnnotations: {}
 
-  # Labels to be added to agent pods, if global podLabels are not set
+  # -- Labels to be added to agent pods, if global podLabels are not set
   podLabels: {}
 
   resources:
@@ -318,6 +320,8 @@ agent:
   nodeSelector: {}
   # -- tolerations for agent
   tolerations: []
+  # -- affinity for agent
+  affinity: {}
 
   # -- Enable service monitoring (exposes "metrics" port "6060" for Prometheus)
   metrics:
