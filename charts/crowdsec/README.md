@@ -40,8 +40,8 @@ helm delete crowdsec -n crowdsec
 | image.pullPolicy | string | `"IfNotPresent"` | pullPolicy |
 | image.pullSecrets | list | `[]` | pullSecrets |
 | image.tag | string | `""` | docker image tag |
-| podAnnotations | object | `{}` |  |
-| podLabels | object | `{}` |  |
+| podAnnotations | object | `{}` | Annotations to be added to pods |
+| podLabels | object | `{}` | Labels to be added to pods |
 | config.parsers | object | `{"s00-raw":{},"s01-parse":{},"s02-enrich":{}}` | To better understand stages in parsers, you can take a look at https://docs.crowdsec.net/docs/next/parsers/intro/ |
 | config.scenarios | object | `{}` | to better understand how to write a scenario, you can take a look at https://docs.crowdsec.net/docs/next/scenarios/intro |
 | config.postoverflows | object | `{"s00-enrich":{},"s01-whitelist":{}}` | to better understand how to write a postoverflow, you can take a look at (https://docs.crowdsec.net/docs/next/whitelist/create/#whitelist-in-postoverflows) |
@@ -65,8 +65,8 @@ helm delete crowdsec -n crowdsec
 | lapi.env | list | `[]` | environment variables from crowdsecurity/crowdsec docker image |
 | lapi.ingress | object | `{"annotations":{"nginx.ingress.kubernetes.io/backend-protocol":"HTTP"},"enabled":false,"host":"","ingressClassName":""}` | Enable ingress lapi object |
 | lapi.priorityClassName | string | `""` | pod priority class name |
-| lapi.podAnnotations | object | `{}` |  |
-| lapi.podLabels | object | `{}` |  |
+| lapi.podAnnotations | object | `{}` | Annotations to be added to lapi pods, if global podAnnotations are not set |
+| lapi.podLabels | object | `{}` | Labels to be added to lapi pods, if global podLabels are not set |
 | lapi.dashboard.enabled | bool | `false` | Enable Metabase Dashboard (by default disabled) |
 | lapi.dashboard.env | list | `[]` | see https://www.metabase.com/docs/latest/configuring-metabase/environment-variables |
 | lapi.dashboard.image.repository | string | `"metabase/metabase"` | docker image repository name |
@@ -91,6 +91,7 @@ helm delete crowdsec -n crowdsec
 | lapi.nodeSelector | object | `{}` | nodeSelector for lapi |
 | lapi.tolerations | list | `[]` | tolerations for lapi |
 | lapi.dnsConfig | object | `{}` | dnsConfig for lapi |
+| lapi.affinity | object | `{}` | affinity for lapi |
 | lapi.metrics | object | `{"enabled":false,"serviceMonitor":{"enabled":false}}` | Enable service monitoring (exposes "metrics" port "6060" for Prometheus) |
 | lapi.metrics.serviceMonitor | object | `{"enabled":false}` | See also: https://github.com/prometheus-community/helm-charts/issues/106#issuecomment-700847774 |
 | lapi.strategy.type | string | `"Recreate"` |  |
@@ -100,8 +101,8 @@ helm delete crowdsec -n crowdsec
 | agent.acquisition[0].program | string | `""` | program name related to specific parser you will use (see https://hub.crowdsec.net/author/crowdsecurity/configurations/docker-logs) |
 | agent.acquisition[0].poll_without_inotify | bool | `false` | If set to true, will poll the files using os.Stat instead of using inotify |
 | agent.priorityClassName | string | `""` | pod priority class name |
-| agent.podAnnotations | object | `{}` |  |
-| agent.podLabels | object | `{}` |  |
+| agent.podAnnotations | object | `{}` | Annotations to be added to agent pods, if global podAnnotations are not set |
+| agent.podLabels | object | `{}` | Labels to be added to agent pods, if global podLabels are not set |
 | agent.resources.limits.memory | string | `"100Mi"` |  |
 | agent.resources.requests.cpu | string | `"150m"` |  |
 | agent.resources.requests.memory | string | `"100Mi"` |  |
@@ -110,6 +111,7 @@ helm delete crowdsec -n crowdsec
 | agent.env | list | `[]` | environment variables from crowdsecurity/crowdsec docker image |
 | agent.nodeSelector | object | `{}` | nodeSelector for agent |
 | agent.tolerations | list | `[]` | tolerations for agent |
+| agent.affinity | object | `{}` | affinity for agent |
 | agent.metrics | object | `{"enabled":false,"serviceMonitor":{"enabled":false}}` | Enable service monitoring (exposes "metrics" port "6060" for Prometheus) |
 | agent.metrics.serviceMonitor | object | `{"enabled":false}` | See also: https://github.com/prometheus-community/helm-charts/issues/106#issuecomment-700847774 |
 | agent.service.type | string | `"ClusterIP"` |  |
