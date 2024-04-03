@@ -258,6 +258,13 @@ lapi:
   # -- Any extra secrets you may need (for example, external DB password)
   extraSecrets: {}
     # dbPassword: randomPass
+  lifecycle: {}
+    # preStop:
+    #   exec:
+    #     command: ["/bin/sh", "-c", "echo Hello from the postStart handler > /usr/share/message"]
+    # postStart:
+    #   exec:
+    #     command: ["/bin/sh", "-c", "echo Hello from the postStart handler > /usr/share/message"]
 
 # agent will deploy pod on every node as daemonSet to read wanted pods logs
 agent:
