@@ -80,6 +80,17 @@ config:
     #  filters:
     #    - Alert.Remediation == true && Alert.GetScope() == "Ip"
     #  ...
+  # -- General configuration (https://docs.crowdsec.net/docs/configuration/crowdsec_configuration/#configuration-example)
+  config.yaml.local: ""
+    #   |
+    # db_config:
+    #   type:     postgresql
+    #   user:     crowdsec
+    #   password: ${DB_PASSWORD}
+    #   db_name:  crowdsec
+    #   host:     192.168.0.2
+    #   port:     5432
+    #   sslmode:  require
   # -- notifications configuration (https://docs.crowdsec.net/docs/next/notification_plugins/intro)
   notifications: {}
     # email.yaml: |
@@ -120,6 +131,8 @@ secrets:
 
 # lapi will deploy pod with crowdsec lapi and dashboard as deployment
 lapi:
+  # -- replicas for local API
+  replicas: 1
   # -- environment variables from crowdsecurity/crowdsec docker image
   env: []
     # by default disable the agent because it only needs the local API.
@@ -223,6 +236,8 @@ lapi:
   dnsConfig: {}
   # -- affinity for lapi
   affinity: {}
+  # -- topologySpreadConstraints for lapi
+  topologySpreadConstraints: []
 
   # -- Enable service monitoring (exposes "metrics" port "6060" for Prometheus)
   metrics:
@@ -236,6 +251,13 @@ lapi:
 
   strategy:
     type: Recreate
+
+  secrets:
+    # -- Shared LAPI secret. Will be generated randomly if not specified. Size must be > 64 characters
+    csLapiSecret: ""
+  # -- Any extra secrets you may need (for example, external DB password)
+  extraSecrets: {}
+    # dbPassword: randomPass
 
 # agent will deploy pod on every node as daemonSet to read wanted pods logs
 agent:
