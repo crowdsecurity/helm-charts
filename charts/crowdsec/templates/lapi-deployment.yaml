@@ -54,6 +54,10 @@ spec:
       - name: crowdsec-lapi
         image: "{{ .Values.image.repository | default "crowdsecurity/crowdsec" }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
+        {{- if .Values.lapi.envFrom }}
+        envFrom:
+          {{- toYaml .Values.lapi.envFrom | nindent 10 }}
+        {{- end }}
         env:
           {{- if .Values.tls.enabled }}
           - name: LOCAL_API_URL
