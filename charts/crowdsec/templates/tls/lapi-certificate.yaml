@@ -13,5 +13,10 @@ spec:
     - localhost
   secretName: {{ .Release.Name }}-lapi-tls
   issuerRef:
+    {{ if .Values.tls.certManager.issuerRef }}
+    name: {{ .Values.tls.certManager.issuerRef.name }}
+    kind: {{ default "Issuer" .Values.tls.certManager.issuerRef.kind }}
+    {{ else }}
     name: {{ .Release.Name }}-ca-issuer
+    {{ end }}
 {{ end }}

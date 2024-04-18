@@ -109,6 +109,10 @@ tls:
   insecureSkipVerify: false
   certManager:
     enabled: true
+    # -- Use existing issuer to sign certificates. Leave empty to generate a self-signed issuer
+    issuerRef: {}
+      # name: ""
+      # kind: "ClusterIssuer"
   bouncer:
     secret: "{{ .Release.Name }}-bouncer-tls"
     reflector:
