@@ -17,7 +17,12 @@ spec:
       reflector.v1.k8s.emberstack.com/reflection-auto-enabled: "true"
       {{ end }}
   issuerRef:
+    {{ if .Values.tls.certManager.issuerRef }}
+    name: {{ .Values.tls.certManager.issuerRef.name }}
+    kind: {{ default "Issuer" .Values.tls.certManager.issuerRef.kind }}
+    {{ else }}
     name: {{ .Release.Name }}-ca-issuer
+    {{ end }}
   subject:
     organizationalUnits:
       - bouncer-ou
