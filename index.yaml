@@ -2,6 +2,38 @@ apiVersion: v1
 entries:
   crowdsec:
   - apiVersion: v2
+    appVersion: v1.6.1-2
+    created: "2024-04-22T14:27:08.422688814Z"
+    description: 'Crowdsec helm chart is an open-source, lightweight agent to detect
+      and respond to bad behaviours.  ## Get Repo Info  ``` helm repo add crowdsec
+      https://crowdsecurity.github.io/helm-charts helm repo update ```  ## Installing
+      the Chart  Before installing the chart, you need to understand some [concepts](https://docs.crowdsec.net/docs/concepts)
+      of Crowdsec. So you can configure well the chart and being able to parse logs
+      and detect attacks inside your Kubernetes cluster.  Here is a [blog post](https://crowdsec.net/blog/kubernetes-crowdsec-integration/)
+      about crowdsec in kubernetes.  ``` # Create namespace for crowdsec kubectl create
+      ns crowdsec # Install helm chart with proper values.yaml config helm install
+      crowdsec crowdsec/crowdsec -f crowdsec-values.yaml -n crowdsec ```  ## Uninstalling
+      the Chart  ``` helm delete crowdsec -n crowdsec ```  ## Setup for High Availability  Below
+      a basic configuration for High availability  ``` # your-values.yaml  # Configure
+      external DB (https://docs.crowdsec.net/docs/configuration/crowdsec_configuration/#configuration-example)
+      config:   config.yaml.local: |     db_config:       type:     postgresql       user:     crowdsec       password:
+      ${DB_PASSWORD}       db_name:  crowdsec       host:     192.168.0.2       port:     5432       sslmode:  require  lapi:   #
+      2 or more replicas for HA   replicas: 2   # You can specify your own CS_LAPI_SECRET,
+      or let the chart generate one. Length must be >= 64   secrets:     csLapiSecret:
+      <anyRandomSecret>   # Specify your external DB password here   extraSecrets:     dbPassword:
+      <externalDbPassword>   persistentVolume:     # When replicas for LAPI is greater
+      than 1, two options, persistent volumes must be disabled, or in ReadWriteMany
+      mode     config:       enabled: false     # data volume is not required, since
+      SQLite isn''t used     data:       enabled: false   # DB Password passed through
+      environment variable   env:     - name: DB_PASSWORD       valueFrom:         secretKeyRef:           name:
+      crowdsec-lapi-secrets           key: dbPassword ``` '
+    digest: f505dfebff1a0cfcb7a62b1f9afc0e4c14bb7d5e91ddc083565c3a8d1ad2c5d8
+    name: crowdsec
+    type: application
+    urls:
+    - https://github.com/crowdsecurity/helm-charts/releases/download/crowdsec-0.10.0/crowdsec-0.10.0.tgz
+    version: 0.10.0
+  - apiVersion: v2
     appVersion: v1.6.0
     created: "2024-01-25T12:48:23.454823809Z"
     description: 'Crowdsec helm chart is an open-source, lightweight agent to detect
@@ -620,4 +652,4 @@ entries:
     urls:
     - https://github.com/crowdsecurity/helm-charts/releases/download/helloworld-0.1.0/helloworld-0.1.0.tgz
     version: 0.1.0
-generated: "2024-02-15T08:33:12.719856505Z"
+generated: "2024-04-22T14:27:08.611966648Z"
