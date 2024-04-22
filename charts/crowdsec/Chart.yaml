@@ -30,6 +30,50 @@ description: |
   helm delete crowdsec -n crowdsec
   ```
 
+  ## Setup for High Availability
+
+  Below a basic configuration for High availability
+
+  ```
+  # your-values.yaml
+
+  # Configure external DB (https://docs.crowdsec.net/docs/configuration/crowdsec_configuration/#configuration-example)
+  config:
+    config.yaml.local: |
+      db_config:
+        type:     postgresql
+        user:     crowdsec
+        password: ${DB_PASSWORD}
+        db_name:  crowdsec
+        host:     192.168.0.2
+        port:     5432
+        sslmode:  require
+
+  lapi:
+    # 2 or more replicas for HA
+    replicas: 2
+    # You can specify your own CS_LAPI_SECRET, or let the chart generate one. Length must be >= 64
+    secrets:
+      csLapiSecret: <anyRandomSecret>
+    # Specify your external DB password here
+    extraSecrets:
+      dbPassword: <externalDbPassword>
+    persistentVolume:
+      # When replicas for LAPI is greater than 1, two options, persistent volumes must be disabled, or in ReadWriteMany mode
+      config:
+        enabled: false
+      # data volume is not required, since SQLite isn't used
+      data:
+        enabled: false
+    # DB Password passed through environment variable
+    env:
+      - name: DB_PASSWORD
+        valueFrom:
+          secretKeyRef:
+            name: crowdsec-lapi-secrets
+            key: dbPassword
+  ```
+
 # A chart can be either an 'application' or a 'library' chart.
 #
 # Application charts are a collection of templates that can be packaged into versioned archives
@@ -43,9 +87,9 @@ type: application
 # This is the chart version. This version number should be incremented each time you make changes
 # to the chart and its templates, including the app version.
 # Versions are expected to follow Semantic Versioning (https://semver.org/)
-version: 0.9.12
+version: 0.10.0
 
 # This is the version number of the application being deployed. This version number should be
 # incremented each time you make changes to the application. Versions are not expected to
 # follow Semantic Versioning. They should reflect the version the application is using.
-appVersion: v1.6.0
+appVersion: v1.6.1-2

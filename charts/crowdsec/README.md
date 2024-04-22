@@ -1,6 +1,6 @@
 # crowdsec
 
-![Version: 0.9.12](https://img.shields.io/badge/Version-0.9.12-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v1.6.0](https://img.shields.io/badge/AppVersion-v1.6.0-informational?style=flat-square)
+![Version: 0.10.0](https://img.shields.io/badge/Version-0.10.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v1.6.1-2](https://img.shields.io/badge/AppVersion-v1.6.1--2-informational?style=flat-square)
 
 Crowdsec helm chart is an open-source, lightweight agent to detect and respond to bad behaviours.
 
@@ -31,6 +31,50 @@ helm install crowdsec crowdsec/crowdsec -f crowdsec-values.yaml -n crowdsec
 helm delete crowdsec -n crowdsec
 ```
 
+## Setup for High Availability
+
+Below a basic configuration for High availability
+
+```
+# your-values.yaml
+
+# Configure external DB (https://docs.crowdsec.net/docs/configuration/crowdsec_configuration/#configuration-example)
+config:
+  config.yaml.local: |
+    db_config:
+      type:     postgresql
+      user:     crowdsec
+      password: ${DB_PASSWORD}
+      db_name:  crowdsec
+      host:     192.168.0.2
+      port:     5432
+      sslmode:  require
+
+lapi:
+  # 2 or more replicas for HA
+  replicas: 2
+  # You can specify your own CS_LAPI_SECRET, or let the chart generate one. Length must be >= 64
+  secrets:
+    csLapiSecret: <anyRandomSecret>
+  # Specify your external DB password here
+  extraSecrets:
+    dbPassword: <externalDbPassword>
+  persistentVolume:
+    # When replicas for LAPI is greater than 1, two options, persistent volumes must be disabled, or in ReadWriteMany mode
+    config:
+      enabled: false
+    # data volume is not required, since SQLite isn't used
+    data:
+      enabled: false
+  # DB Password passed through environment variable
+  env:
+    - name: DB_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: crowdsec-lapi-secrets
+          key: dbPassword
+```
+
 ## Values
 
 | Key | Type | Default | Description |
@@ -38,7 +82,10 @@ helm delete crowdsec -n crowdsec
 | container_runtime | string | `"docker"` | for raw logs format: json or cri (docker|containerd) |
 | image.repository | string | `"crowdsecurity/crowdsec"` | docker image repository name |
 | image.pullPolicy | string | `"IfNotPresent"` | pullPolicy |
+| image.pullSecrets | list | `[]` | pullSecrets |
 | image.tag | string | `""` | docker image tag |
+| podAnnotations | object | `{}` | Annotations to be added to pods |
+| podLabels | object | `{}` | Labels to be added to pods |
 | config.parsers | object | `{"s00-raw":{},"s01-parse":{},"s02-enrich":{}}` | To better understand stages in parsers, you can take a look at https://docs.crowdsec.net/docs/next/parsers/intro/ |
 | config.scenarios | object | `{}` | to better understand how to write a scenario, you can take a look at https://docs.crowdsec.net/docs/next/scenarios/intro |
 | config.postoverflows | object | `{"s00-enrich":{},"s01-whitelist":{}}` | to better understand how to write a postoverflow, you can take a look at (https://docs.crowdsec.net/docs/next/whitelist/create/#whitelist-in-postoverflows) |
@@ -46,11 +93,13 @@ helm delete crowdsec -n crowdsec
 | config."console.yaml" | string | `""` |  |
 | config."capi_whitelists.yaml" | string | `""` |  |
 | config."profiles.yaml" | string | `""` | Profiles configuration (https://docs.crowdsec.net/docs/next/profiles/format/#profile-configuration-example) |
+| config."config.yaml.local" | string | `""` | General configuration (https://docs.crowdsec.net/docs/configuration/crowdsec_configuration/#configuration-example) |
 | config.notifications | object | `{}` | notifications configuration (https://docs.crowdsec.net/docs/next/notification_plugins/intro) |
 | tls.enabled | bool | `false` |  |
 | tls.caBundle | bool | `true` |  |
 | tls.insecureSkipVerify | bool | `false` |  |
 | tls.certManager.enabled | bool | `true` |  |
+| tls.certManager.issuerRef | object | `{}` | Use existing issuer to sign certificates. Leave empty to generate a self-signed issuer |
 | tls.bouncer.secret | string | `"{{ .Release.Name }}-bouncer-tls"` |  |
 | tls.bouncer.reflector.namespaces | list | `[]` |  |
 | tls.agent.tlsClientAuth | bool | `true` |  |
@@ -59,9 +108,13 @@ helm delete crowdsec -n crowdsec
 | tls.lapi.secret | string | `"{{ .Release.Name }}-lapi-tls"` |  |
 | secrets.username | string | `""` | agent username (default is generated randomly) |
 | secrets.password | string | `""` | agent password (default is generated randomly) |
+| lapi.replicas | int | `1` | replicas for local API |
 | lapi.env | list | `[]` | environment variables from crowdsecurity/crowdsec docker image |
+| lapi.envFrom | list | `[]` |  |
 | lapi.ingress | object | `{"annotations":{"nginx.ingress.kubernetes.io/backend-protocol":"HTTP"},"enabled":false,"host":"","ingressClassName":""}` | Enable ingress lapi object |
 | lapi.priorityClassName | string | `""` | pod priority class name |
+| lapi.podAnnotations | object | `{}` | Annotations to be added to lapi pods, if global podAnnotations are not set |
+| lapi.podLabels | object | `{}` | Labels to be added to lapi pods, if global podLabels are not set |
 | lapi.dashboard.enabled | bool | `false` | Enable Metabase Dashboard (by default disabled) |
 | lapi.dashboard.env | list | `[]` | see https://www.metabase.com/docs/latest/configuring-metabase/environment-variables |
 | lapi.dashboard.image.repository | string | `"metabase/metabase"` | docker image repository name |
@@ -86,15 +139,22 @@ helm delete crowdsec -n crowdsec
 | lapi.nodeSelector | object | `{}` | nodeSelector for lapi |
 | lapi.tolerations | list | `[]` | tolerations for lapi |
 | lapi.dnsConfig | object | `{}` | dnsConfig for lapi |
+| lapi.affinity | object | `{}` | affinity for lapi |
+| lapi.topologySpreadConstraints | list | `[]` | topologySpreadConstraints for lapi |
 | lapi.metrics | object | `{"enabled":false,"serviceMonitor":{"enabled":false}}` | Enable service monitoring (exposes "metrics" port "6060" for Prometheus) |
 | lapi.metrics.serviceMonitor | object | `{"enabled":false}` | See also: https://github.com/prometheus-community/helm-charts/issues/106#issuecomment-700847774 |
 | lapi.strategy.type | string | `"Recreate"` |  |
+| lapi.secrets.csLapiSecret | string | `""` | Shared LAPI secret. Will be generated randomly if not specified. Size must be > 64 characters |
+| lapi.extraSecrets | object | `{}` | Any extra secrets you may need (for example, external DB password) |
+| lapi.lifecycle | object | `{}` |  |
 | agent.additionalAcquisition | list | `[]` | To add custom acquisitions using available datasources (https://docs.crowdsec.net/docs/next/data_sources/intro) |
 | agent.acquisition[0] | object | `{"namespace":"","podName":"","poll_without_inotify":false,"program":""}` | Specify each pod you want to process it logs (namespace, podName and program) |
 | agent.acquisition[0].podName | string | `""` | to select pod logs to process |
 | agent.acquisition[0].program | string | `""` | program name related to specific parser you will use (see https://hub.crowdsec.net/author/crowdsecurity/configurations/docker-logs) |
 | agent.acquisition[0].poll_without_inotify | bool | `false` | If set to true, will poll the files using os.Stat instead of using inotify |
 | agent.priorityClassName | string | `""` | pod priority class name |
+| agent.podAnnotations | object | `{}` | Annotations to be added to agent pods, if global podAnnotations are not set |
+| agent.podLabels | object | `{}` | Labels to be added to agent pods, if global podLabels are not set |
 | agent.resources.limits.memory | string | `"100Mi"` |  |
 | agent.resources.requests.cpu | string | `"150m"` |  |
 | agent.resources.requests.memory | string | `"100Mi"` |  |
@@ -103,6 +163,7 @@ helm delete crowdsec -n crowdsec
 | agent.env | list | `[]` | environment variables from crowdsecurity/crowdsec docker image |
 | agent.nodeSelector | object | `{}` | nodeSelector for agent |
 | agent.tolerations | list | `[]` | tolerations for agent |
+| agent.affinity | object | `{}` | affinity for agent |
 | agent.metrics | object | `{"enabled":false,"serviceMonitor":{"enabled":false}}` | Enable service monitoring (exposes "metrics" port "6060" for Prometheus) |
 | agent.metrics.serviceMonitor | object | `{"enabled":false}` | See also: https://github.com/prometheus-community/helm-charts/issues/106#issuecomment-700847774 |
 | agent.service.type | string | `"ClusterIP"` |  |

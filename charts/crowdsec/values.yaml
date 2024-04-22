@@ -12,8 +12,17 @@ image:
   repository: crowdsecurity/crowdsec
   # -- pullPolicy
   pullPolicy: IfNotPresent
+  # -- pullSecrets
+  pullSecrets: []
+    # - name: ""
   # -- docker image tag
   tag: ""
+
+# -- Annotations to be added to pods
+podAnnotations: {}
+
+# -- Labels to be added to pods
+podLabels: {}
 
 # Here you can specify your own custom configuration to be loaded in crowdsec agent or lapi
 # Each config needs to be a multi-line using '|' in YAML specs
@@ -71,6 +80,17 @@ config:
     #  filters:
     #    - Alert.Remediation == true && Alert.GetScope() == "Ip"
     #  ...
+  # -- General configuration (https://docs.crowdsec.net/docs/configuration/crowdsec_configuration/#configuration-example)
+  config.yaml.local: ""
+    #   |
+    # db_config:
+    #   type:     postgresql
+    #   user:     crowdsec
+    #   password: ${DB_PASSWORD}
+    #   db_name:  crowdsec
+    #   host:     192.168.0.2
+    #   port:     5432
+    #   sslmode:  require
   # -- notifications configuration (https://docs.crowdsec.net/docs/next/notification_plugins/intro)
   notifications: {}
     # email.yaml: |
@@ -89,6 +109,10 @@ tls:
   insecureSkipVerify: false
   certManager:
     enabled: true
+    # -- Use existing issuer to sign certificates. Leave empty to generate a self-signed issuer
+    issuerRef: {}
+      # name: ""
+      # kind: "ClusterIssuer"
   bouncer:
     secret: "{{ .Release.Name }}-bouncer-tls"
     reflector:
@@ -111,11 +135,19 @@ secrets:
 
 # lapi will deploy pod with crowdsec lapi and dashboard as deployment
 lapi:
+  # -- replicas for local API
+  replicas: 1
   # -- environment variables from crowdsecurity/crowdsec docker image
   env: []
     # by default disable the agent because it only needs the local API.
     #- name: DISABLE_AGENT
     #  value: "true"
+  # Allows you to load environment variables from kubernetes secret or config map
+  envFrom: []
+    # - secretRef:
+    #     name: env-secret
+    # - configMapRef:
+    #     name: config-map
   # -- Enable ingress lapi object
   ingress:
     enabled: false
@@ -129,6 +161,12 @@ lapi:
 
   # -- pod priority class name
   priorityClassName: ""
+
+  # -- Annotations to be added to lapi pods, if global podAnnotations are not set
+  podAnnotations: {}
+
+  # -- Labels to be added to lapi pods, if global podLabels are not set
+  podLabels: {}
 
   dashboard:
     # -- Enable Metabase Dashboard (by default disabled)
@@ -206,6 +244,10 @@ lapi:
   tolerations: []
   # -- dnsConfig for lapi
   dnsConfig: {}
+  # -- affinity for lapi
+  affinity: {}
+  # -- topologySpreadConstraints for lapi
+  topologySpreadConstraints: []
 
   # -- Enable service monitoring (exposes "metrics" port "6060" for Prometheus)
   metrics:
@@ -219,6 +261,20 @@ lapi:
 
   strategy:
     type: Recreate
+
+  secrets:
+    # -- Shared LAPI secret. Will be generated randomly if not specified. Size must be > 64 characters
+    csLapiSecret: ""
+  # -- Any extra secrets you may need (for example, external DB password)
+  extraSecrets: {}
+    # dbPassword: randomPass
+  lifecycle: {}
+    # preStop:
+    #   exec:
+    #     command: ["/bin/sh", "-c", "echo Hello from the postStart handler > /usr/share/message"]
+    # postStart:
+    #   exec:
+    #     command: ["/bin/sh", "-c", "echo Hello from the postStart handler > /usr/share/message"]
 
 # agent will deploy pod on every node as daemonSet to read wanted pods logs
 agent:
@@ -245,7 +301,13 @@ agent:
 
   # -- pod priority class name
   priorityClassName: ""
-  
+
+  # -- Annotations to be added to agent pods, if global podAnnotations are not set
+  podAnnotations: {}
+
+  # -- Labels to be added to agent pods, if global podLabels are not set
+  podLabels: {}
+
   resources:
     limits:
       memory: 100Mi
@@ -297,6 +359,8 @@ agent:
   nodeSelector: {}
   # -- tolerations for agent
   tolerations: []
+  # -- affinity for agent
+  affinity: {}
 
   # -- Enable service monitoring (exposes "metrics" port "6060" for Prometheus)
   metrics:
@@ -328,4 +392,3 @@ agent:
       tag: "1.28"
 
 #service: {}
-

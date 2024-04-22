@@ -16,20 +16,36 @@ spec:
       type: agent
   template:
     metadata:
+      {{- if .Values.podAnnotations }}
+      annotations:
+{{ toYaml .Values.podAnnotations | trim | indent 8 }}
+      {{- else if .Values.agent.podAnnotations }}
+      annotations:
+{{ toYaml .Values.agent.podAnnotations | trim | indent 8 }}
+      {{- end }}
       labels:
         k8s-app: {{ .Release.Name }}
         type: agent
         version: v1
+        {{- if .Values.podLabels }}
+{{ toYaml .Values.podLabels | trim | indent 8 }}
+        {{- else if .Values.agent.podLabels }}
+{{ toYaml .Values.agent.podLabels | trim | indent 8 }}
+        {{- end }}
     spec:
       {{- with .Values.agent.tolerations }}
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      {{- if .Values.image.pullSecrets }}
+      imagePullSecrets:
+{{ toYaml .Values.image.pullSecrets | indent 8 }}
+      {{- end }}
       initContainers:
       - name: wait-for-lapi
         image: "{{ .Values.agent.wait_for_lapi.image.repository }}:{{ .Values.agent.wait_for_lapi.image.tag }}"
         imagePullPolicy: {{ .Values.agent.wait_for_lapi.image.pullPolicy }}
-        command: ['sh', '-c', "until nc {{ .Release.Name }}-service.{{ .Release.Namespace }} 8080; do echo waiting for lapi to start; sleep 5; done"]
+        command: ['sh', '-c', "until nc {{ .Release.Name }}-service.{{ .Release.Namespace }} 8080 -z; do echo waiting for lapi to start; sleep 5; done"]
         resources:
           limits:
             memory: 50Mi
