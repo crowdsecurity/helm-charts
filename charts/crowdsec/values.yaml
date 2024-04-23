@@ -186,12 +186,13 @@ lapi:
 
     ## Ref: http://kubernetes.io/docs/user-guide/compute-resources/
     ##
-    resources: {}
-      # limits:
-      #   memory: 2Gi
-      # requests:
-      #   cpu: 150m
-      #   memory: 1700Mi
+    resources:
+      limits:
+        memory: "500Mi"
+        cpu: "500m"
+      requests:
+        cpu: 150m
+        memory: 100Mi
 
     # -- Enable ingress object
     ingress:
@@ -204,12 +205,6 @@ lapi:
       host: "" # metabase.example.com
       # tls: {}
 
-  resources:
-    limits:
-      memory: 100Mi
-    requests:
-      cpu: 150m
-      memory: 100Mi
   # -- Enable persistent volumes
   persistentVolume:
     # -- Persistent volume for data folder. Stores e.g. registered bouncer api keys
@@ -310,7 +305,8 @@ agent:
 
   resources:
     limits:
-      memory: 100Mi
+      memory: "250Mi"
+      cpu: "500m"
     requests:
       cpu: 150m
       memory: 100Mi
