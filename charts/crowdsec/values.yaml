@@ -188,8 +188,8 @@ lapi:
     ##
     resources:
       limits:
-        memory: "500Mi"
-        cpu: "500m"
+        memory: 500Mi
+        cpu: 500m
       requests:
         cpu: 150m
         memory: 100Mi
@@ -305,8 +305,8 @@ agent:
 
   resources:
     limits:
-      memory: "250Mi"
-      cpu: "500m"
+      memory: 250Mi
+      cpu: 500m
     requests:
       cpu: 150m
       memory: 100Mi
