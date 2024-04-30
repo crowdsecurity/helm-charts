@@ -168,6 +168,15 @@ lapi:
   # -- Labels to be added to lapi pods, if global podLabels are not set
   podLabels: {}
 
+  # -- resources for lapi
+  resources:
+    limits:
+      memory: 500Mi
+      cpu: 500m
+    requests:
+      cpu: 500m
+      memory: 500Mi
+
   dashboard:
     # -- Enable Metabase Dashboard (by default disabled)
     enabled: false
@@ -185,14 +194,14 @@ lapi:
     assetURL: https://crowdsec-statics-assets.s3-eu-west-1.amazonaws.com/metabase_sqlite.zip
 
     ## Ref: http://kubernetes.io/docs/user-guide/compute-resources/
-    ##
-    resources:
-      limits:
-        memory: 500Mi
-        cpu: 500m
-      requests:
-        cpu: 500m
-        memory: 500Mi
+    # -- resources for metabase dashboard
+    resources: {}
+      # limits:
+      #   memory: 1Gi
+      #   cpu: 500m
+      # requests:
+      #   cpu: 500m
+      #   memory: 1Gi
 
     # -- Enable ingress object
     ingress:
