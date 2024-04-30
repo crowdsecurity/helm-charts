@@ -191,8 +191,8 @@ lapi:
         memory: 500Mi
         cpu: 500m
       requests:
-        cpu: 150m
-        memory: 100Mi
+        cpu: 500m
+        memory: 500Mi
 
     # -- Enable ingress object
     ingress:
@@ -308,8 +308,8 @@ agent:
       memory: 250Mi
       cpu: 500m
     requests:
-      cpu: 150m
-      memory: 100Mi
+      cpu: 500m
+      memory: 250Mi
   # -- Enable persistent volumes
   persistentVolume:
     # -- Persistent volume for config folder. Stores local config (parsers, scenarios etc.)
