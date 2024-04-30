@@ -121,11 +121,11 @@ lapi:
 | lapi.dashboard.image.pullPolicy | string | `"IfNotPresent"` | pullPolicy |
 | lapi.dashboard.image.tag | string | `"v0.46.6.1"` | docker image tag |
 | lapi.dashboard.assetURL | string | `"https://crowdsec-statics-assets.s3-eu-west-1.amazonaws.com/metabase_sqlite.zip"` | Metabase SQLite static DB containing Dashboards |
-| lapi.dashboard.resources | object | `{}` |  |
+| lapi.dashboard.resources.limits.memory | string | `"500Mi"` |  |
+| lapi.dashboard.resources.limits.cpu | string | `"500m"` |  |
+| lapi.dashboard.resources.requests.cpu | string | `"500m"` |  |
+| lapi.dashboard.resources.requests.memory | string | `"500Mi"` |  |
 | lapi.dashboard.ingress | object | `{"annotations":{"nginx.ingress.kubernetes.io/backend-protocol":"HTTP"},"enabled":false,"host":"","ingressClassName":""}` | Enable ingress object |
-| lapi.resources.limits.memory | string | `"100Mi"` |  |
-| lapi.resources.requests.cpu | string | `"150m"` |  |
-| lapi.resources.requests.memory | string | `"100Mi"` |  |
 | lapi.persistentVolume | object | `{"config":{"accessModes":["ReadWriteOnce"],"enabled":true,"existingClaim":"","size":"100Mi","storageClassName":""},"data":{"accessModes":["ReadWriteOnce"],"enabled":true,"existingClaim":"","size":"1Gi","storageClassName":""}}` | Enable persistent volumes |
 | lapi.persistentVolume.data | object | `{"accessModes":["ReadWriteOnce"],"enabled":true,"existingClaim":"","size":"1Gi","storageClassName":""}` | Persistent volume for data folder. Stores e.g. registered bouncer api keys |
 | lapi.persistentVolume.config | object | `{"accessModes":["ReadWriteOnce"],"enabled":true,"existingClaim":"","size":"100Mi","storageClassName":""}` | Persistent volume for config folder. Stores e.g. online api credentials |
@@ -155,9 +155,10 @@ lapi:
 | agent.priorityClassName | string | `""` | pod priority class name |
 | agent.podAnnotations | object | `{}` | Annotations to be added to agent pods, if global podAnnotations are not set |
 | agent.podLabels | object | `{}` | Labels to be added to agent pods, if global podLabels are not set |
-| agent.resources.limits.memory | string | `"100Mi"` |  |
-| agent.resources.requests.cpu | string | `"150m"` |  |
-| agent.resources.requests.memory | string | `"100Mi"` |  |
+| agent.resources.limits.memory | string | `"250Mi"` |  |
+| agent.resources.limits.cpu | string | `"500m"` |  |
+| agent.resources.requests.cpu | string | `"500m"` |  |
+| agent.resources.requests.memory | string | `"250Mi"` |  |
 | agent.persistentVolume | object | `{"config":{"accessModes":["ReadWriteOnce"],"enabled":false,"existingClaim":"","size":"100Mi","storageClassName":""}}` | Enable persistent volumes |
 | agent.persistentVolume.config | object | `{"accessModes":["ReadWriteOnce"],"enabled":false,"existingClaim":"","size":"100Mi","storageClassName":""}` | Persistent volume for config folder. Stores local config (parsers, scenarios etc.) |
 | agent.env | list | `[]` | environment variables from crowdsecurity/crowdsec docker image |
