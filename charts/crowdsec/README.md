@@ -115,16 +115,14 @@ lapi:
 | lapi.priorityClassName | string | `""` | pod priority class name |
 | lapi.podAnnotations | object | `{}` | Annotations to be added to lapi pods, if global podAnnotations are not set |
 | lapi.podLabels | object | `{}` | Labels to be added to lapi pods, if global podLabels are not set |
+| lapi.resources | object | `{"limits":{"cpu":"500m","memory":"500Mi"},"requests":{"cpu":"500m","memory":"500Mi"}}` | resources for lapi |
 | lapi.dashboard.enabled | bool | `false` | Enable Metabase Dashboard (by default disabled) |
 | lapi.dashboard.env | list | `[]` | see https://www.metabase.com/docs/latest/configuring-metabase/environment-variables |
 | lapi.dashboard.image.repository | string | `"metabase/metabase"` | docker image repository name |
 | lapi.dashboard.image.pullPolicy | string | `"IfNotPresent"` | pullPolicy |
 | lapi.dashboard.image.tag | string | `"v0.46.6.1"` | docker image tag |
 | lapi.dashboard.assetURL | string | `"https://crowdsec-statics-assets.s3-eu-west-1.amazonaws.com/metabase_sqlite.zip"` | Metabase SQLite static DB containing Dashboards |
-| lapi.dashboard.resources.limits.memory | string | `"500Mi"` |  |
-| lapi.dashboard.resources.limits.cpu | string | `"500m"` |  |
-| lapi.dashboard.resources.requests.cpu | string | `"500m"` |  |
-| lapi.dashboard.resources.requests.memory | string | `"500Mi"` |  |
+| lapi.dashboard.resources | object | `{}` | resources for metabase dashboard |
 | lapi.dashboard.ingress | object | `{"annotations":{"nginx.ingress.kubernetes.io/backend-protocol":"HTTP"},"enabled":false,"host":"","ingressClassName":""}` | Enable ingress object |
 | lapi.persistentVolume | object | `{"config":{"accessModes":["ReadWriteOnce"],"enabled":true,"existingClaim":"","size":"100Mi","storageClassName":""},"data":{"accessModes":["ReadWriteOnce"],"enabled":true,"existingClaim":"","size":"1Gi","storageClassName":""}}` | Enable persistent volumes |
 | lapi.persistentVolume.data | object | `{"accessModes":["ReadWriteOnce"],"enabled":true,"existingClaim":"","size":"1Gi","storageClassName":""}` | Persistent volume for data folder. Stores e.g. registered bouncer api keys |
