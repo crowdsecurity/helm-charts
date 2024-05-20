@@ -9,6 +9,8 @@ metadata:
 spec:
   commonName: CrowdSec Bouncer
   secretName: {{ .Release.Name }}-bouncer-tls
+  duration: {{ .Values.tls.certManager.duration }}
+  renewBefore: {{ .Values.tls.certManager.renewBefore }}
   secretTemplate:
     annotations:
       {{ if .Values.tls.bouncer.reflector.namespaces }}

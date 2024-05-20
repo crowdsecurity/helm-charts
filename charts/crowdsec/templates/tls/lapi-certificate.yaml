@@ -12,6 +12,8 @@ spec:
     - {{ .Release.Name }}-service.{{ .Release.Namespace }}.svc.cluster.local
     - localhost
   secretName: {{ .Release.Name }}-lapi-tls
+  duration: {{ .Values.tls.certManager.duration }}
+  renewBefore: {{ .Values.tls.certManager.renewBefore }}
   issuerRef:
     {{ if .Values.tls.certManager.issuerRef }}
     name: {{ .Values.tls.certManager.issuerRef.name }}
