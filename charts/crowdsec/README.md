@@ -100,6 +100,8 @@ lapi:
 | tls.insecureSkipVerify | bool | `false` |  |
 | tls.certManager.enabled | bool | `true` |  |
 | tls.certManager.issuerRef | object | `{}` | Use existing issuer to sign certificates. Leave empty to generate a self-signed issuer |
+| tls.certManager.duration | string | `"2160h"` | duration for Certificate resources |
+| tls.certManager.renewBefore | string | `"720h"` | renewBefore for Certificate resources |
 | tls.bouncer.secret | string | `"{{ .Release.Name }}-bouncer-tls"` |  |
 | tls.bouncer.reflector.namespaces | list | `[]` |  |
 | tls.agent.tlsClientAuth | bool | `true` |  |
