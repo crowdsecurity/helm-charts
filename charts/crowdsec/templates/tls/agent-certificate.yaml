@@ -9,6 +9,8 @@ metadata:
 spec:
   commonName: CrowdSec Agent
   secretName: {{ .Release.Name }}-agent-tls
+  duration: {{ .Values.tls.certManager.duration }}
+  renewBefore: {{ .Values.tls.certManager.renewBefore }}
   secretTemplate:
     annotations:
       {{ if .Values.tls.agent.reflector.namespaces }}

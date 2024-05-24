@@ -113,6 +113,10 @@ tls:
     issuerRef: {}
       # name: ""
       # kind: "ClusterIssuer"
+    # -- duration for Certificate resources
+    duration: 2160h # 90d
+    # -- renewBefore for Certificate resources
+    renewBefore: 720h # 30d
   bouncer:
     secret: "{{ .Release.Name }}-bouncer-tls"
     reflector:
