@@ -21,4 +21,15 @@ spec:
     {{ else }}
     name: {{ .Release.Name }}-ca-issuer
     {{ end }}
+  {{ if or .Values.tls.certManager.secretTemplate.annotations .Values.tls.certManager.secretTemplate.labels }}
+  secretTemplate:
+    {{ if .Values.tls.certManager.secretTemplate.annotations }}
+    annotations:
+    {{ toYaml .Values.tls.certManager.secretTemplate.annotations | nindent 6 }}
+    {{ end }}
+    {{ if .Values.tls.certManager.secretTemplate.labels }}
+    labels:
+    {{ toYaml .Values.tls.certManager.secretTemplate.labels | nindent 6 }}
+    {{ end }}
+  {{ end }}
 {{ end }}

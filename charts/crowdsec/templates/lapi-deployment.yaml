@@ -9,6 +9,10 @@ metadata:
     k8s-app: {{ .Release.Name }}
     type: lapi
     version: v1
+  {{- if .Values.lapi.deployAnnotations }}
+  annotations:
+  {{ toYaml .Values.lapi.deployAnnotations | trim | indent 4 }}
+  {{- end }}
 spec:
   replicas: {{ .Values.lapi.replicas }}
   selector:

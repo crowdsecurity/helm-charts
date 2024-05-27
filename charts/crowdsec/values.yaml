@@ -113,6 +113,10 @@ tls:
     issuerRef: {}
       # name: ""
       # kind: "ClusterIssuer"
+    # -- Add annotations and/or labels to generated secret
+    secretTemplate:
+      annotations: {}
+      labels: {}
     # -- duration for Certificate resources
     duration: 2160h # 90d
     # -- renewBefore for Certificate resources
@@ -165,6 +169,9 @@ lapi:
 
   # -- pod priority class name
   priorityClassName: ""
+
+  # -- Annotations to be added to lapi deployment
+  deployAnnotations: {}
 
   # -- Annotations to be added to lapi pods, if global podAnnotations are not set
   podAnnotations: {}
@@ -309,6 +316,9 @@ agent:
 
   # -- pod priority class name
   priorityClassName: ""
+
+  # -- Annotations to be added to agent daemonset
+  daemonsetAnnotations: {}
 
   # -- Annotations to be added to agent pods, if global podAnnotations are not set
   podAnnotations: {}
