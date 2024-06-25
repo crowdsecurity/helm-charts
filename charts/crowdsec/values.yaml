@@ -375,7 +375,7 @@ agent:
       scheme: HTTP
     periodSeconds: 10
     successThreshold: 1
-    timeoutSeconds: 1
+    timeoutSeconds: 5
     failureThreshold: 3
 
   # -- readinessProbe for agent
@@ -386,7 +386,7 @@ agent:
       scheme: HTTP
     periodSeconds: 10
     successThreshold: 1
-    timeoutSeconds: 1
+    timeoutSeconds: 5
     failureThreshold: 3
 
   # -- startupProbe for agent
@@ -397,12 +397,12 @@ agent:
       scheme: HTTP
     periodSeconds: 10
     successThreshold: 1
-    timeoutSeconds: 1
+    timeoutSeconds: 5
     failureThreshold: 30
 
   # -- Enable service monitoring (exposes "metrics" port "6060" for Prometheus)
   metrics:
-    enabled: false
+    enabled: true
     # -- Creates a ServiceMonitor so Prometheus will monitor this service
     # -- Prometheus needs to be configured to watch on all namespaces for ServiceMonitors
     # -- See the documentation: https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack#prometheusioscrape

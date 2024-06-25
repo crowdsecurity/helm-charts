@@ -113,7 +113,8 @@ spec:
           - name: metrics
             containerPort: 6060
             protocol: TCP
-        {{ end }}
+
+        {{/* Probes depend on the metrics port, there is no other service on the log processor */}}
 
         {{ if .Values.agent.livenessProbe }}
         livenessProbe:
@@ -126,6 +127,8 @@ spec:
         {{ if .Values.agent.startupProbe }}
         startupProbe:
 {{ toYaml .Values.agent.startupProbe | indent 10 }}
+        {{ end }}
+
         {{ end }}
 
         securityContext:
