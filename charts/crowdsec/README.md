@@ -161,6 +161,7 @@ lapi:
 | agent.resources.requests.memory | string | `"250Mi"` |  |
 | agent.persistentVolume | object | `{"config":{"accessModes":["ReadWriteOnce"],"enabled":false,"existingClaim":"","size":"100Mi","storageClassName":""}}` | Enable persistent volumes |
 | agent.persistentVolume.config | object | `{"accessModes":["ReadWriteOnce"],"enabled":false,"existingClaim":"","size":"100Mi","storageClassName":""}` | Persistent volume for config folder. Stores local config (parsers, scenarios etc.) |
+| agent.hostVarLog | bool | `true` | Enable hostPath to /var/log |
 | agent.env | list | `[]` | environment variables from crowdsecurity/crowdsec docker image |
 | agent.nodeSelector | object | `{}` | nodeSelector for agent |
 | agent.tolerations | list | `[]` | tolerations for agent |
