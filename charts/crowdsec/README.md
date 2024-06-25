@@ -100,6 +100,7 @@ lapi:
 | tls.insecureSkipVerify | bool | `false` |  |
 | tls.certManager.enabled | bool | `true` |  |
 | tls.certManager.issuerRef | object | `{}` | Use existing issuer to sign certificates. Leave empty to generate a self-signed issuer |
+| tls.certManager.secretTemplate | object | `{"annotations":{},"labels":{}}` | Add annotations and/or labels to generated secret |
 | tls.certManager.duration | string | `"2160h"` | duration for Certificate resources |
 | tls.certManager.renewBefore | string | `"720h"` | renewBefore for Certificate resources |
 | tls.bouncer.secret | string | `"{{ .Release.Name }}-bouncer-tls"` |  |
@@ -115,6 +116,7 @@ lapi:
 | lapi.envFrom | list | `[]` |  |
 | lapi.ingress | object | `{"annotations":{"nginx.ingress.kubernetes.io/backend-protocol":"HTTP"},"enabled":false,"host":"","ingressClassName":""}` | Enable ingress lapi object |
 | lapi.priorityClassName | string | `""` | pod priority class name |
+| lapi.deployAnnotations | object | `{}` | Annotations to be added to lapi deployment |
 | lapi.podAnnotations | object | `{}` | Annotations to be added to lapi pods, if global podAnnotations are not set |
 | lapi.podLabels | object | `{}` | Labels to be added to lapi pods, if global podLabels are not set |
 | lapi.resources | object | `{"limits":{"cpu":"500m","memory":"500Mi"},"requests":{"cpu":"500m","memory":"500Mi"}}` | resources for lapi |
@@ -153,6 +155,7 @@ lapi:
 | agent.acquisition[0].program | string | `""` | program name related to specific parser you will use (see https://hub.crowdsec.net/author/crowdsecurity/configurations/docker-logs) |
 | agent.acquisition[0].poll_without_inotify | bool | `false` | If set to true, will poll the files using os.Stat instead of using inotify |
 | agent.priorityClassName | string | `""` | pod priority class name |
+| agent.daemonsetAnnotations | object | `{}` | Annotations to be added to agent daemonset |
 | agent.podAnnotations | object | `{}` | Annotations to be added to agent pods, if global podAnnotations are not set |
 | agent.podLabels | object | `{}` | Labels to be added to agent pods, if global podLabels are not set |
 | agent.resources.limits.memory | string | `"250Mi"` |  |
