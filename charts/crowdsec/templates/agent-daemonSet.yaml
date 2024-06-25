@@ -114,11 +114,27 @@ spec:
             containerPort: 6060
             protocol: TCP
 
+        {{/* Probes depend on the metrics port, there is no other service on the log processor */}}
+
+        {{ if .Values.agent.livenessProbe }}
+        livenessProbe:
+{{ toYaml .Values.agent.livenessProbe | indent 10 }}
+        {{ end }}
+        {{ if .Values.agent.readinessProbe }}
+        readinessProbe:
+{{ toYaml .Values.agent.readinessProbe | indent 10 }}
+        {{ end }}
+        {{ if .Values.agent.startupProbe }}
+        startupProbe:
+{{ toYaml .Values.agent.startupProbe | indent 10 }}
+        {{ end }}
+
+        {{ end }}
+
         securityContext:
           allowPrivilegeEscalation: false
           privileged: false
 
-        {{ end }}
         {{- if .Values.agent.persistentVolume.config.enabled }}
         command: ['sh', '-c', 'mv -n /staging/etc/crowdsec/* /etc/crowdsec_data/ && rm -rf /staging/etc/crowdsec && ln -s /etc/crowdsec_data /etc/crowdsec && ./docker_start.sh']
         {{- end }}
