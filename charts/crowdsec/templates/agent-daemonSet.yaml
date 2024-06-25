@@ -166,9 +166,11 @@ spec:
           - name: acquis-config-volume
             mountPath: {{ $crowdsecConfig }}/acquis.yaml
             subPath: acquis.yaml
+          {{- if .Values.agent.hostVarLog }}
           - name: varlog
             mountPath: /var/log
             readOnly: true
+          {{- end }}
           {{- if (eq "docker" .Values.container_runtime) }}
           - name: varlibdockercontainers
             mountPath: /var/lib/docker/containers
@@ -183,9 +185,11 @@ spec:
       - name: acquis-config-volume
         configMap:
           name: acquis-configmap
+      {{- if .Values.agent.hostVarLog }}
       - name: varlog
         hostPath:
           path: /var/log
+      {{- end }}
       {{- if .Values.agent.persistentVolume.config.enabled }}
       - name: crowdsec-agent-config
         persistentVolumeClaim:

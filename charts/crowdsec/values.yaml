@@ -333,6 +333,8 @@ agent:
       storageClassName: ""
       existingClaim: ""
       size: 100Mi
+  # -- Enable hostPath to /var/log
+  hostVarLog: true
   # -- environment variables from crowdsecurity/crowdsec docker image
   env: []
     # by default we configure the docker-logs parser to be able to parse docker logs in k8s
