@@ -59,6 +59,9 @@ spec:
         securityContext:
           allowPrivilegeEscalation: false
           privileged: false
+      {{- if .Values.agent.extraInitContainers }}
+      {{- toYaml .Values.agent.extraInitContainers | nindent 6 }}
+      {{- end }}
       containers:
       - name: crowdsec-agent
         image: "{{ .Values.image.repository | default "crowdsecurity/crowdsec" }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
