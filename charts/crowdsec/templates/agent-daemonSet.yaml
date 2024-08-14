@@ -20,13 +20,16 @@ spec:
       type: agent
   template:
     metadata:
-      {{- if .Values.podAnnotations }}
       annotations:
-{{ toYaml .Values.podAnnotations | trim | indent 8 }}
-      {{- else if .Values.agent.podAnnotations }}
-      annotations:
-{{ toYaml .Values.agent.podAnnotations | trim | indent 8 }}
-      {{- end }}
+        checksum/agent-secret: {{ include (print $.Template.BasePath "/secrets.yaml") . | sha256sum }}
+        checksum/agent-configmap: {{ include (print $.Template.BasePath "/agent-configmap.yaml") . | sha256sum }}
+        checksum/acquis-configmap: {{ include (print $.Template.BasePath "/acquis-configmap.yaml") . | sha256sum }}
+        {{- if .Values.podAnnotations }}
+        {{- toYaml .Values.podAnnotations | trim | indent 8 }}
+        {{- end }}
+        {{- if .Values.agent.podAnnotations }}
+        {{- toYaml .Values.agent.podAnnotations | trim | indent 8 }}
+        {{- end }}
       labels:
         k8s-app: {{ .Release.Name }}
         type: agent

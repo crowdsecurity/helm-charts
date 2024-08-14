@@ -22,13 +22,16 @@ spec:
   strategy: {{- toYaml .Values.lapi.strategy | nindent 4 }}
   template:
     metadata:
-      {{- if .Values.podAnnotations }}
       annotations:
-{{ toYaml .Values.podAnnotations | trim | indent 8 }}
-      {{- else if .Values.lapi.podAnnotations }}
-      annotations:
-{{ toYaml .Values.lapi.podAnnotations | trim | indent 8 }}
-      {{- end }}
+        checksum/agent-secret: {{ include (print $.Template.BasePath "/secrets.yaml") . | sha256sum }}
+        checksum/lapi-secret: {{ include (print $.Template.BasePath "/lapi-secrets.yaml") . | sha256sum }}
+        checksum/lapi-configmap: {{ include (print $.Template.BasePath "/lapi-configmap.yaml") . | sha256sum }}
+        {{- if .Values.podAnnotations }}
+        {{- toYaml .Values.podAnnotations | trim | indent 8 }}
+        {{- end }}
+        {{- if .Values.lapi.podAnnotations }}
+        {{- toYaml .Values.lapi.podAnnotations | trim | indent 8 }}
+        {{- end }}
       labels:
         k8s-app: {{ .Release.Name }}
         type: lapi
