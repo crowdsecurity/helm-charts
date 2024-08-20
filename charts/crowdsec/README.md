@@ -119,6 +119,7 @@ lapi:
 | lapi.deployAnnotations | object | `{}` | Annotations to be added to lapi deployment |
 | lapi.podAnnotations | object | `{}` | Annotations to be added to lapi pods, if global podAnnotations are not set |
 | lapi.podLabels | object | `{}` | Labels to be added to lapi pods, if global podLabels are not set |
+| lapi.extraInitContainers | list | `[]` | Extra init containers to be added to lapi pods |
 | lapi.resources | object | `{"limits":{"cpu":"500m","memory":"500Mi"},"requests":{"cpu":"500m","memory":"500Mi"}}` | resources for lapi |
 | lapi.dashboard.enabled | bool | `false` | Enable Metabase Dashboard (by default disabled) |
 | lapi.dashboard.env | list | `[]` | see https://www.metabase.com/docs/latest/configuring-metabase/environment-variables |
@@ -158,6 +159,7 @@ lapi:
 | agent.daemonsetAnnotations | object | `{}` | Annotations to be added to agent daemonset |
 | agent.podAnnotations | object | `{}` | Annotations to be added to agent pods, if global podAnnotations are not set |
 | agent.podLabels | object | `{}` | Labels to be added to agent pods, if global podLabels are not set |
+| agent.extraInitContainers | list | `[]` | Extra init containers to be added to agent pods |
 | agent.resources.limits.memory | string | `"250Mi"` |  |
 | agent.resources.limits.cpu | string | `"500m"` |  |
 | agent.resources.requests.cpu | string | `"500m"` |  |
