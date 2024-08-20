@@ -43,8 +43,9 @@ spec:
       imagePullSecrets:
 {{ toYaml .Values.image.pullSecrets | indent 8 }}
       {{- end }}
-      {{ if .Values.lapi.dashboard.enabled }}
+      {{- if or (.Values.lapi.dashboard.enabled) (.Values.lapi.extraInitContainers) }}
       initContainers:
+      {{- if .Values.lapi.dashboard.enabled }}
       - name: fetch-metabase-config
         image: busybox:1.28
         imagePullPolicy: IfNotPresent
@@ -53,6 +54,10 @@ spec:
         - name: crowdsec-db
           mountPath: /metabase-data
           subPath: dashboard
+      {{- end }}
+      {{- if .Values.lapi.extraInitContainers }}
+      {{- toYaml .Values.lapi.extraInitContainers | nindent 8 }}
+      {{- end }}
       {{- end }}
       containers:
       - name: crowdsec-lapi

@@ -179,6 +179,9 @@ lapi:
   # -- Labels to be added to lapi pods, if global podLabels are not set
   podLabels: {}
 
+  # -- Extra init containers to be added to lapi pods
+  extraInitContainers: []
+
   # -- resources for lapi
   resources:
     limits:
@@ -325,6 +328,9 @@ agent:
 
   # -- Labels to be added to agent pods, if global podLabels are not set
   podLabels: {}
+
+  # -- Extra init containers to be added to agent pods
+  extraInitContainers: []
 
   resources:
     limits:
