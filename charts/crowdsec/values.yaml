@@ -276,6 +276,7 @@ lapi:
     # -- See also: https://github.com/prometheus-community/helm-charts/issues/106#issuecomment-700847774
     serviceMonitor:
       enabled: false
+      additionalLabels: {}
 
   strategy:
     type: Recreate
@@ -431,6 +432,7 @@ agent:
     # -- See also: https://github.com/prometheus-community/helm-charts/issues/106#issuecomment-700847774
     serviceMonitor:
       enabled: false
+      additionalLabels: {}
 
   service:
     type: ClusterIP
