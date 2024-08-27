@@ -125,7 +125,10 @@ spec:
               secretKeyRef:
                 name: crowdsec-lapi-secrets
                 key: csLapiSecret
-
+          - name: CUSTOM_HOSTNAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
         {{- with .Values.lapi.env }}
           {{- toYaml . | nindent 10 }}
         {{- end }}
