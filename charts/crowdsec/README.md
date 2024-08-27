@@ -144,8 +144,8 @@ lapi:
 | lapi.dnsConfig | object | `{}` | dnsConfig for lapi |
 | lapi.affinity | object | `{}` | affinity for lapi |
 | lapi.topologySpreadConstraints | list | `[]` | topologySpreadConstraints for lapi |
-| lapi.metrics | object | `{"enabled":false,"serviceMonitor":{"enabled":false}}` | Enable service monitoring (exposes "metrics" port "6060" for Prometheus) |
-| lapi.metrics.serviceMonitor | object | `{"enabled":false}` | See also: https://github.com/prometheus-community/helm-charts/issues/106#issuecomment-700847774 |
+| lapi.metrics | object | `{"enabled":false,"serviceMonitor":{"additionalLabels":{},"enabled":false}}` | Enable service monitoring (exposes "metrics" port "6060" for Prometheus) |
+| lapi.metrics.serviceMonitor | object | `{"additionalLabels":{},"enabled":false}` | See also: https://github.com/prometheus-community/helm-charts/issues/106#issuecomment-700847774 |
 | lapi.strategy.type | string | `"Recreate"` |  |
 | lapi.secrets.csLapiSecret | string | `""` | Shared LAPI secret. Will be generated randomly if not specified. Size must be > 64 characters |
 | lapi.extraSecrets | object | `{}` | Any extra secrets you may need (for example, external DB password) |
@@ -174,8 +174,8 @@ lapi:
 | agent.livenessProbe | object | `{"failureThreshold":3,"httpGet":{"path":"/metrics","port":"metrics","scheme":"HTTP"},"periodSeconds":10,"successThreshold":1,"timeoutSeconds":5}` | livenessProbe for agent |
 | agent.readinessProbe | object | `{"failureThreshold":3,"httpGet":{"path":"/metrics","port":"metrics","scheme":"HTTP"},"periodSeconds":10,"successThreshold":1,"timeoutSeconds":5}` | readinessProbe for agent |
 | agent.startupProbe | object | `{"failureThreshold":30,"httpGet":{"path":"/metrics","port":"metrics","scheme":"HTTP"},"periodSeconds":10,"successThreshold":1,"timeoutSeconds":5}` | startupProbe for agent |
-| agent.metrics | object | `{"enabled":true,"serviceMonitor":{"enabled":false}}` | Enable service monitoring (exposes "metrics" port "6060" for Prometheus) |
-| agent.metrics.serviceMonitor | object | `{"enabled":false}` | See also: https://github.com/prometheus-community/helm-charts/issues/106#issuecomment-700847774 |
+| agent.metrics | object | `{"enabled":true,"serviceMonitor":{"additionalLabels":{},"enabled":false}}` | Enable service monitoring (exposes "metrics" port "6060" for Prometheus) |
+| agent.metrics.serviceMonitor | object | `{"additionalLabels":{},"enabled":false}` | See also: https://github.com/prometheus-community/helm-charts/issues/106#issuecomment-700847774 |
 | agent.service.type | string | `"ClusterIP"` |  |
 | agent.service.labels | object | `{}` |  |
 | agent.service.annotations | object | `{}` |  |
