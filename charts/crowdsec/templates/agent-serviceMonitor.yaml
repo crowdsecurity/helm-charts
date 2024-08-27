@@ -7,6 +7,10 @@ kind: ServiceMonitor
 metadata:
   name: {{ .Release.Name }}-agent-service
   namespace: {{ .Release.Namespace }}
+  {{- if .Values.agent.metrics.serviceMonitor.additionalLabels }}
+  labels:
+{{ toYaml .Values.agent.metrics.serviceMonitor.additionalLabels | indent 4 }}
+  {{- end }}
 spec:
   selector:
     matchLabels:
