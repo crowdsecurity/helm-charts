@@ -9,7 +9,25 @@ on:
       - 'charts/*/*.yaml'
 
 jobs:
+  update-readme:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Run helm-docs
+        run: |
+          GOBIN=$PWD go install github.com/norwoodj/helm-docs/cmd/helm-docs@v1.11.0
+          ./helm-docs --sort-values-order file
+          rm helm-docs
+
+      - name: Commit bump
+        uses: EndBug/add-and-commit@v9
+        with:
+          branch: main
+          message: 'Regenerate chart README.md'
+
   release:
+    needs: update-readme
     permissions:
       contents: write
     runs-on: ubuntu-latest
