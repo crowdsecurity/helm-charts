@@ -192,7 +192,7 @@ spec:
         lifecycle:
           {{- toYaml .Values.lapi.lifecycle | nindent 10 }}
         {{- end }}
-        {{- if or (.Values.tls.enabled) (.Values.lapi.persistentVolume.data.enabled) (.Values.lapi.persistentVolume.config.enabled) (.Values.lapi.dashboard.enabled) (include "lapiCustomConfigIsNotEmpty" .) }}
+        {{- if or (.Values.tls.enabled) (.Values.lapi.persistentVolume.data.enabled) (.Values.lapi.persistentVolume.config.enabled) (.Values.lapi.dashboard.enabled) (include "lapiCustomConfigIsNotEmpty" .) (.Values.lapi.extraVolumeMounts) }}
         volumeMounts:
           {{- if .Values.tls.enabled }}
           - name: crowdsec-lapi-tls
@@ -239,6 +239,9 @@ spec:
             subPath: {{ $fileName }}
           {{- end }}
           {{- end }}
+          {{- end }}
+          {{- if .Values.lapi.extraVolumeMounts }}
+          {{ toYaml .Values.lapi.extraVolumeMounts | nindent 10 }}
           {{- end }}
           {{- end }}
       {{- if .Values.lapi.dashboard.enabled }}
@@ -306,7 +309,7 @@ spec:
 
       {{- end }}
       terminationGracePeriodSeconds: 30
-      {{- if or (.Values.tls.enabled) (.Values.lapi.persistentVolume.data.enabled) (.Values.lapi.persistentVolume.config.enabled) (.Values.lapi.dashboard.enabled) (include "lapiCustomConfigIsNotEmpty" .) }}
+      {{- if or (.Values.tls.enabled) (.Values.lapi.persistentVolume.data.enabled) (.Values.lapi.persistentVolume.config.enabled) (.Values.lapi.dashboard.enabled) (include "lapiCustomConfigIsNotEmpty" .) (.Values.lapi.extraVolumes) }}
       volumes:
       {{- if .Values.lapi.persistentVolume.data.enabled }}
       - name: crowdsec-db
@@ -368,6 +371,9 @@ spec:
       - name: crowdsec-agent-tls
         secret:
           secretName: {{ .Release.Name }}-agent-tls
+      {{- end }}
+      {{- if .Values.lapi.extraVolumes }}
+      {{ toYaml .Values.lapi.extraVolumes | nindent 6 }}
       {{- end }}
       {{- end }}
       {{- with .Values.lapi.tolerations }}

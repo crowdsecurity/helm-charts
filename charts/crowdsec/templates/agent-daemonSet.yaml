@@ -206,6 +206,9 @@ spec:
           - name: crowdsec-agent-tls
             mountPath: /etc/ssl/crowdsec-agent
           {{- end }}
+          {{- if .Values.agent.extraVolumeMounts }}
+          {{ toYaml .Values.agent.extraVolumeMounts | nindent 10 }}
+          {{- end }}
       terminationGracePeriodSeconds: 30
       volumes:
       - name: acquis-config-volume
@@ -277,6 +280,9 @@ spec:
       - name: crowdsec-agent-tls
         secret:
           secretName: {{ .Release.Name }}-agent-tls
+      {{- end }}
+      {{- if .Values.agent.extraVolumes }}
+      {{ toYaml .Values.agent.extraVolumes | nindent 6 }}
       {{- end }}
       {{- with .Values.agent.nodeSelector }}
       nodeSelector:
