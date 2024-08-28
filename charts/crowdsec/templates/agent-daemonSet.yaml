@@ -11,7 +11,7 @@ metadata:
     version: v1
   {{- if .Values.agent.daemonsetAnnotations }}
   annotations:
-  {{ toYaml .Values.agent.daemonsetAnnotations | trim | indent 4 }}
+{{ toYaml .Values.agent.daemonsetAnnotations | trim | indent 4 }}
   {{- end }}
 spec:
   selector:
@@ -25,10 +25,10 @@ spec:
         checksum/agent-configmap: {{ include (print $.Template.BasePath "/agent-configmap.yaml") . | sha256sum }}
         checksum/acquis-configmap: {{ include (print $.Template.BasePath "/acquis-configmap.yaml") . | sha256sum }}
         {{- if .Values.podAnnotations }}
-        {{- toYaml .Values.podAnnotations | trim | indent 8 }}
+{{ toYaml .Values.podAnnotations | trim | indent 8 }}
         {{- end }}
         {{- if .Values.agent.podAnnotations }}
-        {{- toYaml .Values.agent.podAnnotations | trim | indent 8 }}
+{{ toYaml .Values.agent.podAnnotations | trim | indent 8 }}
         {{- end }}
       labels:
         k8s-app: {{ .Release.Name }}

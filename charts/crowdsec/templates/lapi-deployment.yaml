@@ -11,7 +11,7 @@ metadata:
     version: v1
   {{- if .Values.lapi.deployAnnotations }}
   annotations:
-  {{ toYaml .Values.lapi.deployAnnotations | trim | indent 4 }}
+{{ toYaml .Values.lapi.deployAnnotations | trim | indent 4 }}
   {{- end }}
 spec:
   replicas: {{ .Values.lapi.replicas }}
@@ -27,10 +27,10 @@ spec:
         checksum/lapi-secret: {{ include (print $.Template.BasePath "/lapi-secrets.yaml") . | sha256sum }}
         checksum/lapi-configmap: {{ include (print $.Template.BasePath "/lapi-configmap.yaml") . | sha256sum }}
         {{- if .Values.podAnnotations }}
-        {{- toYaml .Values.podAnnotations | trim | indent 8 }}
+{{ toYaml .Values.podAnnotations | trim | indent 8 }}
         {{- end }}
         {{- if .Values.lapi.podAnnotations }}
-        {{- toYaml .Values.lapi.podAnnotations | trim | indent 8 }}
+{{ toYaml .Values.lapi.podAnnotations | trim | indent 8 }}
         {{- end }}
       labels:
         k8s-app: {{ .Release.Name }}
