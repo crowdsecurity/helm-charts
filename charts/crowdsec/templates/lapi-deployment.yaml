@@ -125,6 +125,11 @@ spec:
               secretKeyRef:
                 name: crowdsec-lapi-secrets
                 key: csLapiSecret
+          - name: REGISTRATION_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: crowdsec-lapi-secrets
+                key: registrationToken
 
         {{- with .Values.lapi.env }}
           {{- toYaml . | nindent 10 }}

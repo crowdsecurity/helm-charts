@@ -75,6 +75,90 @@ lapi:
           key: dbPassword
 ```
 
+## Setup for AppSec (WAF) with Traefik bouncer as example
+
+Below a basic configuration for AppSec (WAF)
+
+```
+# your-values.yaml (option 1)
+appsec:
+  enabled: true
+  acquisitions:
+    - source: appsec
+      listen_addr: "0.0.0.0:7422"
+      path: /
+      appsec_config: crowdsecurity/virtual-patching
+      labels:
+        type: appsec
+  env:
+    - name: COLLECTIONS
+      value: "crowdsecurity/appsec-virtual-patching"
+```
+
+Or you can also use your own custom configurations and rules for AppSec:
+  
+```
+# your-values.yaml (option 2)
+appsec:
+  enabled: true
+  acquisitions:
+    - source: appsec
+      listen_addr: "0.0.0.0:7422"
+      path: /
+      appsec_config: crowdsecurity/crs-vpatch
+      labels:
+        type: appsec
+  configs:
+    mycustom-appsec-config.yaml: |
+      name: crowdsecurity/crs-vpatch
+      default_remediation: ban
+      #log_level: debug
+      outofband_rules:
+        - crowdsecurity/crs
+      inband_rules:
+        - crowdsecurity/base-config 
+        - crowdsecurity/vpatch-*
+  env:
+    - name: COLLECTIONS
+      value: "crowdsecurity/appsec-virtual-patching crowdsecurity/appsec-crs"
+```
+
+In the traefik `values.yaml`, you need to add the following configuration:
+
+```
+# traefik-values.yaml
+experimental:
+  plugins:
+    crowdsec-bouncer:
+      moduleName: github.com/maxlerebourg/crowdsec-bouncer-traefik-plugin
+      version: v1.3.3
+additionalArguments:
+  - "--entrypoints.web.http.middlewares=<NAMESPACE>-crowdsec-bouncer@kubernetescrd"
+  - "--entrypoints.websecure.http.middlewares=<NAMESPACE>-crowdsec-bouncer@kubernetescrd"
+  - "--providers.kubernetescrd"
+```
+
+And then, you can apply this middleware to your traefik ingress:
+
+```
+# crowdsec-bouncer-middleware.yaml
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: crowdsec-bouncer
+  namespace: default
+spec:
+  plugin:
+    crowdsec-bouncer:
+      enabled: true
+      crowdsecMode: appsec
+      crowdsecAppsecEnabled: true
+      crowdsecAppsecHost: crowdsec-appsec-service:7422
+      crowdsecLapiScheme: http
+      crowdsecLapiHost: crowdsec-service:8080
+      crowdsecLapiKey: "<YOUR_BOUNCER_KEY>"
+```
+
 ## Values
 
 | Key | Type | Default | Description |
