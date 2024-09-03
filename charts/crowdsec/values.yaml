@@ -182,6 +182,12 @@ lapi:
   # -- Extra init containers to be added to lapi pods
   extraInitContainers: []
 
+  # -- Extra volumes to be added to lapi pods
+  extraVolumes: []
+
+  # -- Extra volumeMounts to be added to lapi pods
+  extraVolumeMounts: []
+
   # -- resources for lapi
   resources:
     limits:
@@ -332,6 +338,12 @@ agent:
 
   # -- Extra init containers to be added to agent pods
   extraInitContainers: []
+
+  # -- Extra volumes to be added to agent pods
+  extraVolumes: []
+
+  # -- Extra volumeMounts to be added to agent pods
+  extraVolumeMounts: []
 
   resources:
     limits:
