@@ -1,6 +1,6 @@
 # crowdsec
 
-![Version: 0.11.1](https://img.shields.io/badge/Version-0.11.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v1.6.2](https://img.shields.io/badge/AppVersion-v1.6.2-informational?style=flat-square)
+![Version: 0.13.0](https://img.shields.io/badge/Version-0.13.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v1.6.3](https://img.shields.io/badge/AppVersion-v1.6.3-informational?style=flat-square)
 
 Crowdsec helm chart is an open-source, lightweight agent to detect and respond to bad behaviours.
 
@@ -204,6 +204,8 @@ spec:
 | lapi.podAnnotations | object | `{}` | Annotations to be added to lapi pods, if global podAnnotations are not set |
 | lapi.podLabels | object | `{}` | Labels to be added to lapi pods, if global podLabels are not set |
 | lapi.extraInitContainers | list | `[]` | Extra init containers to be added to lapi pods |
+| lapi.extraVolumes | list | `[]` | Extra volumes to be added to lapi pods |
+| lapi.extraVolumeMounts | list | `[]` | Extra volumeMounts to be added to lapi pods |
 | lapi.resources | object | `{"limits":{"cpu":"500m","memory":"500Mi"},"requests":{"cpu":"500m","memory":"500Mi"}}` | resources for lapi |
 | lapi.dashboard.enabled | bool | `false` | Enable Metabase Dashboard (by default disabled) |
 | lapi.dashboard.env | list | `[]` | see https://www.metabase.com/docs/latest/configuring-metabase/environment-variables |
@@ -244,6 +246,8 @@ spec:
 | agent.podAnnotations | object | `{}` | Annotations to be added to agent pods, if global podAnnotations are not set |
 | agent.podLabels | object | `{}` | Labels to be added to agent pods, if global podLabels are not set |
 | agent.extraInitContainers | list | `[]` | Extra init containers to be added to agent pods |
+| agent.extraVolumes | list | `[]` | Extra volumes to be added to agent pods |
+| agent.extraVolumeMounts | list | `[]` | Extra volumeMounts to be added to agent pods |
 | agent.resources.limits.memory | string | `"250Mi"` |  |
 | agent.resources.limits.cpu | string | `"500m"` |  |
 | agent.resources.requests.cpu | string | `"500m"` |  |

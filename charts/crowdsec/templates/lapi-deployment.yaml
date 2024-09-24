@@ -11,7 +11,7 @@ metadata:
     version: v1
   {{- if .Values.lapi.deployAnnotations }}
   annotations:
-  {{ toYaml .Values.lapi.deployAnnotations | trim | indent 4 }}
+{{ toYaml .Values.lapi.deployAnnotations | trim | indent 4 }}
   {{- end }}
 spec:
   replicas: {{ .Values.lapi.replicas }}
@@ -27,10 +27,10 @@ spec:
         checksum/lapi-secret: {{ include (print $.Template.BasePath "/lapi-secrets.yaml") . | sha256sum }}
         checksum/lapi-configmap: {{ include (print $.Template.BasePath "/lapi-configmap.yaml") . | sha256sum }}
         {{- if .Values.podAnnotations }}
-        {{- toYaml .Values.podAnnotations | trim | indent 8 }}
+{{ toYaml .Values.podAnnotations | trim | indent 8 }}
         {{- end }}
         {{- if .Values.lapi.podAnnotations }}
-        {{- toYaml .Values.lapi.podAnnotations | trim | indent 8 }}
+{{ toYaml .Values.lapi.podAnnotations | trim | indent 8 }}
         {{- end }}
       labels:
         k8s-app: {{ .Release.Name }}
@@ -52,7 +52,7 @@ spec:
       - name: fetch-metabase-config
         image: busybox:1.28
         imagePullPolicy: IfNotPresent
-        command: ['sh', '-c', 'if [ -f /metabase-data/metabase.db/metabase.db.mv.db ]; then echo "Metabase database file already exists, skipping download and unzip"; else wget {{ .Values.lapi.dashboard.assetURL }} && unzip metabase_sqlite.zip -d /metabase-data/; fi']
+        command: ['sh', '-c', 'if [ -f /metabase-data/metabase.db/metabase.db.mv.db ]; then echo "Metabase database file already exists, skipping download and unzip"; else wget {{ .Values.lapi.dashboard.assetURL }} && unzip metabase_sqlite.zip -nd /metabase-data/; fi']
         volumeMounts:
         - name: crowdsec-db
           mountPath: /metabase-data
@@ -130,7 +130,10 @@ spec:
               secretKeyRef:
                 name: crowdsec-lapi-secrets
                 key: registrationToken
-
+          - name: CUSTOM_HOSTNAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
         {{- with .Values.lapi.env }}
           {{- toYaml . | nindent 10 }}
         {{- end }}
@@ -197,7 +200,7 @@ spec:
         lifecycle:
           {{- toYaml .Values.lapi.lifecycle | nindent 10 }}
         {{- end }}
-        {{- if or (.Values.tls.enabled) (.Values.lapi.persistentVolume.data.enabled) (.Values.lapi.persistentVolume.config.enabled) (.Values.lapi.dashboard.enabled) (include "lapiCustomConfigIsNotEmpty" .) }}
+        {{- if or (.Values.tls.enabled) (.Values.lapi.persistentVolume.data.enabled) (.Values.lapi.persistentVolume.config.enabled) (.Values.lapi.dashboard.enabled) (include "lapiCustomConfigIsNotEmpty" .) (.Values.lapi.extraVolumeMounts) }}
         volumeMounts:
           {{- if .Values.tls.enabled }}
           - name: crowdsec-lapi-tls
@@ -244,6 +247,9 @@ spec:
             subPath: {{ $fileName }}
           {{- end }}
           {{- end }}
+          {{- end }}
+          {{- if .Values.lapi.extraVolumeMounts }}
+          {{ toYaml .Values.lapi.extraVolumeMounts | nindent 10 }}
           {{- end }}
           {{- end }}
       {{- if .Values.lapi.dashboard.enabled }}
@@ -311,7 +317,7 @@ spec:
 
       {{- end }}
       terminationGracePeriodSeconds: 30
-      {{- if or (.Values.tls.enabled) (.Values.lapi.persistentVolume.data.enabled) (.Values.lapi.persistentVolume.config.enabled) (.Values.lapi.dashboard.enabled) (include "lapiCustomConfigIsNotEmpty" .) }}
+      {{- if or (.Values.tls.enabled) (.Values.lapi.persistentVolume.data.enabled) (.Values.lapi.persistentVolume.config.enabled) (.Values.lapi.dashboard.enabled) (include "lapiCustomConfigIsNotEmpty" .) (.Values.lapi.extraVolumes) }}
       volumes:
       {{- if .Values.lapi.persistentVolume.data.enabled }}
       - name: crowdsec-db
@@ -373,6 +379,9 @@ spec:
       - name: crowdsec-agent-tls
         secret:
           secretName: {{ .Release.Name }}-agent-tls
+      {{- end }}
+      {{- if .Values.lapi.extraVolumes }}
+      {{ toYaml .Values.lapi.extraVolumes | nindent 6 }}
       {{- end }}
       {{- end }}
       {{- with .Values.lapi.tolerations }}
