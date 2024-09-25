@@ -93,6 +93,20 @@ appsec:
   env:
     - name: COLLECTIONS
       value: "crowdsecurity/appsec-virtual-patching"
+
+# This allows the LAPI pod to register and communicate with the appsec pod
+config:
+  config.yaml.local: |
+    api:
+      server:
+        auto_registration:
+          enabled: true
+          token: "${REGISTRATION_TOKEN}"
+          allowed_ranges:
+            - "127.0.0.1/32"
+            - "192.168.0.0/16"
+            - "10.0.0.0/8"
+            - "172.16.0.0/12"
 ```
 
 Or you can also use your own custom configurations and rules for AppSec:
@@ -121,6 +135,20 @@ appsec:
   env:
     - name: COLLECTIONS
       value: "crowdsecurity/appsec-virtual-patching crowdsecurity/appsec-crs"
+
+# This allows the LAPI pod to register and communicate with the appsec pod
+config:
+  config.yaml.local: |
+    api:
+      server:
+        auto_registration:
+          enabled: true
+          token: "${REGISTRATION_TOKEN}"
+          allowed_ranges:
+            - "127.0.0.1/32"
+            - "192.168.0.0/16"
+            - "10.0.0.0/8"
+            - "172.16.0.0/12"
 ```
 
 In the traefik `values.yaml`, you need to add the following configuration:
