@@ -7,6 +7,11 @@ http://{{ .Values.lapi.ingress.host }}
 http://{{ .Release.Name }}-service:8080
 {{- end }}
 
+{{- if .Values.appsec.enabled }}
+## AppSec URL
+http://{{ .Release.Name }}-appsec-service:7422
+{{- end }}
+
 {{ if .Values.lapi.dashboard.enabled }}
 ## Dashboard information
 

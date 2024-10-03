@@ -465,4 +465,115 @@ agent:
       # -- docker image tag
       tag: "1.28"
 
-#service: {}
+# -- Enable AppSec (https://docs.crowdsec.net/docs/next/appsec/intro)
+appsec:
+  # -- Enable AppSec (by default disabled)
+  enabled: false
+  # -- Additional acquisitions for AppSec
+  acquisitions: []
+    #- source: appsec
+    #  listen_addr: "0.0.0.0:7422"
+    #  path: /
+    #  appsec_config: crowdsecurity/virtual-patching
+    #  labels:
+    #    type: appsec
+  # -- appsec_configs (https://docs.crowdsec.net/docs/next/appsec/configuration): key is the filename, value is the config content
+  configs: {}
+    #mycustom-appsec-config.yaml: |
+    #  name: crowdsecurity/crs-vpatch
+    #  default_remediation: ban
+    #  #log_level: debug
+    #  outofband_rules:
+    #    - crowdsecurity/crs
+    #  inband_rules:
+    #    - crowdsecurity/base-config 
+    #    - crowdsecurity/vpatch-*
+  # -- appsec_configs to disable
+  # -- appsec_rules (https://docs.crowdsec.net/docs/next/appsec/rules_syntax)
+  rules: {}
+    #mycustom-appsec-rule.yaml: |
+    #  name: crowdsecurity/example-rule
+    #  description: "Detect example pattern"
+    #  rules:
+    #    - zones:
+    #        - URI
+    #      transform:
+    #        - lowercase
+    #      match:
+    #        type: contains
+    #        value: this-is-a-appsec-rule-test
+    #  labels:
+    #    type: exploit
+    #    service: http
+    #    behavior: "http:exploit"
+    #    confidence: 3
+    #    spoofable: 0
+    #    label: "A good description of the rule"
+    #    classification:
+    #      - cve.CVE-xxxx-xxxxx
+    #      - attack.Txxxx 
+
+  # -- environment variables
+  env:
+    # -- COLLECTIONS to install, separated by space (value: "crowdsecurity/appsec-virtual-patching crowdsecurity/appsec-crs")
+    #- name: COLLECTIONS
+    #  value: "crowdsecurity/appsec-virtual-patching"
+    # -- APPSEC_CONFIGS files to install, separated by space (value: "crowdsecurity/config-1 crowdsecurity/config-2")
+    #- name: APPSEC_CONFIGS
+    #  value: "crowdsecurity/appsec-default"
+    # -- APPSEC_RULES files to install, separated by space (value: "crowdsecurity/rules-1 crowdsecurity/rules-2")
+    #- name: APPSEC_RULES
+    #  value: ""
+    # -- DISABLE_APPSEC_RULES files to disable, separated by space (value: "crowdsecurity/rules-1 crowdsecurity/rules-2")
+    #- name: DISABLE_APPSEC_RULES
+    #  value: ""
+    # -- DISABLE_APPSEC_CONFIGS files to disable, separated by space (value: "crowdsecurity/config-1 crowdsecurity/config-2")
+    #- name: DISABLE_APPSEC_CONFIGS
+    #  value: ""
+
+  # -- appsec deployment annotations
+  deployAnnotations: {}
+  # -- strategy for appsec deployment
+  strategy:
+    type: Recreate
+  # -- podAnnotations for appsec deployment
+  podAnnotations: {}
+  # -- podLabels for appsec deployment
+  podLabels: {}
+  # -- tolerations for appsec deployment
+  tolerations: []
+  # -- nodeSelector for appsec deployment
+  nodeSelector: {}
+  # -- affinity for appsec deployment
+  affinity: {}
+  # -- priorityClassName for appsec deployment
+  priorityClassName: ""
+  # -- extraInitContainers for appsec deployment
+  extraInitContainers: []
+  # -- resources for appsec deployment
+  resources:
+    limits:
+      memory: 250Mi
+      cpu: 500m
+    requests:
+      cpu: 500m
+      memory: 250Mi
+  # -- Enable service monitoring (exposes "metrics" port "6060" for Prometheus and "7422" for AppSec) 
+  metrics:
+    enabled: true
+    # -- Creates a ServiceMonitor so Prometheus will monitor this service
+    # -- Prometheus needs to be configured to watch on all namespaces for ServiceMonitors
+    # -- See the documentation: https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack#prometheusioscrape
+    # -- See also: https://github.com/prometheus-community/helm-charts/issues/106#issuecomment-700847774
+    serviceMonitor:
+      enabled: false
+      additionalLabels: {}
+
+  service:
+    type: ClusterIP
+    labels: {}
+    annotations: {}
+    externalIPs: []
+    loadBalancerIP: null
+    loadBalancerClass: null
+    externalTrafficPolicy: Cluster
