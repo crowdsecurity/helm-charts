@@ -75,7 +75,7 @@ lapi:
           key: dbPassword
 ```
 
-## Setup for AppSec (WAF) with Traefik bouncer as example
+## Setup for AppSec (WAF)
 
 Below a basic configuration for AppSec (WAF)
 
@@ -101,7 +101,7 @@ config:
       server:
         auto_registration:
           enabled: true
-          token: "${REGISTRATION_TOKEN}"
+          token: "${REGISTRATION_TOKEN}" # /!\ Do not modify this variable (auto-generated and handled by the chart)
           allowed_ranges:
             - "127.0.0.1/32"
             - "192.168.0.0/16"
@@ -143,13 +143,15 @@ config:
       server:
         auto_registration:
           enabled: true
-          token: "${REGISTRATION_TOKEN}"
+          token: "${REGISTRATION_TOKEN}" # /!\ Do not modify this variable (auto-generated and handled by the chart)
           allowed_ranges:
             - "127.0.0.1/32"
             - "192.168.0.0/16"
             - "10.0.0.0/8"
             - "172.16.0.0/12"
 ```
+
+### With Traefik
 
 In the traefik `values.yaml`, you need to add the following configuration:
 
@@ -185,6 +187,33 @@ spec:
       crowdsecLapiScheme: http
       crowdsecLapiHost: crowdsec-service:8080
       crowdsecLapiKey: "<YOUR_BOUNCER_KEY>"
+```
+
+### With Ingrees Nginx
+
+Following [this documentation](https://docs.crowdsec.net/u/bouncers/ingress-nginx).
+
+In the nginx ingress `upgrade-values.yaml`, you need to add the following configuration:
+
+```
+controller:
+  extraInitContainers:
+    - name: init-clone-crowdsec-bouncer
+      env:
+        - name: APPSEC_URL
+          value: "http://crowdsec-appsec-service.default.svc.cluster.local:7422"
+        - name: APPSEC_FAILURE_ACTION
+          value: "passthrough"
+        - name: APPSEC_CONNECT_TIMEOUT
+          value: "100"
+        - name: APPSEC_SEND_TIMEOUT
+          value: "100"
+        - name: APPSEC_PROCESS_TIMEOUT
+          value: "1000"
+        - name: ALWAYS_SEND_TO_APPSEC
+          value: "false"
+        - name: SSL_VERIFY
+          value: "true"
 ```
 
 ## Values
