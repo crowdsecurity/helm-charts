@@ -1,29 +1,18 @@
-# vim: set ft=gotmpl:
----
-
-{{- if and (.Values.appsec.enabled) (.Values.appsec.metrics.enabled) (.Values.appsec.metrics.serviceMonitor.enabled) }}
-apiVersion: monitoring.coreos.com/v1
-kind: ServiceMonitor
+apiVersion: v1
+kind: Pod
 metadata:
-  name: {{ .Release.Name }}-appsec-service
-  namespace: {{ .Release.Namespace }}
-  {{- if .Values.appsec.metrics.serviceMonitor.additionalLabels }}
-  labels:
-{{ toYaml .Values.appsec.metrics.serviceMonitor.additionalLabels | indent 4 }}
-  {{- end }}
+  name: "{{ .Release.Name }}-test-appsec-up"
+  annotations:
+    "helm.sh/hook": test
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
 spec:
-  selector:
-    matchLabels:
-      app: {{ .Release.Name }}-appsec-service
-  namespaceSelector:
-    matchNames: [{{ .Release.Namespace }}]
-  attachMetadata:
-    node: true
-  endpoints:
-    - port: metrics
-      relabelings:
-      - action: replace
-        sourceLabels:
-        - __meta_kubernetes_pod_node_name
-        targetLabel: machine
-{{ end }}
+  containers:
+  - name: {{ .Release.Name }}-test-appsec-up
+    image: curlimages/curl
+    command:
+      - /bin/sh
+      - -ec
+      - |
+        curl -XGET http://{{ .Release.Name }}-appsec-service:7422/
+        curl -XGET http://{{ .Release.Name }}-appsec-service:6060/metrics
+  restartPolicy: Never
