@@ -1,0 +1,43 @@
+# vim: set ft=gotmpl:
+---
+
+{{- if .Values.appsec.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: appsec-acquis-config
+data:
+  acquis.yaml: |-
+    {{- range .Values.appsec.acquisitions }}
+    ---
+    {{. | toYaml | nindent 4}}
+    {{- end }}
+{{- end }}
+
+
+---
+{{- if .Values.appsec.configs }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "crowdsec-appsec-configs"
+data:
+{{ range $fileName, $content := .Values.appsec.configs -}}
+  {{ printf "%s: |" $fileName | indent 2 }}
+{{ $content | indent 4 }}
+{{ end }}
+{{- end }}
+
+
+---
+{{- if .Values.appsec.rules }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "crowdsec-appsec-rules"
+data:
+{{ range $fileName, $content := .Values.appsec.rules -}}
+  {{ printf "%s: |" $fileName | indent 2 }}
+{{ $content | indent 4 }}
+{{ end }}
+{{- end }}
