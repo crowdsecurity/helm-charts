@@ -531,25 +531,26 @@ appsec:
     #- name: DISABLE_APPSEC_CONFIGS
     #  value: ""
 
-  # -- appsec deployment annotations
-  deployAnnotations: {}
-  # -- strategy for appsec deployment
-  strategy:
-    type: Recreate
-  # -- podAnnotations for appsec deployment
-  podAnnotations: {}
-  # -- podLabels for appsec deployment
-  podLabels: {}
-  # -- tolerations for appsec deployment
-  tolerations: []
-  # -- nodeSelector for appsec deployment
-  nodeSelector: {}
-  # -- affinity for appsec deployment
-  affinity: {}
-  # -- priorityClassName for appsec deployment
+  # -- pod priority class name
   priorityClassName: ""
-  # -- extraInitContainers for appsec deployment
+
+  # -- Annotations to be added to appsec daemonset
+  daemonsetAnnotations: {}
+
+  # -- Annotations to be added to appsec pods, if global podAnnotations are not set
+  podAnnotations: {}
+
+  # -- Labels to be added to appsec pods, if global podLabels are not set
+  podLabels: {}
+
+  # -- Extra init containers to be added to appsec pods
   extraInitContainers: []
+
+  # -- Extra volumes to be added to appsec pods
+  extraVolumes: []
+
+  # -- Extra volumeMounts to be added to appsec pods
+  extraVolumeMounts: []
   # -- resources for appsec deployment
   resources:
     limits:
@@ -558,6 +559,57 @@ appsec:
     requests:
       cpu: 500m
       memory: 250Mi
+
+  # -- Enable persistent volumes
+  persistentVolume:
+    # -- Persistent volume for config folder. Stores local config (parsers, scenarios etc.)
+    config:
+      enabled: false
+      accessModes:
+        - ReadWriteOnce
+      storageClassName: ""
+      existingClaim: ""
+      size: 100Mi
+  # -- nodeSelector for appsec
+  nodeSelector: {}
+  # -- tolerations for appsec
+  tolerations: []
+  # -- affinity for appsec
+  affinity: {}
+
+  # -- livenessProbe for appsec
+  livenessProbe:
+    httpGet:
+      path: /metrics
+      port: metrics
+      scheme: HTTP
+    periodSeconds: 10
+    successThreshold: 1
+    timeoutSeconds: 5
+    failureThreshold: 3
+
+  # -- readinessProbe for appsec
+  readinessProbe:
+    httpGet:
+      path: /metrics
+      port: metrics
+      scheme: HTTP
+    periodSeconds: 10
+    successThreshold: 1
+    timeoutSeconds: 5
+    failureThreshold: 3
+
+  # -- startupProbe for appsec
+  startupProbe:
+    httpGet:
+      path: /metrics
+      port: metrics
+      scheme: HTTP
+    periodSeconds: 10
+    successThreshold: 1
+    timeoutSeconds: 5
+    failureThreshold: 30
+        
   # -- Enable service monitoring (exposes "metrics" port "6060" for Prometheus and "7422" for AppSec) 
   metrics:
     enabled: true
@@ -577,5 +629,15 @@ appsec:
     loadBalancerIP: null
     loadBalancerClass: null
     externalTrafficPolicy: Cluster
+
+  # -- wait-for-lapi init container
+  wait_for_lapi:
+    image:
+      # -- docker image repository name
+      repository: busybox
+      # -- pullPolicy
+      pullPolicy: IfNotPresent
+      # -- docker image tag
+      tag: "1.28"
 
 #service: {}
