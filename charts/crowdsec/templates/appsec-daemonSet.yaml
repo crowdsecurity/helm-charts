@@ -124,7 +124,6 @@ spec:
           - name: metrics
             containerPort: 6060
             protocol: TCP
-          {{- end }}
 
         {{/* Probes depend on the metrics port, there is no other service on the log processor */}}
 
@@ -180,7 +179,7 @@ spec:
 
       terminationGracePeriodSeconds: 30
       volumes:
-       - name: appsec-acquis-config-volume
+      - name: appsec-acquis-config-volume
         configMap:
           name: appsec-acquis-config
       - name: crowdsec-config
