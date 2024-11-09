@@ -125,6 +125,11 @@ spec:
               secretKeyRef:
                 name: crowdsec-lapi-secrets
                 key: csLapiSecret
+          - name: REGISTRATION_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: crowdsec-lapi-secrets
+                key: registrationToken
           - name: CUSTOM_HOSTNAME
             valueFrom:
               fieldRef:

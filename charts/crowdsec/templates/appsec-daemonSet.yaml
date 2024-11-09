@@ -47,10 +47,10 @@ spec:
 {{ toYaml .Values.image.pullSecrets | indent 8 }}
       {{- end }}
       initContainers:
-      - name: wait-for-lapi
-        image: "{{ .Values.appsec.wait_for_lapi.image.repository }}:{{ .Values.appsec.wait_for_lapi.image.tag }}"
-        imagePullPolicy: {{ .Values.appsec.wait_for_lapi.image.pullPolicy }}
-        command: ['sh', '-c', "until nc {{ .Release.Name }}-service.{{ .Release.Namespace }} 8080 -z; do echo waiting for lapi to start; sleep 5; done"]
+      - name: wait-for-lapi-and-register
+        image: "{{ .Values.image.repository | default "crowdsecurity/crowdsec" }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        command: ['sh', '-c', 'until nc "$LAPI_HOST" "$LAPI_PORT" -z; do echo waiting for lapi to start; sleep 5; done; ln -s /staging/etc/crowdsec /etc/crowdsec && cscli lapi register --machine "$USERNAME" -u $LAPI_URL --token "$REGISTRATION_TOKEN" && cp /etc/crowdsec/local_api_credentials.yaml /tmp_config/local_api_credentials.yaml']
         resources:
           limits:
             memory: 50Mi
@@ -60,6 +60,25 @@ spec:
         securityContext:
           allowPrivilegeEscalation: false
           privileged: false
+        volumeMounts:
+          - name: crowdsec-config
+            mountPath: /tmp_config
+        env:
+          - name: REGISTRATION_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: crowdsec-lapi-secrets
+                key: registrationToken
+          - name: USERNAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+          - name: LAPI_URL
+            value: http://{{ .Release.Name }}-service.{{ .Release.Namespace }}:8080
+          - name: LAPI_HOST
+            value: "{{ .Release.Name }}-service.{{ .Release.Namespace }}"
+          - name: LAPI_PORT
+            value: "8080"
       {{- if .Values.appsec.extraInitContainers }}
       {{- toYaml .Values.appsec.extraInitContainers | nindent 6 }}
       {{- end }}
@@ -72,40 +91,8 @@ spec:
             value: "true"
           - name: DISABLE_ONLINE_API
             value: "true"
-
-          # appsec - lapi authentication, with TLS or password
-
-          {{- if .Values.tls.enabled }}
-          - name: LOCAL_API_URL
-            value: https://{{ .Release.Name }}-service.{{ .Release.Namespace }}:8080
-          - name: USE_TLS
-            value: "true"
-          {{- if .Values.tls.agent.tlsClientAuth }}
-          - name: CLIENT_CERT_FILE
-            value: /etc/ssl/crowdsec-agent/tls.crt
-          - name: CLIENT_KEY_FILE
-            value: /etc/ssl/crowdsec-agent/tls.key
-          {{- end }}
-          {{- if .Values.tls.caBundle }}
-          - name: CACERT_FILE
-            value: /etc/ssl/crowdsec-agent/ca.crt
-          {{- end }}
-          {{- else }}
           - name: LOCAL_API_URL
             value: http://{{ .Release.Name }}-service.{{ .Release.Namespace }}:8080
-          {{- end }}
-          {{- if or (not .Values.tls.enabled) (not .Values.tls.agent.tlsClientAuth) }}
-          - name: AGENT_USERNAME
-            valueFrom:
-              secretKeyRef:
-                name: agent-credentials
-                key: username
-          - name: AGENT_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                name: agent-credentials
-                key: password
-          {{- end }}
           {{- if .Values.tls.insecureSkipVerify }}
           - name: INSECURE_SKIP_VERIFY
             value: {{ quote .Values.tls.insecureSkipVerify }}
@@ -169,10 +156,6 @@ spec:
             subPath: {{ $fileName }}
           {{- end }}
           {{- end }}
-          {{- if .Values.tls.enabled }}
-          - name: crowdsec-agent-tls
-            mountPath: /etc/ssl/crowdsec-agent
-          {{- end }}
           {{- if .Values.appsec.extraVolumeMounts }}
           {{ toYaml .Values.appsec.extraVolumeMounts | nindent 10 }}
           {{- end }}
@@ -203,11 +186,6 @@ spec:
           - key: {{ $fileName }}
             path: {{ $fileName }}
       {{- end }}
-      {{- end }}
-      {{- if .Values.tls.enabled }}
-      - name: crowdsec-agent-tls
-        secret:
-          secretName: {{ .Release.Name }}-agent-tls
       {{- end }}
       {{- if .Values.appsec.extraVolumes }}
       {{ toYaml .Values.appsec.extraVolumes | nindent 6 }}
