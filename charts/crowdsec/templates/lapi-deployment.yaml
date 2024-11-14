@@ -189,7 +189,7 @@ spec:
             protocol: TCP
           {{- end }}
         {{ if .Values.lapi.persistentVolume.config.enabled }}
-        command: ['sh', '-c', 'mv -n /staging/etc/crowdsec/* /etc/crowdsec_data/ && rm -rf /staging/etc/crowdsec && ln -s /etc/crowdsec_data /etc/crowdsec && ./docker_start.sh']
+        command: ['sh', '-c', 'cp -R /staging/etc/crowdsec/* /etc/crowdsec_data/ && ln -s /etc/crowdsec_data /etc/crowdsec && bash /docker_start.sh']
         {{ end }}
         {{- if .Values.lapi.lifecycle }}
         lifecycle:
@@ -197,9 +197,12 @@ spec:
         {{- end }}
         {{- if or (.Values.tls.enabled) (.Values.lapi.persistentVolume.data.enabled) (.Values.lapi.persistentVolume.config.enabled) (.Values.lapi.dashboard.enabled) (include "lapiCustomConfigIsNotEmpty" .) (.Values.lapi.extraVolumeMounts) }}
         volumeMounts:
+          - name: crowdsec-docker-start-script
+            mountPath: /docker_start.sh
+            subPath: docker_start.sh
           {{- if not (eq (include "IsOnlineAPIDisabled" .) "true") }}
           - name: {{ .Release.Name }}-capi-credentials-volume
-            mountPath: /etc/crowdsec
+            mountPath: /staging/etc/crowdsec/online_api_credentials.yaml
             subPath: online_api_credentials.yaml
           {{- end }}
           {{- if .Values.tls.enabled }}
@@ -319,6 +322,9 @@ spec:
       terminationGracePeriodSeconds: 30
       {{- if or (.Values.tls.enabled) (.Values.lapi.persistentVolume.data.enabled) (.Values.lapi.persistentVolume.config.enabled) (.Values.lapi.dashboard.enabled) (include "lapiCustomConfigIsNotEmpty" .) (.Values.lapi.extraVolumes) }}
       volumes:
+      - name: crowdsec-docker-start-script
+        configMap:
+          name: crowdsec-docker-start-script-configmap
       {{- if not (eq (include "IsOnlineAPIDisabled" .) "true") }}
       - name: {{ .Release.Name }}-capi-credentials-volume
         configMap:
@@ -410,3 +416,19 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       priorityClassName: {{ .Values.lapi.priorityClassName }}
+
+
+
+api:
+  client:
+    insecure_skip_verify: false
+    credentials_path: /etc/crowdsec/local_api_credentials.yaml
+  server:
+    log_level: info
+    listen_uri: 0.0.0.0:8080
+    profiles_path: /etc/crowdsec/profiles.yaml
+    trusted_ips: # IP ranges, or IPs which can have admin API access
+      - 127.0.0.1
+      - ::1
+    online_client: # Central API credentials (to push signals and receive bad IPs)
+      credentials_path: /etc/crowdsec/online_api_credentials.yaml

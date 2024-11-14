@@ -19,6 +19,15 @@ spec:
         - name: {{ .Release.Name }}-capi-credentials-volume
           configMap:
             name: {{ .Release.Name }}-capi-credentials
+        {{- if .Values.lapi.persistentVolume.config.enabled }}
+        - name: crowdsec-config
+          persistentVolumeClaim:
+            {{ if .Values.lapi.persistentVolume.config.existingClaim }}
+            claimName: {{ .Values.lapi.persistentVolume.config.existingClaim }}
+            {{ else }}
+            claimName: {{ .Release.Name }}-config-pvc
+            {{ end }}
+        {{- end }}
       containers:
         - name: capi-register
           {{- if .Values.image.pullSecrets }}
@@ -31,31 +40,27 @@ spec:
             - "/bin/bash"
             - "-c"
             - |
-                apk update && apk add curl
-                set -e
+                apk update && apk add curl jq kubectl
+                set -x
                 echo "check if the Central API credentials are already present"
                 cp /staging/etc/crowdsec/config.yaml /etc/crowdsec/config.yaml
                 cp /staging/etc/crowdsec/profiles.yaml /etc/crowdsec/profiles.yaml
                 sed -i /etc/crowdsec/config.yaml -e 's/#credentials_path/  credentials_path/'
-                if grep -q "placeholder" /etc/crowdsec/online_api_credentials.yaml; then
+                login=$(yq e '.login' /etc/crowdsec_data/online_api_credentials.yaml)
+                if [ -n "$login" ] && [ "$login" != "null" ]; then
+                    CONFIGMAP_CONTENT="$(cat /etc/crowdsec_data/online_api_credentials.yaml | base64 -w0)"
+                    PATCH=$(jq -n --arg value "$(echo -e "$CONFIGMAP_CONTENT" | base64 -d)" '[{op: "replace", path: "/data/online_api_credentials.yaml", value: $value}]')
+
+                    echo "Updating the Central API credentials in the configmap"
+                    kubectl -n {{ .Release.Namespace }} patch configmap {{ .Release.Name }}-capi-credentials --type json -p "$PATCH"
+                elif grep -q "placeholder" /etc/crowdsec/online_api_credentials.yaml; then
                     echo "Registering this instance to the Central API"
                     cscli capi register -f /tmp/online_api_credentials.yaml
-                    CONFIGMAP_CONTENT=$(cat /tmp/online_api_credentials.yaml | base64 -w0)
+                    CONFIGMAP_CONTENT="$(cat /tmp/online_api_credentials.yaml | base64 -w0)"
+                    PATCH=$(jq -n --arg value "$(echo -e "$CONFIGMAP_CONTENT" | base64 -d)" '[{op: "replace", path: "/data/online_api_credentials.yaml", value: $value}]')
 
-                    echo "Retrieve token and CA cert for API call"
-                    TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
-                    env
-                    CA_CERT=/var/run/secrets/kubernetes.io/serviceaccount/ca.crt
-
-                    curl -0 --request GET -k -H "Authorization: Bearer $TOKEN" \
-                        --cacert $CA_CERT \
-                        https://kubernetes.default.svc/api/v1/namespaces/{{ .Release.Namespace }}/configmaps/{{ .Release.Name }}-capi-credentials
-
-                    curl -0 --request PATCH -k -H "Authorization: Bearer $TOKEN" \
-                        -H "Content-Type: application/json-patch+json" \
-                        --cacert $CA_CERT \
-                        -d "[{\"op\": \"replace\", \"path\": \"/data/online_api_credentials.yaml\", \"value\": \"$(echo -n $CONFIGMAP_CONTENT | base64 -d)\"}]" \
-                        https://kubernetes.default.svc/api/v1/namespaces/{{ .Release.Namespace }}/configmaps/{{ .Release.Name }}-capi-credentials
+                    echo "Updating the Central API credentials in the configmap"
+                    kubectl -n {{ .Release.Namespace }} patch configmap {{ .Release.Name }}-capi-credentials --type json -p "$PATCH"
                 else
                     echo "Central API credentials are already present, skipping registration"
                     exit 0
@@ -64,4 +69,8 @@ spec:
             - name: {{ .Release.Name }}-capi-credentials-volume
               mountPath: /etc/crowdsec/online_api_credentials.yaml
               subPath: online_api_credentials.yaml
+            {{- if .Values.lapi.persistentVolume.config.enabled }}
+            - name: crowdsec-config
+              mountPath: /etc/crowdsec_data
+            {{- end }}
 {{- end }}
