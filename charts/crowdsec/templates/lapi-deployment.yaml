@@ -197,6 +197,11 @@ spec:
         {{- end }}
         {{- if or (.Values.tls.enabled) (.Values.lapi.persistentVolume.data.enabled) (.Values.lapi.persistentVolume.config.enabled) (.Values.lapi.dashboard.enabled) (include "lapiCustomConfigIsNotEmpty" .) (.Values.lapi.extraVolumeMounts) }}
         volumeMounts:
+          {{- if not (eq (include "IsOnlineAPIDisabled" .) "true") }}
+          - name: {{ .Release.Name }}-capi-credentials-volume
+            mountPath: /etc/crowdsec
+            subPath: online_api_credentials.yaml
+          {{- end }}
           {{- if .Values.tls.enabled }}
           - name: crowdsec-lapi-tls
             mountPath: /etc/ssl/crowdsec-lapi
@@ -314,6 +319,11 @@ spec:
       terminationGracePeriodSeconds: 30
       {{- if or (.Values.tls.enabled) (.Values.lapi.persistentVolume.data.enabled) (.Values.lapi.persistentVolume.config.enabled) (.Values.lapi.dashboard.enabled) (include "lapiCustomConfigIsNotEmpty" .) (.Values.lapi.extraVolumes) }}
       volumes:
+      {{- if not (eq (include "IsOnlineAPIDisabled" .) "true") }}
+      - name: {{ .Release.Name }}-capi-credentials-volume
+        configMap:
+          name: {{ .Release.Name }}-capi-credentials
+      {{- end }}
       {{- if .Values.lapi.persistentVolume.data.enabled }}
       - name: crowdsec-db
         persistentVolumeClaim:

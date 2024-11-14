@@ -91,3 +91,16 @@ true
 true
 {{- end -}}
 {{- end -}}
+
+{{/*
+  Check if DISABLE_ONLINE_API is set in lapi.env and store it in a variable
+*/}}
+{{ define "IsOnlineAPIDisabled" }}
+{{- $IsCAPIDisabled := false -}}
+{{- range .Values.lapi.env }}
+  {{- if and (eq .name "DISABLE_ONLINE_API") (eq .value "true") }}
+    {{- $IsCAPIDisabled = true -}}
+  {{- end -}}
+{{- end -}}
+{{- $IsCAPIDisabled }}
+{{- end }}

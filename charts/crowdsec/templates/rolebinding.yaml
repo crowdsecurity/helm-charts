@@ -1,0 +1,19 @@
+{{- if not (eq (include "IsOnlineAPIDisabled" .) "true") }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: {{ .Release.Name }}-configmap-updater-binding
+  labels:
+    k8s-app: {{ .Release.Name }}
+    type: capi-register-job
+    version: v1
+roleRef:
+    apiGroup: rbac.authorization.k8s.io
+    kind: Role
+    name: {{ .Release.Name }}-configmap-updater-role
+subjects:
+  - kind: ServiceAccount
+    name: {{ .Release.Name }}-configmap-updater-sa
+    namespace: {{ .Release.Namespace }}
+{{- end }}

@@ -1,0 +1,67 @@
+{{- if not (eq (include "IsOnlineAPIDisabled" .) "true") }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Release.Name }}-capi-register-job
+  labels:
+    k8s-app: {{ .Release.Name }}
+    type: capi-register-job
+    version: v1
+  annotations:
+    "helm.sh/hook": "pre-install,pre-upgrade"
+    "helm.sh/hook-weight": "-1"
+spec:
+  template:
+    spec:
+      serviceAccountName: {{ .Release.Name }}-configmap-updater-sa
+      restartPolicy: OnFailure
+      volumes:
+        - name: {{ .Release.Name }}-capi-credentials-volume
+          configMap:
+            name: {{ .Release.Name }}-capi-credentials
+      containers:
+        - name: capi-register
+          {{- if .Values.image.pullSecrets }}
+          imagePullSecrets:
+{{ toYaml .Values.image.pullSecrets | indent 12 }}
+          {{- end }}
+          image: "{{ .Values.image.repository | default "crowdsecurity/crowdsec" }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+            - "/bin/bash"
+            - "-c"
+            - |
+                apk update && apk add curl
+                set -e
+                echo "check if the Central API credentials are already present"
+                cp /staging/etc/crowdsec/config.yaml /etc/crowdsec/config.yaml
+                cp /staging/etc/crowdsec/profiles.yaml /etc/crowdsec/profiles.yaml
+                sed -i /etc/crowdsec/config.yaml -e 's/#credentials_path/  credentials_path/'
+                if grep -q "placeholder" /etc/crowdsec/online_api_credentials.yaml; then
+                    echo "Registering this instance to the Central API"
+                    cscli capi register -f /tmp/online_api_credentials.yaml
+                    CONFIGMAP_CONTENT=$(cat /tmp/online_api_credentials.yaml | base64 -w0)
+
+                    echo "Retrieve token and CA cert for API call"
+                    TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
+                    env
+                    CA_CERT=/var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+
+                    curl -0 --request GET -k -H "Authorization: Bearer $TOKEN" \
+                        --cacert $CA_CERT \
+                        https://kubernetes.default.svc/api/v1/namespaces/{{ .Release.Namespace }}/configmaps/{{ .Release.Name }}-capi-credentials
+
+                    curl -0 --request PATCH -k -H "Authorization: Bearer $TOKEN" \
+                        -H "Content-Type: application/json-patch+json" \
+                        --cacert $CA_CERT \
+                        -d "[{\"op\": \"replace\", \"path\": \"/data/online_api_credentials.yaml\", \"value\": \"$(echo -n $CONFIGMAP_CONTENT | base64 -d)\"}]" \
+                        https://kubernetes.default.svc/api/v1/namespaces/{{ .Release.Namespace }}/configmaps/{{ .Release.Name }}-capi-credentials
+                else
+                    echo "Central API credentials are already present, skipping registration"
+                    exit 0
+                fi
+          volumeMounts:
+            - name: {{ .Release.Name }}-capi-credentials-volume
+              mountPath: /etc/crowdsec/online_api_credentials.yaml
+              subPath: online_api_credentials.yaml
+{{- end }}
