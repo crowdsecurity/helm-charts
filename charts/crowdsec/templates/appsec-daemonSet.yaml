@@ -11,7 +11,7 @@ metadata:
     version: v1
   {{- if .Values.appsec.daemonsetAnnotations }}
   annotations:
-{{ toYaml .Values.appsec.daemonsetAnnotations | trim | indent 4 }}
+  {{ toYaml .Values.appsec.daemonsetAnnotations | trim | indent 4 }}
   {{- end }}
 spec:
   selector:
@@ -23,10 +23,10 @@ spec:
       annotations:
         checksum/acquis-configmap: {{ include (print $.Template.BasePath "/acquis-configmap.yaml") . | sha256sum }}
         {{- if .Values.podAnnotations }}
-{{ toYaml .Values.podAnnotations | trim | indent 8 }}
+        {{ toYaml .Values.podAnnotations | trim | indent 8 }}
         {{- end }}
         {{- if .Values.appsec.podAnnotations }}
-{{ toYaml .Values.appsec.podAnnotations | trim | indent 8 }}
+        {{ toYaml .Values.appsec.podAnnotations | trim | indent 8 }}
         {{- end }}
       labels:
         k8s-app: {{ .Release.Name }}
