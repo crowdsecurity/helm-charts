@@ -1,0 +1,59 @@
+{{- if not (eq (include "IsOnlineAPIDisabled" .) "true") }}
+{{- if .Values.lapi.storeCAPICredentialsInSecret }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Release.Name }}-capi-register-job
+  labels:
+    k8s-app: {{ .Release.Name }}
+    type: capi-register-job
+    version: v1
+  annotations:
+    "helm.sh/hook": "pre-install,pre-upgrade"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+    "helm.sh/hook-weight": "0"
+spec:
+  template:
+    spec:
+      serviceAccountName: {{ .Release.Name }}-configmap-updater-sa
+      restartPolicy: OnFailure
+      volumes:
+        - name: {{ .Release.Name }}-capi-credentials-volume
+          secret:
+            secretName: {{ .Release.Name }}-capi-credentials
+      containers:
+        - name: capi-register
+          {{- if .Values.image.pullSecrets }}
+          imagePullSecrets:
+{{ toYaml .Values.image.pullSecrets | indent 12 }}
+          {{- end }}
+          image: "{{ .Values.image.repository | default "crowdsecurity/crowdsec" }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+            - "/bin/bash"
+            - "-c"
+            - |
+                apk update && apk add curl jq kubectl
+                set -x
+                echo "check if the Central API credentials are already present"
+                cp /staging/etc/crowdsec/config.yaml /etc/crowdsec/config.yaml
+                cp /staging/etc/crowdsec/profiles.yaml /etc/crowdsec/profiles.yaml
+                sed -i /etc/crowdsec/config.yaml -e 's/#credentials_path/  credentials_path/'
+                if grep -q "placeholder" /etc/crowdsec/online_api_credentials.yaml; then
+                    echo "Registering this instance to the Central API"
+                    cscli capi register -f /tmp/online_api_credentials.yaml
+                    SECRET_CONTENT="$(cat /tmp/online_api_credentials.yaml | yq '.papi_url = "https://papi.api.crowdsec.net/"' | base64 -w0)"
+                    PATCH=$(jq -n --arg value "$(echo -e "$SECRET_CONTENT")" '[{op: "replace", path: "/data/online_api_credentials.yaml", value: $value}]')
+
+                    echo "Updating the Central API credentials in the secret"
+                    kubectl -n {{ .Release.Namespace }} patch secret {{ .Release.Name }}-capi-credentials --type json -p "$PATCH"
+                else
+                    echo "Central API credentials are already present, skipping registration"
+                    exit 0
+                fi
+          volumeMounts:
+            - name: {{ .Release.Name }}-capi-credentials-volume
+              mountPath: /etc/crowdsec/online_api_credentials.yaml
+              subPath: online_api_credentials.yaml
+{{- end }}
+{{- end }}
