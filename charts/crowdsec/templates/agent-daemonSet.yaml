@@ -74,24 +74,24 @@ spec:
             value: "true"
           - name: DISABLE_ONLINE_API
             value: "true"
-          
-          # agent - lapi authentication, with TLS or password	
 
-          {{- if .Values.tls.enabled }}	
-          - name: LOCAL_API_URL	
-            value: https://{{ .Release.Name }}-service.{{ .Release.Namespace }}:8080	
-          - name: USE_TLS	
-            value: "true"	
-          {{- if .Values.tls.agent.tlsClientAuth }}	
-          - name: CLIENT_CERT_FILE	
-            value: /etc/ssl/crowdsec-agent/tls.crt	
-          - name: CLIENT_KEY_FILE	
-            value: /etc/ssl/crowdsec-agent/tls.key	
-          {{- end }}	
-          {{- if .Values.tls.caBundle }}	
-          - name: CACERT_FILE	
-            value: /etc/ssl/crowdsec-agent/ca.crt	
-          {{- end }}	
+          # agent - lapi authentication, with TLS or password
+
+          {{- if .Values.tls.enabled }}
+          - name: LOCAL_API_URL
+            value: https://{{ .Release.Name }}-service.{{ .Release.Namespace }}:8080
+          - name: USE_TLS
+            value: "true"
+          {{- if .Values.tls.agent.tlsClientAuth }}
+          - name: CLIENT_CERT_FILE
+            value: /etc/ssl/crowdsec-agent/tls.crt
+          - name: CLIENT_KEY_FILE
+            value: /etc/ssl/crowdsec-agent/tls.key
+          {{- end }}
+          {{- if .Values.tls.caBundle }}
+          - name: CACERT_FILE
+            value: /etc/ssl/crowdsec-agent/ca.crt
+          {{- end }}
           {{- else }}
           - name: LOCAL_API_URL
             value: http://{{ .Release.Name }}-service.{{ .Release.Namespace }}:8080
