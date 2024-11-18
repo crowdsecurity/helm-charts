@@ -42,7 +42,7 @@ spec:
                 if grep -q "placeholder" /etc/crowdsec/online_api_credentials.yaml; then
                     echo "Registering this instance to the Central API"
                     cscli capi register -f /tmp/online_api_credentials.yaml
-                    SECRET_CONTENT="$(cat /tmp/online_api_credentials.yaml | base64 -w0)"
+                    SECRET_CONTENT="$(cat /tmp/online_api_credentials.yaml | yq '.papi_url = "https://papi.api.crowdsec.net/"' | base64 -w0)"
                     PATCH=$(jq -n --arg value "$(echo -e "$SECRET_CONTENT")" '[{op: "replace", path: "/data/online_api_credentials.yaml", value: $value}]')
 
                     echo "Updating the Central API credentials in the secret"
