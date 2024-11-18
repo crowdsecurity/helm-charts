@@ -1,4 +1,5 @@
 {{- if not (eq (include "IsOnlineAPIDisabled" .) "true") }}
+{{- if .Values.lapi.storeCAPICredentialsInSecret }}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -8,7 +9,7 @@ metadata:
     type: capi-register-job
     version: v1
   annotations:
-    "helm.sh/hook": "pre-install"
+    "helm.sh/hook": "pre-install,pre-upgrade"
     "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
     "helm.sh/hook-weight": "0"
 spec:
@@ -18,17 +19,8 @@ spec:
       restartPolicy: OnFailure
       volumes:
         - name: {{ .Release.Name }}-capi-credentials-volume
-          configMap:
-            name: {{ .Release.Name }}-capi-credentials
-        {{- if .Values.lapi.persistentVolume.config.enabled }}
-        - name: crowdsec-config
-          persistentVolumeClaim:
-            {{ if .Values.lapi.persistentVolume.config.existingClaim }}
-            claimName: {{ .Values.lapi.persistentVolume.config.existingClaim }}
-            {{ else }}
-            claimName: {{ .Release.Name }}-config-pvc
-            {{ end }}
-        {{- end }}
+          secret:
+            secretName: {{ .Release.Name }}-capi-credentials
       containers:
         - name: capi-register
           {{- if .Values.image.pullSecrets }}
@@ -47,21 +39,14 @@ spec:
                 cp /staging/etc/crowdsec/config.yaml /etc/crowdsec/config.yaml
                 cp /staging/etc/crowdsec/profiles.yaml /etc/crowdsec/profiles.yaml
                 sed -i /etc/crowdsec/config.yaml -e 's/#credentials_path/  credentials_path/'
-                login=$(yq e '.login' /etc/crowdsec_data/online_api_credentials.yaml)
-                if [ -n "$login" ] && [ "$login" != "null" ]; then
-                    CONFIGMAP_CONTENT="$(cat /etc/crowdsec_data/online_api_credentials.yaml | base64 -w0)"
-                    PATCH=$(jq -n --arg value "$(echo -e "$CONFIGMAP_CONTENT" | base64 -d)" '[{op: "replace", path: "/data/online_api_credentials.yaml", value: $value}]')
-
-                    echo "Updating the Central API credentials in the configmap"
-                    kubectl -n {{ .Release.Namespace }} patch configmap {{ .Release.Name }}-capi-credentials --type json -p "$PATCH"
-                elif grep -q "placeholder" /etc/crowdsec/online_api_credentials.yaml; then
+                if grep -q "placeholder" /etc/crowdsec/online_api_credentials.yaml; then
                     echo "Registering this instance to the Central API"
                     cscli capi register -f /tmp/online_api_credentials.yaml
-                    CONFIGMAP_CONTENT="$(cat /tmp/online_api_credentials.yaml | base64 -w0)"
-                    PATCH=$(jq -n --arg value "$(echo -e "$CONFIGMAP_CONTENT" | base64 -d)" '[{op: "replace", path: "/data/online_api_credentials.yaml", value: $value}]')
+                    SECRET_CONTENT="$(cat /tmp/online_api_credentials.yaml | base64 -w0)"
+                    PATCH=$(jq -n --arg value "$(echo -e "$SECRET_CONTENT")" '[{op: "replace", path: "/data/online_api_credentials.yaml", value: $value}]')
 
-                    echo "Updating the Central API credentials in the configmap"
-                    kubectl -n {{ .Release.Namespace }} patch configmap {{ .Release.Name }}-capi-credentials --type json -p "$PATCH"
+                    echo "Updating the Central API credentials in the secret"
+                    kubectl -n {{ .Release.Namespace }} patch secret {{ .Release.Name }}-capi-credentials --type json -p "$PATCH"
                 else
                     echo "Central API credentials are already present, skipping registration"
                     exit 0
@@ -70,8 +55,5 @@ spec:
             - name: {{ .Release.Name }}-capi-credentials-volume
               mountPath: /etc/crowdsec/online_api_credentials.yaml
               subPath: online_api_credentials.yaml
-            {{- if .Values.lapi.persistentVolume.config.enabled }}
-            - name: crowdsec-config
-              mountPath: /etc/crowdsec_data
-            {{- end }}
+{{- end }}
 {{- end }}

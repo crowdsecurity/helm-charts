@@ -201,9 +201,11 @@ spec:
             mountPath: /docker_start.sh
             subPath: docker_start.sh
           {{- if not (eq (include "IsOnlineAPIDisabled" .) "true") }}
+          {{- if .Values.lapi.storeCAPICredentialsInSecret }}
           - name: {{ .Release.Name }}-capi-credentials-volume
             mountPath: /staging/etc/crowdsec/online_api_credentials.yaml
             subPath: online_api_credentials.yaml
+          {{- end }}
           {{- end }}
           {{- if .Values.tls.enabled }}
           - name: crowdsec-lapi-tls
@@ -326,9 +328,11 @@ spec:
         configMap:
           name: crowdsec-docker-start-script-configmap
       {{- if not (eq (include "IsOnlineAPIDisabled" .) "true") }}
+      {{- if .Values.lapi.storeCAPICredentialsInSecret }}
       - name: {{ .Release.Name }}-capi-credentials-volume
-        configMap:
-          name: {{ .Release.Name }}-capi-credentials
+        secret:
+          secretName: {{ .Release.Name }}-capi-credentials
+      {{- end }}
       {{- end }}
       {{- if .Values.lapi.persistentVolume.data.enabled }}
       - name: crowdsec-db
@@ -416,19 +420,3 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       priorityClassName: {{ .Values.lapi.priorityClassName }}
-
-
-
-api:
-  client:
-    insecure_skip_verify: false
-    credentials_path: /etc/crowdsec/local_api_credentials.yaml
-  server:
-    log_level: info
-    listen_uri: 0.0.0.0:8080
-    profiles_path: /etc/crowdsec/profiles.yaml
-    trusted_ips: # IP ranges, or IPs which can have admin API access
-      - 127.0.0.1
-      - ::1
-    online_client: # Central API credentials (to push signals and receive bad IPs)
-      credentials_path: /etc/crowdsec/online_api_credentials.yaml

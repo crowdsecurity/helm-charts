@@ -34,10 +34,8 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: {{ .Release.Name }}-config-pvc
-  annotations:
-    "helm.sh/hook": "pre-install"
-    "helm.sh/hook-weight": "-1"
   {{- if .Values.lapi.persistentVolume.config.annotations }}
+  annotations:
 {{ toYaml .Values.lapi.persistentVolume.config.annotations | indent 4 }}
   {{- end }}
   labels:

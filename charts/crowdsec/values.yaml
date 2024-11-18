@@ -300,6 +300,10 @@ lapi:
     # postStart:
     #   exec:
     #     command: ["/bin/sh", "-c", "echo Hello from the postStart handler > /usr/share/message"]
+  
+  # -- storeCAPICredentialsInSecret
+  # -- If set to true, the Central API credentials will be stored in a secret (to use when lapi replicas > 1)
+  storeCAPICredentialsInSecret: false
 
 # agent will deploy pod on every node as daemonSet to read wanted pods logs
 agent:

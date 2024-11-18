@@ -59,6 +59,7 @@ lapi:
   # Specify your external DB password here
   extraSecrets:
     dbPassword: <externalDbPassword>
+  storeCAPICredentialsInSecret: true
   persistentVolume:
     # When replicas for LAPI is greater than 1, two options, persistent volumes must be disabled, or in ReadWriteMany mode
     config:
