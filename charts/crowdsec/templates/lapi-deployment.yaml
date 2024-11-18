@@ -195,7 +195,6 @@ spec:
         lifecycle:
           {{- toYaml .Values.lapi.lifecycle | nindent 10 }}
         {{- end }}
-        {{- if or (.Values.tls.enabled) (.Values.lapi.persistentVolume.data.enabled) (.Values.lapi.persistentVolume.config.enabled) (.Values.lapi.dashboard.enabled) (include "lapiCustomConfigIsNotEmpty" .) (.Values.lapi.extraVolumeMounts) }}
         volumeMounts:
           - name: crowdsec-docker-start-script
             mountPath: /docker_start.sh
@@ -207,6 +206,7 @@ spec:
             subPath: online_api_credentials.yaml
           {{- end }}
           {{- end }}
+        {{- if or (.Values.tls.enabled) (.Values.lapi.persistentVolume.data.enabled) (.Values.lapi.persistentVolume.config.enabled) (.Values.lapi.dashboard.enabled) (include "lapiCustomConfigIsNotEmpty" .) (.Values.lapi.extraVolumeMounts) }}
           {{- if .Values.tls.enabled }}
           - name: crowdsec-lapi-tls
             mountPath: /etc/ssl/crowdsec-lapi
@@ -322,7 +322,6 @@ spec:
 
       {{- end }}
       terminationGracePeriodSeconds: 30
-      {{- if or (.Values.tls.enabled) (.Values.lapi.persistentVolume.data.enabled) (.Values.lapi.persistentVolume.config.enabled) (.Values.lapi.dashboard.enabled) (include "lapiCustomConfigIsNotEmpty" .) (.Values.lapi.extraVolumes) }}
       volumes:
       - name: crowdsec-docker-start-script
         configMap:
@@ -334,6 +333,7 @@ spec:
           secretName: {{ .Release.Name }}-capi-credentials
       {{- end }}
       {{- end }}
+      {{- if or (.Values.tls.enabled) (.Values.lapi.persistentVolume.data.enabled) (.Values.lapi.persistentVolume.config.enabled) (.Values.lapi.dashboard.enabled) (include "lapiCustomConfigIsNotEmpty" .) (.Values.lapi.extraVolumes) }}
       {{- if .Values.lapi.persistentVolume.data.enabled }}
       - name: crowdsec-db
         persistentVolumeClaim:
