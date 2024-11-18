@@ -95,18 +95,18 @@ spec:
           {{- else }}
           - name: LOCAL_API_URL
             value: http://{{ .Release.Name }}-service.{{ .Release.Namespace }}:8080
-          {{- end }}	
+          {{- end }}
           {{- if or (not .Values.tls.enabled) (not .Values.tls.agent.tlsClientAuth) }}	
-          - name: AGENT_USERNAME	
-            valueFrom:	
-              secretKeyRef:	
-                name: agent-credentials	
-                key: username	
-          - name: AGENT_PASSWORD	
-            valueFrom:	
-              secretKeyRef:	
-                name: agent-credentials	
-                key: password	
+          - name: AGENT_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: agent-credentials
+                key: username
+          - name: AGENT_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: agent-credentials
+                key: password
           {{- end }}
           {{- if .Values.tls.insecureSkipVerify }}
           - name: INSECURE_SKIP_VERIFY
