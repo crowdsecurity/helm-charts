@@ -178,7 +178,11 @@ spec:
           httpGet:
             path: /health
             port: lapi
+            {{- if .Values.tls.enabled }}
+            scheme: HTTPS
+            {{- else }}
             scheme: HTTP
+            {{- end }}
 
         securityContext:
           allowPrivilegeEscalation: false
