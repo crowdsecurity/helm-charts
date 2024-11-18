@@ -302,6 +302,10 @@ lapi:
     # postStart:
     #   exec:
     #     command: ["/bin/sh", "-c", "echo Hello from the postStart handler > /usr/share/message"]
+  
+  # -- storeCAPICredentialsInSecret
+  # -- If set to true, the Central API credentials will be stored in a secret (to use when lapi replicas > 1)
+  storeCAPICredentialsInSecret: false
 
 # agent will deploy pod on every node as daemonSet to read wanted pods logs
 agent:
@@ -515,7 +519,7 @@ appsec:
     #      - cve.CVE-xxxx-xxxxx
     #      - attack.Txxxx 
 
-# -- environment variables
+  # -- environment variables
   env:
     # -- COLLECTIONS to install, separated by space (value: "crowdsecurity/appsec-virtual-patching crowdsecurity/appsec-crs")
     #- name: COLLECTIONS
@@ -533,26 +537,27 @@ appsec:
     #- name: DISABLE_APPSEC_CONFIGS
     #  value: ""
 
-  # -- pod priority class name
-  priorityClassName: ""
-
   # -- Annotations to be added to appsec daemonset
   daemonsetAnnotations: {}
-
-  # -- Annotations to be added to appsec pods, if global podAnnotations are not set
+  # -- podAnnotations for appsec deployment
   podAnnotations: {}
-
-  # -- Labels to be added to appsec pods, if global podLabels are not set
+  # -- podLabels for appsec deployment
   podLabels: {}
-
-  # -- Extra init containers to be added to appsec pods
+  # -- tolerations for appsec deployment
+  tolerations: []
+  # -- nodeSelector for appsec deployment
+  nodeSelector: {}
+  # -- affinity for appsec deployment
+  affinity: {}
+  # -- priorityClassName for appsec deployment
+  priorityClassName: ""
+  # -- extraInitContainers for appsec deployment
   extraInitContainers: []
-
   # -- Extra volumes to be added to appsec pods
   extraVolumes: []
-
   # -- Extra volumeMounts to be added to appsec pods
   extraVolumeMounts: []
+
   # -- resources for appsec deployment
   resources:
     limits:
@@ -611,7 +616,7 @@ appsec:
     successThreshold: 1
     timeoutSeconds: 5
     failureThreshold: 30
-        
+
   # -- Enable service monitoring (exposes "metrics" port "6060" for Prometheus and "7422" for AppSec) 
   metrics:
     enabled: true
@@ -641,5 +646,3 @@ appsec:
       pullPolicy: IfNotPresent
       # -- docker image tag
       tag: "1.28"
-
-#service: {}
