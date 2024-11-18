@@ -75,24 +75,24 @@ spec:
           {{- toYaml .Values.lapi.envFrom | nindent 10 }}
         {{- end }}
         env:
-          {{- if .Values.tls.enabled }}	
-          - name: LOCAL_API_URL	
-            value: https://localhost:8080	
+          {{- if .Values.tls.enabled }}
+          - name: LOCAL_API_URL
+            value: https://localhost:8080
           {{- else }}
           - name: LOCAL_API_URL
             value: http://localhost:8080
-          {{- end }}	
-          {{- if or (not .Values.tls.enabled) (not .Values.tls.agent.tlsClientAuth) }}	
-          - name: AGENT_USERNAME	
-            valueFrom:	
-              secretKeyRef:	
-                name: agent-credentials	
-                key: username	
-          - name: AGENT_PASSWORD	
-            valueFrom:	
-              secretKeyRef:	
-                name: agent-credentials	
-                key: password	
+          {{- end }}
+          {{- if or (not .Values.tls.enabled) (not .Values.tls.agent.tlsClientAuth) }}
+          - name: AGENT_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: agent-credentials
+                key: username
+          - name: AGENT_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: agent-credentials
+                key: password
           {{- end }}
           - name: DISABLE_AGENT
             value: "true"
@@ -100,23 +100,23 @@ spec:
           - name: GID
             value: "1000"
           {{- end }}
-          {{- if .Values.tls.enabled }}	
-          - name: USE_TLS	
-            value: "true"	
-          - name: LAPI_CERT_FILE	
-            value: /etc/ssl/crowdsec-lapi/tls.crt	
-          - name: LAPI_KEY_FILE	
-            value: /etc/ssl/crowdsec-lapi/tls.key	
-          {{- if .Values.tls.agent.tlsClientAuth }}	
-          - name: CLIENT_CERT_FILE	
-            value: /etc/ssl/crowdsec-agent/tls.crt	
-          - name: CLIENT_KEY_FILE	
-            value: /etc/ssl/crowdsec-agent/tls.key	
-          {{- end }}	
-          {{- if .Values.tls.caBundle }}	
-          - name: CACERT_FILE	
-            value: /etc/ssl/crowdsec-lapi/ca.crt	
-          {{- end }}	
+          {{- if .Values.tls.enabled }}
+          - name: USE_TLS
+            value: "true"
+          - name: LAPI_CERT_FILE
+            value: /etc/ssl/crowdsec-lapi/tls.crt
+          - name: LAPI_KEY_FILE
+            value: /etc/ssl/crowdsec-lapi/tls.key
+          {{- if .Values.tls.agent.tlsClientAuth }}
+          - name: CLIENT_CERT_FILE
+            value: /etc/ssl/crowdsec-agent/tls.crt
+          - name: CLIENT_KEY_FILE
+            value: /etc/ssl/crowdsec-agent/tls.key
+          {{- end }}
+          {{- if .Values.tls.caBundle }}
+          - name: CACERT_FILE
+            value: /etc/ssl/crowdsec-lapi/ca.crt
+          {{- end }}
           {{- end }}
           - name: INSECURE_SKIP_VERIFY
             value: {{ quote .Values.tls.insecureSkipVerify }}
@@ -152,8 +152,8 @@ spec:
           httpGet:
             path: /health
             port: lapi
-            {{- if .Values.tls.enabled }}	
-            scheme: HTTPS	
+            {{- if .Values.tls.enabled }}
+            scheme: HTTPS
             {{- else }}
             scheme: HTTP
             {{- end }}
@@ -165,8 +165,8 @@ spec:
           httpGet:
             path: /health
             port: lapi
-            {{- if .Values.tls.enabled }}	
-            scheme: HTTPS	
+            {{- if .Values.tls.enabled }}
+            scheme: HTTPS
             {{- else }}
             scheme: HTTP
             {{- end }}
@@ -392,13 +392,13 @@ spec:
       {{ end }}
       {{- end }}
       {{- end }}
-      {{- if .Values.tls.enabled }}	
-      - name: crowdsec-lapi-tls	
-        secret:	
-          secretName: {{ .Release.Name }}-lapi-tls	
-      - name: crowdsec-agent-tls	
-        secret:	
-          secretName: {{ .Release.Name }}-agent-tls	
+      {{- if .Values.tls.enabled }}
+      - name: crowdsec-lapi-tls
+        secret:
+          secretName: {{ .Release.Name }}-lapi-tls
+      - name: crowdsec-agent-tls
+        secret:
+          secretName: {{ .Release.Name }}-agent-tls
       {{- end }}
       {{- if .Values.lapi.extraVolumes }}
       {{ toYaml .Values.lapi.extraVolumes | nindent 6 }}
