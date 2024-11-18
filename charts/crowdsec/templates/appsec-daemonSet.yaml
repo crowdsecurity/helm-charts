@@ -1,5 +1,6 @@
 # vim: set ft=gotmpl:
 ---
+
 {{- if .Values.appsec.enabled }}
 apiVersion: apps/v1
 kind: DaemonSet
@@ -23,10 +24,10 @@ spec:
       annotations:
         checksum/acquis-configmap: {{ include (print $.Template.BasePath "/acquis-configmap.yaml") . | sha256sum }}
         {{- if .Values.podAnnotations }}
-        {{ toYaml .Values.podAnnotations | trim | indent 8 }}
+        {{ -toYaml .Values.podAnnotations | trim | indent 8 }}
         {{- end }}
         {{- if .Values.appsec.podAnnotations }}
-        {{ toYaml .Values.appsec.podAnnotations | trim | indent 8 }}
+        {{- toYaml .Values.appsec.podAnnotations | trim | indent 8 }}
         {{- end }}
       labels:
         k8s-app: {{ .Release.Name }}
