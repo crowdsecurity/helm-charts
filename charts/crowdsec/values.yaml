@@ -300,7 +300,7 @@ lapi:
   secrets:
     # -- Shared LAPI secret. Will be generated randomly if not specified. Size must be > 64 characters
     csLapiSecret: ""
-    # -- Registration Token for agents. Will be generated randomly if not specified. Size must be > 48 characters
+    # -- Registration Token for Appsec. Will be generated randomly if not specified. Size must be > 48 characters
     registrationToken: ""
   # -- Any extra secrets you may need (for example, external DB password)
   extraSecrets: {}
@@ -577,16 +577,6 @@ appsec:
       cpu: 500m
       memory: 250Mi
 
-  # -- Enable persistent volumes
-  persistentVolume:
-    # -- Persistent volume for config folder. Stores local config (parsers, scenarios etc.)
-    config:
-      enabled: false
-      accessModes:
-        - ReadWriteOnce
-      storageClassName: ""
-      existingClaim: ""
-      size: 100Mi
   # -- nodeSelector for appsec
   nodeSelector: {}
   # -- tolerations for appsec
@@ -646,13 +636,3 @@ appsec:
     loadBalancerIP: null
     loadBalancerClass: null
     externalTrafficPolicy: Cluster
-
-  # -- wait-for-lapi init container
-  wait_for_lapi:
-    image:
-      # -- docker image repository name
-      repository: busybox
-      # -- pullPolicy
-      pullPolicy: IfNotPresent
-      # -- docker image tag
-      tag: "1.28"

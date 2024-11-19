@@ -95,10 +95,6 @@ spec:
             value: "true"
           - name: LOCAL_API_URL
             value: http://{{ .Release.Name }}-service.{{ .Release.Namespace }}:8080
-          {{- if .Values.tls.insecureSkipVerify }}
-          - name: INSECURE_SKIP_VERIFY
-            value: {{ quote .Values.tls.insecureSkipVerify }}
-          {{- end }}
 
         {{- with .Values.appsec.env }}
           {{- toYaml . | nindent 10 }}
@@ -135,9 +131,6 @@ spec:
           allowPrivilegeEscalation: false
           privileged: false
 
-        {{- if .Values.appsec.persistentVolume.config.enabled }}
-        command: ['sh', '-c', 'mv -n /staging/etc/crowdsec/* /etc/crowdsec_data/ && rm -rf /staging/etc/crowdsec && ln -s /etc/crowdsec_data /etc/crowdsec && ./docker_start.sh']
-        {{- end }}
         volumeMounts:
           - name: crowdsec-config
             mountPath: /tmp_config
