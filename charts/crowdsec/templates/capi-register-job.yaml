@@ -51,6 +51,25 @@ spec:
                     echo "Central API credentials are already present, skipping registration"
                     exit 0
                 fi
+                # Enroll instance if enroll key is provided
+                if [ "$ENROLL_KEY" != "" ]; then
+                    enroll_args=""
+                    if [ "$ENROLL_INSTANCE_NAME" != "" ]; then
+                        enroll_args="--name $ENROLL_INSTANCE_NAME"
+                    fi
+                    if [ "$ENROLL_TAGS" != "" ]; then
+                        # shellcheck disable=SC2086
+                        for tag in ${ENROLL_TAGS}; do
+                            enroll_args="$enroll_args --tags $tag"
+                        done
+                    fi
+                    # shellcheck disable=SC2086
+                    cscli console enroll $enroll_args "$ENROLL_KEY"
+                fi
+          env:
+        {{- with .Values.capi-register.env }}
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
           volumeMounts:
             - name: {{ .Release.Name }}-capi-credentials-volume
               mountPath: /etc/crowdsec/online_api_credentials.yaml
