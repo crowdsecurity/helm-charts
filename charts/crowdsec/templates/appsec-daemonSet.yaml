@@ -95,7 +95,6 @@ spec:
             value: "true"
           - name: LOCAL_API_URL
             value: http://{{ .Release.Name }}-service.{{ .Release.Namespace }}:8080
-
         {{- with .Values.appsec.env }}
           {{- toYaml . | nindent 10 }}
         {{- end }}
