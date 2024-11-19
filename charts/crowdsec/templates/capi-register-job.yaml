@@ -69,7 +69,7 @@ spec:
                             done
                         fi
                         # shellcheck disable=SC2086
-                        cscli console enroll -c /tmp/online_api_credentials.yaml $enroll_args "$ENROLL_KEY"
+                        #cscli console enroll -c /tmp/online_api_credentials.yaml $enroll_args "$ENROLL_KEY"
                     fi
                 else
                     echo "Central API credentials are already present, skipping registration"
@@ -87,7 +87,7 @@ spec:
                             done
                         fi
                         # shellcheck disable=SC2086
-                        cscli console enroll -c /etc/crowdsec/online_api_credentials.yaml $enroll_args "$ENROLL_KEY"
+                        #cscli console enroll -c /etc/crowdsec/online_api_credentials.yaml $enroll_args "$ENROLL_KEY"
                     fi
                 fi
                 
