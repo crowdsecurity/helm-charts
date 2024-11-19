@@ -303,6 +303,24 @@ if istrue "$DISABLE_ONLINE_API"; then
     conf_set 'del(.api.server.online_client)'
 fi
 
+if isfalse "$DISABLE_LOCAL_API" && isfalse "$DISABLE_ONLINE_API" ; then
+    CONFIG_DIR=$(conf_get '.config_paths.config_dir')
+    export CONFIG_DIR
+    config_exists=$(conf_get '.api.server.online_client | has("credentials_path")')
+    if isfalse "$config_exists"; then
+        # no CAPI config in the pod (either 1st run with volume, or any run with CAPI creds stored in secrets)
+        # check if we have a login in online_api_credentials.yaml
+        # if we don't, register to the online API
+        conf_set '.api.server.online_client = {"credentials_path": strenv(CONFIG_DIR) + "/online_api_credentials.yaml"}'
+        has_login=$(conf_get ".login"  "$CONFIG_DIR/online_api_credentials.yaml")
+        if [ "$has_login" = "null" ] || [ -z "$has_login" ]; then
+            echo "Registering to online API"
+            cscli capi register
+            echo "Registration to online API done"
+        fi
+    fi
+fi
+
 # Enroll instance if enroll key is provided
 if isfalse "$DISABLE_LOCAL_API" && isfalse "$DISABLE_ONLINE_API" && [ "$ENROLL_KEY" != "" ]; then
     enroll_args=""
