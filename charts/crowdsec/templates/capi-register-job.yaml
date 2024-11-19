@@ -67,9 +67,9 @@ spec:
                     cscli console enroll $enroll_args "$ENROLL_KEY"
                 fi
           env:
-        {{- with .Values.capi-register.env }}
-          {{- toYaml . | nindent 10 }}
-        {{- end }}
+          {{- with .Values.capi-register.env }}
+            {{- toYaml . | nindent 10 }}
+          {{- end }}
           volumeMounts:
             - name: {{ .Release.Name }}-capi-credentials-volume
               mountPath: /etc/crowdsec/online_api_credentials.yaml
