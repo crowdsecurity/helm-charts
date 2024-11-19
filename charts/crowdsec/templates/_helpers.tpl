@@ -118,3 +118,17 @@ true
 {{- end -}}
 {{- $IsCAPIDisabled }}
 {{- end }}
+
+{{/*
+  Provide a default value for StoreCAPICredentialsInSecret. 
+  If StoreCAPICredentialsInSecret is not set in the values, and there's no persistency for the LAPI config, defaults to true
+*/}}
+{{ define "StoreCAPICredentialsInSecret" }}
+{{- if .Values.lapi.storeCAPICredentialsInSecret -}}
+true
+{{- else if (and (not .Values.lapi.storeCAPICredentialsInSecret) (not .Values.lapi.persistentVolume.config.enabled)) -}}
+true
+{{- else -}}
+false
+{{- end -}}
+{{- end -}}

@@ -198,7 +198,7 @@ spec:
             protocol: TCP
           {{- end }}
         {{ if .Values.lapi.persistentVolume.config.enabled }}
-        command: ['sh', '-c', 'cp -R /staging/etc/crowdsec/* /etc/crowdsec_data/ && ln -s /etc/crowdsec_data /etc/crowdsec && bash /docker_start.sh']
+        command: ['sh', '-c', 'cp -nR /staging/etc/crowdsec/* /etc/crowdsec_data/ && ln -s /etc/crowdsec_data /etc/crowdsec && bash /docker_start.sh']
         {{ end }}
         {{- if .Values.lapi.lifecycle }}
         lifecycle:
@@ -209,7 +209,7 @@ spec:
             mountPath: /docker_start.sh
             subPath: docker_start.sh
           {{- if not (eq (include "IsOnlineAPIDisabled" .) "true") }}
-          {{- if .Values.lapi.storeCAPICredentialsInSecret }}
+          {{- if eq (include "StoreCAPICredentialsInSecret" .) "true" }}
           - name: {{ .Release.Name }}-capi-credentials-volume
             mountPath: /staging/etc/crowdsec/online_api_credentials.yaml
             subPath: online_api_credentials.yaml
@@ -336,7 +336,7 @@ spec:
         configMap:
           name: crowdsec-docker-start-script-configmap
       {{- if not (eq (include "IsOnlineAPIDisabled" .) "true") }}
-      {{- if .Values.lapi.storeCAPICredentialsInSecret }}
+      {{- if eq (include "StoreCAPICredentialsInSecret" .) "true" }}
       - name: {{ .Release.Name }}-capi-credentials-volume
         secret:
           secretName: {{ .Release.Name }}-capi-credentials
