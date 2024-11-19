@@ -52,6 +52,13 @@ spec:
                 fi
                 # Enroll instance if enroll key is provided
                 if [ "$ENROLL_KEY" != "" ]; then
+                    index_modification_time=$(stat -c %Y /etc/crowdsec/hub/.index.json 2>/dev/null)
+                    # Run cscli hub update if no date or if the index file is older than 24h
+                    if [ -z "$index_modification_time" ] || [ $(( $(date +%s) - index_modification_time )) -gt 86400 ]; then
+                        cscli hub update --with-content
+                    else
+                        echo "Skipping hub update, index file is recent"
+                    fi
                     echo "Enroll console"
                     enroll_args=""
                     if [ "$ENROLL_INSTANCE_NAME" != "" ]; then
