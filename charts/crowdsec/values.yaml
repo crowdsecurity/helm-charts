@@ -83,6 +83,16 @@ config:
   # -- General configuration (https://docs.crowdsec.net/docs/configuration/crowdsec_configuration/#configuration-example)
   config.yaml.local: ""
     #   |
+    # api:
+    #   server:
+    #     auto_registration: # Activate if using Appsec
+    #       enabled: true
+    #       token: "${REGISTRATION_TOKEN}" # /!\ Do not modify this variable (auto-generated and handled by the chart)
+    #       allowed_ranges:
+    #         - "127.0.0.1/32"
+    #         - "192.168.0.0/16"
+    #         - "10.0.0.0/8"
+    #         - "172.16.0.0/12"
     # db_config:
     #   type:     postgresql
     #   user:     crowdsec
@@ -288,9 +298,9 @@ lapi:
     type: Recreate
 
   secrets:
-    # -- Shared LAPI secret. Size must be > 64 characters
+    # -- Shared LAPI secret. Will be generated randomly if not specified. Size must be > 64 characters
     csLapiSecret: ""
-    # -- Shared LAPI registrationToken. Size must be > 48 characters
+    # -- Registration Token for agents. Will be generated randomly if not specified. Size must be > 48 characters
     registrationToken: ""
   # -- Any extra secrets you may need (for example, external DB password)
   extraSecrets: {}
