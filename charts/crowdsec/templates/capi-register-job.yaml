@@ -49,10 +49,10 @@ spec:
                     kubectl -n {{ .Release.Namespace }} patch secret {{ .Release.Name }}-capi-credentials --type json -p "$PATCH"
                 else
                     echo "Central API credentials are already present, skipping registration"
-                    exit 0
                 fi
                 # Enroll instance if enroll key is provided
                 if [ "$ENROLL_KEY" != "" ]; then
+                    echo "Enroll console"
                     enroll_args=""
                     if [ "$ENROLL_INSTANCE_NAME" != "" ]; then
                         enroll_args="--name $ENROLL_INSTANCE_NAME"
