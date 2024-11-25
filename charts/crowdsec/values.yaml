@@ -275,7 +275,7 @@ lapi:
 
   # -- Enable service monitoring (exposes "metrics" port "6060" for Prometheus)
   metrics:
-    enabled: false
+    enabled: true
     # -- Creates a ServiceMonitor so Prometheus will monitor this service
     # -- Prometheus needs to be configured to watch on all namespaces for ServiceMonitors
     # -- See the documentation: https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack#prometheusioscrape
@@ -307,6 +307,19 @@ lapi:
 
 # agent will deploy pod on every node as daemonSet to read wanted pods logs
 agent:
+  # -- Switch to Deployment instead of DaemonSet (In some cases, you may want to deploy the agent as a Deployment)
+  isDeployment: false
+  # -- replicas for agent if isDeployment is set to true
+  replicas: 1
+  # -- strategy for agent if isDeployment is set to true
+  strategy:
+    type: Recreate
+  
+  # -- add your custom ports here, by default we expose port 6060 for metrics if metrics is enabled
+  ports: []
+    # - name: http-datasource
+    #   containerPort: 8080
+    #   protocol: TCP
   # -- To add custom acquisitions using available datasources (https://docs.crowdsec.net/docs/next/data_sources/intro)
   additionalAcquisition: []
     # - source: kinesis
@@ -318,21 +331,21 @@ agent:
     #   listen_port: 4242
     #   labels:
     #     type: syslog
-  acquisition:
-    # -- Specify each pod you want to process it logs (namespace, podName and program)
-    - namespace: "" #ingress-nginx
+  # -- Specify each pod you want to process it logs (namespace, podName and program)
+  acquisition: []
+    #- namespace: "" #ingress-nginx
       # -- to select pod logs to process
-      podName: "" #ingress-nginx-controller-*
+    #  podName: "" #ingress-nginx-controller-*
       # -- program name related to specific parser you will use (see https://hub.crowdsec.net/author/crowdsecurity/configurations/docker-logs)
-      program: "" #nginx
+    #  program: "" #nginx
       # -- If set to true, will poll the files using os.Stat instead of using inotify
-      poll_without_inotify: false
+    #  poll_without_inotify: false
 
   # -- pod priority class name
   priorityClassName: ""
 
-  # -- Annotations to be added to agent daemonset
-  daemonsetAnnotations: {}
+  # -- Annotations to be added to agent daemonset/deployment
+  Annotations: {}
 
   # -- Annotations to be added to agent pods, if global podAnnotations are not set
   podAnnotations: {}
@@ -458,6 +471,13 @@ agent:
     loadBalancerIP: null
     loadBalancerClass: null
     externalTrafficPolicy: Cluster
+    # -- ports for agent service, if metrics is enabled, it will expose port 6060 by default
+    ports: []
+      ## add your custom ports here following specific datasource like https://docs.crowdsec.net/docs/next/data_sources/http/
+      # - port: 8080
+      #   targetPort: 8080
+      #   protocol: TCP
+      #   name: http-datasource
 
   # -- wait-for-lapi init container
   wait_for_lapi:

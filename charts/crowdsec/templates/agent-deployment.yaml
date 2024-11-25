@@ -1,10 +1,8 @@
 # vim: set ft=gotmpl:
 ---
-
-{{- if not .Values.agent.isDeployment}}
-
+{{- if .Values.agent.isDeployment}}
 apiVersion: apps/v1
-kind: DaemonSet
+kind: Deployment
 metadata:
   name: {{ .Release.Name }}-agent
   labels:
@@ -16,6 +14,8 @@ metadata:
 {{ toYaml .Values.agent.Annotations | trim | indent 4 }}
   {{- end }}
 spec:
+  replicas: {{ .Values.agent.replicas }}
+  strategy: {{- toYaml .Values.agent.strategy | nindent 4 }}
   selector:
     matchLabels:
       k8s-app: {{ .Release.Name }}
@@ -120,12 +120,16 @@ spec:
         {{- end }}
         resources:
           {{- toYaml .Values.agent.resources | nindent 10 }}
-        {{ if .Values.agent.metrics.enabled }}
+        {{- if or .Values.agent.ports .Values.agent.metrics.enabled }}
         ports:
+        {{- end }}
+        {{- with .Values.agent.ports }}
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{ if .Values.agent.metrics.enabled }}
           - name: metrics
             containerPort: 6060
             protocol: TCP
-
         {{/* Probes depend on the metrics port, there is no other service on the log processor */}}
 
         {{ if .Values.agent.livenessProbe }}
@@ -140,7 +144,6 @@ spec:
         startupProbe:
 {{ toYaml .Values.agent.startupProbe | indent 10 }}
         {{ end }}
-
         {{ end }}
 
         securityContext:
@@ -295,5 +298,4 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       priorityClassName: {{ .Values.agent.priorityClassName }}
-
-{{- end -}}
+{{- end }}

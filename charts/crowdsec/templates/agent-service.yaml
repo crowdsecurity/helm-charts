@@ -1,7 +1,7 @@
 # vim: set ft=gotmpl:
 ---
 
-{{- if .Values.agent.metrics.enabled }}
+{{- if or .Values.agent.service.ports .Values.agent.metrics.enabled }}
 apiVersion: v1
 kind: Service
 metadata:
@@ -31,10 +31,15 @@ spec:
   externalTrafficPolicy: {{ .Values.agent.service.externalTrafficPolicy | quote }}
   {{- end }}
   ports:
+    {{- with .Values.agent.service.ports }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- if .Values.agent.metrics.enabled }}
     - port: 6060
       targetPort: 6060
       protocol: TCP
       name: metrics
+  {{- end }}
   selector:
     k8s-app: {{ .Release.Name }}
     type: agent
