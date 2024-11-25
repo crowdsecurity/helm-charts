@@ -344,8 +344,10 @@ agent:
   # -- pod priority class name
   priorityClassName: ""
 
-  # -- Annotations to be added to agent daemonset/deployment
-  Annotations: {}
+  # -- Annotations to be added to agent daemonset
+  daemonsetAnnotations: {}
+  # -- Annotations to be added to agent deployment
+  deploymentAnnotations: {}
 
   # -- Annotations to be added to agent pods, if global podAnnotations are not set
   podAnnotations: {}

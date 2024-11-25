@@ -11,9 +11,9 @@ metadata:
     k8s-app: {{ .Release.Name }}
     type: agent
     version: v1
-  {{- if .Values.agent.Annotations }}
+  {{- if .Values.agent.daemonsetAnnotations }}
   annotations:
-{{ toYaml .Values.agent.Annotations | trim | indent 4 }}
+{{ toYaml .Values.agent.daemonsetAnnotations | trim | indent 4 }}
   {{- end }}
 spec:
   selector:

@@ -9,9 +9,9 @@ metadata:
     k8s-app: {{ .Release.Name }}
     type: agent
     version: v1
-  {{- if .Values.agent.Annotations }}
+  {{- if .Values.agent.deploymentAnnotations }}
   annotations:
-{{ toYaml .Values.agent.Annotations | trim | indent 4 }}
+{{ toYaml .Values.agent.deploymentAnnotations | trim | indent 4 }}
   {{- end }}
 spec:
   replicas: {{ .Values.agent.replicas }}
