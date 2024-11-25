@@ -1,0 +1,53 @@
+### This is a simple example of values.yaml file for crowdsec helm chart to deploy crowdsec agent as a Deployment 
+### with http-datasource enabled with basic_auth and crowdsec lapi.
+
+container_runtime: containerd
+image:
+  tag: v1.6.4
+agent:
+  persistentVolume:
+    config:
+      enabled: false
+  # This enables the agent as a Deployment
+  isDeployment: true
+  # Number of replicas for the agent
+  replicas: 1
+  # Ports for the agent to listen on for the HTTP datasource
+  ports:
+    - name: http-datasource
+      containerPort: 8080
+      protocol: TCP
+  # Service for the agent, exposing the http-datasource port
+  service:
+    ports:
+      - name: http-datasource
+        port: 8080
+        targetPort: 8080
+        protocol: TCP
+  # Additional acquisition for the agent, to enable HTTP datasource with basic_auth
+  # See https://docs.crowdsec.net/docs/next/data_sources/http/ for more details
+  # For production use, make sure to use a secure username and password
+  additionalAcquisition:
+    - source: http
+      listen_addr: "0.0.0.0:8080"
+      path: /test
+      auth_type: basic_auth
+      basic_auth:
+        username: test
+        password: test
+      labels:
+        type: datadog
+  env:
+    - name: PARSERS
+      value: "crowdsecurity/cri-logs"
+    - name: COLLECTIONS
+      value: "crowdsecurity/nginx"
+lapi:
+  replicas: 1
+  dashboard:
+    enabled: false
+  persistentVolume:
+    data:
+      enabled: false
+    config:
+      enabled: false

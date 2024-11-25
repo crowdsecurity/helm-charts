@@ -61,14 +61,14 @@
                             },
                             {
                                 "$ref": "#/definitions/LokiSource"
+                            },
+                            {
+                                "$ref": "#/definitions/HttpSource"
                             }
                         ]
                     }
                 }
             },
-            "required": [
-                "acquisition"
-            ],
             "title": "Agent"
         },
         "Acquisition": {
@@ -76,16 +76,13 @@
             "additionalProperties": false,
             "properties": {
                 "namespace": {
-                    "type": "string",
-                    "minLength": 1
+                    "type": "string"
                 },
                 "podName": {
-                    "type": "string",
-                    "minLength": 1
+                    "type": "string"
                 },
                 "program": {
-                    "type": "string",
-                    "minLength": 1
+                    "type": "string"
                 },
                 "poll_without_inotify": {
                     "type": "boolean",
@@ -520,6 +517,99 @@
             },
             "required": [
                 "source"
+            ]
+        },
+        "HttpSource": {
+            "type": "object",
+            "description": "https://docs.crowdsec.net/docs/next/data_sources/http/",
+            "additionalProperties": false,
+            "properties": {
+                "source": {
+                    "const": "http"
+                },
+                "labels": {
+                    "$ref": "#/definitions/Labels"
+                },
+                "listen_addr": {
+                    "type": "string",
+                    "description": "The address to listen on (e.g., 127.0.0.1:8088)."
+                },
+                "path": {
+                    "type": "string",
+                    "description": "The endpoint path to listen on. Default is /."
+                },
+                "auth_type": {
+                    "type": "string",
+                    "enum": [
+                        "basic_auth",
+                        "headers",
+                        "mtls"
+                    ],
+                    "description": "The authentication type to use."
+                },
+                "basic_auth": {
+                    "type": "object",
+                    "properties": {
+                        "username": {
+                            "type": "string",
+                            "description": "The username to use for basic authentication."
+                        },
+                        "password": {
+                            "type": "string",
+                            "description": "The password to use for basic authentication."
+                        }
+                    },
+                    "required": [
+                        "username",
+                        "password"
+                    ]
+                },
+                "headers": {
+                    "type": "object",
+                    "description": "A list of headers to check for authentication."
+                },
+                "tls": {
+                    "type": "object",
+                    "properties": {
+                        "server_cert": {
+                            "type": "string",
+                            "description": "The server certificate path."
+                        },
+                        "server_key": {
+                            "type": "string",
+                            "description": "The server key path."
+                        },
+                        "ca_cert": {
+                            "type": "string",
+                            "description": "The CA certificate path."
+                        }
+                    },
+                    "required": [
+                        "server_cert",
+                        "server_key"
+                    ]
+                },
+                "custom_status_code": {
+                    "type": "number",
+                    "description": "The status code to return"
+                },
+                "custom_headers": {
+                    "type": "object",
+                    "description": "A list of headers to return."
+                },
+                "max_body_size": {
+                    "type": "number",
+                    "description": "The maximum size of the body to accept."
+                },
+                "timeout": {
+                    "type": "string",
+                    "description": "The timeout to wait for a request."
+                }
+            },
+            "required": [
+                "source",
+                "listen_addr",
+                "auth_type"
             ]
         },
         "KafkaSource": {
