@@ -32,18 +32,10 @@ jobs:
       - name: Run chart-testing (lint)
         run: helm lint ./charts/crowdsec/ -f ./charts/crowdsec/ci/crowdsec-values.yaml
 
-      - name: mkdir /tmp/stacktraces
-        run: mkdir -p /tmp/stacktraces
-
       - name: Create kind cluster
         uses: helm/kind-action@v1.4.0
-        with:
-            config: ./.github/kind.yaml
 
       - name: Run chart-testing (install)
         run: |
-          ct install --charts ./charts/crowdsec || true
-      
-      - name: cat
-        run: cat /tmp/stacktraces/*
+          ct install --charts ./charts/crowdsec || cat /var/lib/crowdsec/data/trace/*.txt 
           
