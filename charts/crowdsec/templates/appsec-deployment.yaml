@@ -104,7 +104,7 @@ spec:
         volumeMounts:
           - name: crowdsec-config
             mountPath: /tmp_config
-          - name: appsec-stracktraces
+          - name: appsec-stacktraces
             mountPath: /var/lib/crowdsec/data/trace
           - name: appsec-acquis-config-volume
             mountPath: /etc/crowdsec/acquis.yaml
@@ -201,6 +201,6 @@ spec:
             path: {{ $fileName }}
       {{- end }}
       {{- end }}
-    - name: appsec-stacktraces
-      hostPath: /stacktraces
+      - name: appsec-stacktraces
+        hostPath: /stacktraces
 {{- end }}
