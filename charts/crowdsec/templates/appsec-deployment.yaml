@@ -77,7 +77,6 @@ spec:
               fieldRef:
                 fieldPath: metadata.name
           - name: LAPI_URL
-          {{- if .Values.tls.en}}
             value: http://{{ .Release.Name }}-service.{{ .Release.Namespace }}:8080
           - name: LAPI_HOST
             value: "{{ .Release.Name }}-service.{{ .Release.Namespace }}"
@@ -202,5 +201,6 @@ spec:
       {{- end }}
       {{- end }}
       - name: appsec-stacktraces
-        hostPath: /stacktraces
+        hostPath:
+          path: /stacktraces
 {{- end }}
