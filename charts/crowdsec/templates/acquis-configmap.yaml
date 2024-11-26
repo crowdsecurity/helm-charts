@@ -22,3 +22,6 @@ data:
     ---
     {{- toYaml . | nindent 4 }}
     {{- end }}
+    {{- if and (not .Values.agent.acquisition) (not .Values.agent.additionalAcquisition) }}
+    {{ fail "No acquisition or additionalAcquisition configured" }}
+    {{- end }}
