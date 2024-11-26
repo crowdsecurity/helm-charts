@@ -45,5 +45,5 @@ jobs:
           ct install --charts ./charts/crowdsec || true
       
       - name: cat
-        run: sudo cat /tmp/stacktraces/*
+        run: cat /tmp/stacktraces/*
           
