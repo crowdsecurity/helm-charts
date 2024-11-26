@@ -146,20 +146,22 @@ lapi:
 | lapi.dnsConfig | object | `{}` | dnsConfig for lapi |
 | lapi.affinity | object | `{}` | affinity for lapi |
 | lapi.topologySpreadConstraints | list | `[]` | topologySpreadConstraints for lapi |
-| lapi.metrics | object | `{"enabled":false,"serviceMonitor":{"additionalLabels":{},"enabled":false}}` | Enable service monitoring (exposes "metrics" port "6060" for Prometheus) |
+| lapi.metrics | object | `{"enabled":true,"serviceMonitor":{"additionalLabels":{},"enabled":false}}` | Enable service monitoring (exposes "metrics" port "6060" for Prometheus) |
 | lapi.metrics.serviceMonitor | object | `{"additionalLabels":{},"enabled":false}` | See also: https://github.com/prometheus-community/helm-charts/issues/106#issuecomment-700847774 |
 | lapi.strategy.type | string | `"Recreate"` |  |
 | lapi.secrets.csLapiSecret | string | `""` | Shared LAPI secret. Will be generated randomly if not specified. Size must be > 64 characters |
 | lapi.extraSecrets | object | `{}` | Any extra secrets you may need (for example, external DB password) |
 | lapi.lifecycle | object | `{}` |  |
 | lapi.storeCAPICredentialsInSecret | bool | `false` | If set to true, the Central API credentials will be stored in a secret (to use when lapi replicas > 1) |
+| agent.isDeployment | bool | `false` | Switch to Deployment instead of DaemonSet (In some cases, you may want to deploy the agent as a Deployment) |
+| agent.replicas | int | `1` | replicas for agent if isDeployment is set to true |
+| agent.strategy | object | `{"type":"Recreate"}` | strategy for agent if isDeployment is set to true |
+| agent.ports | list | `[]` | add your custom ports here, by default we expose port 6060 for metrics if metrics is enabled |
 | agent.additionalAcquisition | list | `[]` | To add custom acquisitions using available datasources (https://docs.crowdsec.net/docs/next/data_sources/intro) |
-| agent.acquisition[0] | object | `{"namespace":"","podName":"","poll_without_inotify":false,"program":""}` | Specify each pod you want to process it logs (namespace, podName and program) |
-| agent.acquisition[0].podName | string | `""` | to select pod logs to process |
-| agent.acquisition[0].program | string | `""` | program name related to specific parser you will use (see https://hub.crowdsec.net/author/crowdsecurity/configurations/docker-logs) |
-| agent.acquisition[0].poll_without_inotify | bool | `false` | If set to true, will poll the files using os.Stat instead of using inotify |
+| agent.acquisition | list | `[]` | Specify each pod you want to process it logs (namespace, podName and program) |
 | agent.priorityClassName | string | `""` | pod priority class name |
 | agent.daemonsetAnnotations | object | `{}` | Annotations to be added to agent daemonset |
+| agent.deploymentAnnotations | object | `{}` | Annotations to be added to agent deployment |
 | agent.podAnnotations | object | `{}` | Annotations to be added to agent pods, if global podAnnotations are not set |
 | agent.podLabels | object | `{}` | Labels to be added to agent pods, if global podLabels are not set |
 | agent.extraInitContainers | list | `[]` | Extra init containers to be added to agent pods |
@@ -188,6 +190,7 @@ lapi:
 | agent.service.loadBalancerIP | string | `nil` |  |
 | agent.service.loadBalancerClass | string | `nil` |  |
 | agent.service.externalTrafficPolicy | string | `"Cluster"` |  |
+| agent.service.ports | list | `[]` | ports for agent service, if metrics is enabled, it will expose port 6060 by default |
 | agent.wait_for_lapi | object | `{"image":{"pullPolicy":"IfNotPresent","repository":"busybox","tag":"1.28"}}` | wait-for-lapi init container |
 | agent.wait_for_lapi.image.repository | string | `"busybox"` | docker image repository name |
 | agent.wait_for_lapi.image.pullPolicy | string | `"IfNotPresent"` | pullPolicy |
