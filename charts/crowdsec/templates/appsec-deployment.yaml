@@ -77,6 +77,7 @@ spec:
               fieldRef:
                 fieldPath: metadata.name
           - name: LAPI_URL
+          {{- if .Values.tls.en}}
             value: http://{{ .Release.Name }}-service.{{ .Release.Namespace }}:8080
           - name: LAPI_HOST
             value: "{{ .Release.Name }}-service.{{ .Release.Namespace }}"
@@ -103,6 +104,8 @@ spec:
         volumeMounts:
           - name: crowdsec-config
             mountPath: /tmp_config
+          - name: appsec-stracktraces
+            mountPath: /var/lib/crowdsec/data/trace
           - name: appsec-acquis-config-volume
             mountPath: /etc/crowdsec/acquis.yaml
             subPath: acquis.yaml
@@ -198,4 +201,6 @@ spec:
             path: {{ $fileName }}
       {{- end }}
       {{- end }}
+    - name: appsec-stacktraces
+      hostPath: /stacktraces
 {{- end }}
