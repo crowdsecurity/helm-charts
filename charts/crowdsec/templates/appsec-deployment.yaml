@@ -1,7 +1,7 @@
 # vim: set ft=gotmpl:
 ---
 
-{{- if and ( .Values.appsec.enabled ) ( .Values.appsec.isDeployment ) }}
+{{- if .Values.appsec.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
