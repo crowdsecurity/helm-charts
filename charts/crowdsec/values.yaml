@@ -507,6 +507,14 @@ agent:
 appsec:
   # -- Enable AppSec (by default disabled)
   enabled: false
+  # -- Switch to Deployment instead of DaemonSet (In some cases, you may want to deploy Appsec as a Deployment)
+  isDeployment: true
+  # -- replicas for Appsec if isDeployment is set to true
+  replicas: 1
+  # -- strategy for appsec deployment
+  strategy:
+    type: Recreate
+
   # -- Additional acquisitions for AppSec
   acquisitions: []
     #- source: appsec
@@ -551,8 +559,33 @@ appsec:
     #      - cve.CVE-xxxx-xxxxx
     #      - attack.Txxxx 
 
+  # -- priorityClassName for appsec pods
+  priorityClassName: ""
+  # -- Annotations to be added to appsec daemonset
+  daemonsetAnnotations: {}
+  # -- Annotations to be added to appsec deployment
+  deploymentAnnotations: {}
+  # -- podAnnotations for appsec pods
+  podAnnotations: {}
+  # -- podLabels for appsec pods
+  podLabels: {}
+  # -- extraInitContainers for appsec pods
+  extraInitContainers: []
+  # -- Extra volumes to be added to appsec pods
+  extraVolumes: []
+  # -- Extra volumeMounts to be added to appsec pods
+  extraVolumeMounts: []
+  # -- resources for appsec pods
+  resources:
+    limits:
+      memory: 250Mi
+      cpu: 500m
+    requests:
+      cpu: 500m
+      memory: 250Mi
+
   # -- environment variables
-  env:
+  env: []
     # -- COLLECTIONS to install, separated by space (value: "crowdsecurity/appsec-virtual-patching crowdsecurity/appsec-crs")
     #- name: COLLECTIONS
     #  value: "crowdsecurity/appsec-virtual-patching"
@@ -569,33 +602,45 @@ appsec:
     #- name: DISABLE_APPSEC_CONFIGS
     #  value: ""
 
-  # -- appsec deployment annotations
-  deployAnnotations: {}
-  # -- strategy for appsec deployment
-  strategy:
-    type: Recreate
-  # -- podAnnotations for appsec deployment
-  podAnnotations: {}
-  # -- podLabels for appsec deployment
-  podLabels: {}
-  # -- tolerations for appsec deployment
-  tolerations: []
-  # -- nodeSelector for appsec deployment
+  # -- nodeSelector for appsec
   nodeSelector: {}
-  # -- affinity for appsec deployment
+
+  # -- tolerations for appsec
+  tolerations: []
+  # -- affinity for appsec
   affinity: {}
-  # -- priorityClassName for appsec deployment
-  priorityClassName: ""
-  # -- extraInitContainers for appsec deployment
-  extraInitContainers: []
-  # -- resources for appsec deployment
-  resources:
-    limits:
-      memory: 250Mi
-      cpu: 500m
-    requests:
-      cpu: 500m
-      memory: 250Mi
+  
+  # -- livenessProbe for appsec
+  livenessProbe:
+    httpGet:
+      path: /metrics
+      port: metrics
+      scheme: HTTP
+    periodSeconds: 10
+    successThreshold: 1
+    timeoutSeconds: 5
+    failureThreshold: 3
+  # -- readinessProbe for appsec
+  readinessProbe:
+    httpGet:
+      path: /metrics
+      port: metrics
+      scheme: HTTP
+    periodSeconds: 10
+    successThreshold: 1
+    timeoutSeconds: 5
+    failureThreshold: 3
+  # -- startupProbe for appsec
+  startupProbe:
+    httpGet:
+      path: /metrics
+      port: metrics
+      scheme: HTTP
+    periodSeconds: 10
+    successThreshold: 1
+    timeoutSeconds: 5
+    failureThreshold: 30
+
   # -- Enable service monitoring (exposes "metrics" port "6060" for Prometheus and "7422" for AppSec) 
   metrics:
     enabled: true
