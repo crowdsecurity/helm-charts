@@ -23,7 +23,6 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/agent-secret: {{ include (print $.Template.BasePath "/secrets.yaml") . | sha256sum }}
         checksum/agent-configmap: {{ include (print $.Template.BasePath "/agent-configmap.yaml") . | sha256sum }}
         checksum/acquis-configmap: {{ include (print $.Template.BasePath "/acquis-configmap.yaml") . | sha256sum }}
         {{- if .Values.podAnnotations }}
@@ -51,10 +50,17 @@ spec:
 {{ toYaml .Values.image.pullSecrets | indent 8 }}
       {{- end }}
       initContainers:
+      {{- if or (not .Values.tls.enabled) (not .Values.tls.agent.tlsClientAuth) }}
+      - name: wait-for-lapi-and-register
+        image: "{{ .Values.image.repository | default "crowdsecurity/crowdsec" }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        command: ['sh', '-c', 'until nc "$LAPI_HOST" "$LAPI_PORT" -z; do echo waiting for lapi to start; sleep 5; done; ln -s /staging/etc/crowdsec /etc/crowdsec && cscli lapi register --machine "$USERNAME" -u $LAPI_URL --token "$REGISTRATION_TOKEN" && cp /etc/crowdsec/local_api_credentials.yaml /tmp_config/local_api_credentials.yaml']
+      {{- else }}
       - name: wait-for-lapi
         image: "{{ .Values.agent.wait_for_lapi.image.repository }}:{{ .Values.agent.wait_for_lapi.image.tag }}"
         imagePullPolicy: {{ .Values.agent.wait_for_lapi.image.pullPolicy }}
         command: ['sh', '-c', "until nc {{ .Release.Name }}-service.{{ .Release.Namespace }} 8080 -z; do echo waiting for lapi to start; sleep 5; done"]
+      {{- end }}
         resources:
           limits:
             memory: 50Mi
@@ -64,6 +70,27 @@ spec:
         securityContext:
           allowPrivilegeEscalation: false
           privileged: false
+        {{- if or (not .Values.tls.enabled) (not .Values.tls.agent.tlsClientAuth) }}
+        volumeMounts:
+          - name: crowdsec-config
+            mountPath: /tmp_config
+        env:
+          - name: REGISTRATION_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: crowdsec-lapi-secrets
+                key: registrationToken
+          - name: USERNAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+          - name: LAPI_URL
+            value: http://{{ .Release.Name }}-service.{{ .Release.Namespace }}:8080
+          - name: LAPI_HOST
+            value: "{{ .Release.Name }}-service.{{ .Release.Namespace }}"
+          - name: LAPI_PORT
+            value: "8080"
+        {{- end }}
       {{- if .Values.agent.extraInitContainers }}
       {{- toYaml .Values.agent.extraInitContainers | nindent 6 }}
       {{- end }}
@@ -71,6 +98,9 @@ spec:
       - name: crowdsec-agent
         image: "{{ .Values.image.repository | default "crowdsecurity/crowdsec" }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
+        {{- if or (not .Values.tls.enabled) (not .Values.tls.agent.tlsClientAuth) }}
+        command: ['sh', '-c', 'cp /tmp_config/local_api_credentials.yaml /staging/etc/crowdsec/local_api_credentials.yaml && ./docker_start.sh']
+        {{- end }}
         env:
           - name: DISABLE_LOCAL_API
             value: "true"
@@ -97,18 +127,6 @@ spec:
           {{- else }}
           - name: LOCAL_API_URL
             value: http://{{ .Release.Name }}-service.{{ .Release.Namespace }}:8080
-          {{- end }}
-          {{- if or (not .Values.tls.enabled) (not .Values.tls.agent.tlsClientAuth) }}
-          - name: AGENT_USERNAME
-            valueFrom:
-              secretKeyRef:
-                name: agent-credentials
-                key: username
-          - name: AGENT_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                name: agent-credentials
-                key: password
           {{- end }}
           {{- if .Values.tls.insecureSkipVerify }}
           - name: INSECURE_SKIP_VERIFY
@@ -154,6 +172,10 @@ spec:
         command: ['sh', '-c', 'mv -n /staging/etc/crowdsec/* /etc/crowdsec_data/ && rm -rf /staging/etc/crowdsec && ln -s /etc/crowdsec_data /etc/crowdsec && ./docker_start.sh']
         {{- end }}
         volumeMounts:
+          {{- if or (not .Values.tls.enabled) (not .Values.tls.agent.tlsClientAuth) }}
+          - name: crowdsec-config
+            mountPath: /tmp_config
+          {{- end }}
           {{- $crowdsecConfig := "/etc/crowdsec" -}}
           {{- if .Values.agent.persistentVolume.config.enabled -}}
           {{- $crowdsecConfig = "/etc/crowdsec_data" }}
@@ -197,6 +219,10 @@ spec:
           - name: acquis-config-volume
             mountPath: {{ $crowdsecConfig }}/acquis.yaml
             subPath: acquis.yaml
+          {{- if or (not .Values.tls.enabled) (not .Values.tls.agent.tlsClientAuth) }}
+          - name: crowdsec-config
+            emptyDir: {}
+          {{- end }}
           {{- if .Values.agent.hostVarLog }}
           - name: varlog
             mountPath: /var/log
