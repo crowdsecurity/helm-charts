@@ -27,7 +27,6 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/agent-secret: {{ include (print $.Template.BasePath "/secrets.yaml") . | sha256sum }}
         checksum/lapi-secret: {{ include (print $.Template.BasePath "/lapi-secrets.yaml") . | sha256sum }}
         checksum/lapi-configmap: {{ include (print $.Template.BasePath "/lapi-configmap.yaml") . | sha256sum }}
         {{- if .Values.podAnnotations }}
@@ -81,18 +80,6 @@ spec:
           {{- else }}
           - name: LOCAL_API_URL
             value: http://localhost:8080
-          {{- end }}
-          {{- if or (not .Values.tls.enabled) (not .Values.tls.agent.tlsClientAuth) }}
-          - name: AGENT_USERNAME
-            valueFrom:
-              secretKeyRef:
-                name: agent-credentials
-                key: username
-          - name: AGENT_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                name: agent-credentials
-                key: password
           {{- end }}
           - name: DISABLE_AGENT
             value: "true"
