@@ -219,10 +219,6 @@ spec:
           - name: acquis-config-volume
             mountPath: {{ $crowdsecConfig }}/acquis.yaml
             subPath: acquis.yaml
-          {{- if or (not .Values.tls.enabled) (not .Values.tls.agent.tlsClientAuth) }}
-          - name: crowdsec-config
-            emptyDir: {}
-          {{- end }}
           {{- if .Values.agent.hostVarLog }}
           - name: varlog
             mountPath: /var/log
@@ -242,6 +238,10 @@ spec:
           {{- end }}
       terminationGracePeriodSeconds: 30
       volumes:
+      {{- if or (not .Values.tls.enabled) (not .Values.tls.agent.tlsClientAuth) }}
+      - name: crowdsec-config
+        emptyDir: {}
+      {{- end }}
       - name: acquis-config-volume
         configMap:
           name: acquis-configmap
