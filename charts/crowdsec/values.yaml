@@ -290,6 +290,8 @@ lapi:
   secrets:
     # -- Shared LAPI secret. Will be generated randomly if not specified. Size must be > 64 characters
     csLapiSecret: ""
+    # -- Registration Token for Appsec. Will be generated randomly if not specified. Size must be > 48 characters
+    registrationToken: ""
   # -- Any extra secrets you may need (for example, external DB password)
   extraSecrets: {}
     # dbPassword: randomPass
