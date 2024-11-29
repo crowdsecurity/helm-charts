@@ -53,7 +53,7 @@ Generate registrationToken if not specified in values
   {{- $obj := (lookup "v1" "Secret" .Release.Namespace "crowdsec-lapi-secrets").data -}}
   {{- index $obj "registrationToken" | b64dec -}}
 {{- else -}}
-  {{- randAscii 48 -}}
+  {{- randAlphaNum 48 -}}
 {{- end -}}
 {{- end -}}
 
