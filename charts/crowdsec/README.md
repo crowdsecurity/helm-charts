@@ -75,6 +75,147 @@ lapi:
           key: dbPassword
 ```
 
+## Setup for AppSec (WAF)
+
+Below a basic configuration for AppSec (WAF)
+
+```
+# your-values.yaml (option 1)
+appsec:
+  enabled: true
+  acquisitions:
+    - source: appsec
+      listen_addr: "0.0.0.0:7422"
+      path: /
+      appsec_config: crowdsecurity/virtual-patching
+      labels:
+        type: appsec
+  env:
+    - name: COLLECTIONS
+      value: "crowdsecurity/appsec-virtual-patching"
+
+# This allows the LAPI pod to register and communicate with the appsec pod
+config:
+  config.yaml.local: |
+    api:
+      server:
+        auto_registration:
+          enabled: true
+          token: "${REGISTRATION_TOKEN}" # /!\ Do not modify this variable (auto-generated and handled by the chart)
+          allowed_ranges:
+            - "127.0.0.1/32"
+            - "192.168.0.0/16"
+            - "10.0.0.0/8"
+            - "172.16.0.0/12"
+```
+
+Or you can also use your own custom configurations and rules for AppSec:
+
+```
+# your-values.yaml (option 2)
+appsec:
+  enabled: true
+  acquisitions:
+    - source: appsec
+      listen_addr: "0.0.0.0:7422"
+      path: /
+      appsec_config: crowdsecurity/crs-vpatch
+      labels:
+        type: appsec
+  configs:
+    mycustom-appsec-config.yaml: |
+      name: crowdsecurity/crs-vpatch
+      default_remediation: ban
+      #log_level: debug
+      outofband_rules:
+        - crowdsecurity/crs
+      inband_rules:
+        - crowdsecurity/base-config
+        - crowdsecurity/vpatch-*
+  env:
+    - name: COLLECTIONS
+      value: "crowdsecurity/appsec-virtual-patching crowdsecurity/appsec-crs"
+
+# This allows the LAPI pod to register and communicate with the appsec pod
+config:
+  config.yaml.local: |
+    api:
+      server:
+        auto_registration:
+          enabled: true
+          token: "${REGISTRATION_TOKEN}" # /!\ Do not modify this variable (auto-generated and handled by the chart)
+          allowed_ranges:
+            - "127.0.0.1/32"
+            - "192.168.0.0/16"
+            - "10.0.0.0/8"
+            - "172.16.0.0/12"
+```
+
+### With Traefik
+
+In the traefik `values.yaml`, you need to add the following configuration:
+
+```
+# traefik-values.yaml
+experimental:
+  plugins:
+    crowdsec-bouncer:
+      moduleName: github.com/maxlerebourg/crowdsec-bouncer-traefik-plugin
+      version: v1.3.3
+additionalArguments:
+  - "--entrypoints.web.http.middlewares=<NAMESPACE>-crowdsec-bouncer@kubernetescrd"
+  - "--entrypoints.websecure.http.middlewares=<NAMESPACE>-crowdsec-bouncer@kubernetescrd"
+  - "--providers.kubernetescrd"
+```
+
+And then, you can apply this middleware to your traefik ingress:
+
+```
+# crowdsec-bouncer-middleware.yaml
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: crowdsec-bouncer
+  namespace: default
+spec:
+  plugin:
+    crowdsec-bouncer:
+      enabled: true
+      crowdsecMode: appsec
+      crowdsecAppsecEnabled: true
+      crowdsecAppsecHost: crowdsec-appsec-service:7422
+      crowdsecLapiScheme: http
+      crowdsecLapiHost: crowdsec-service:8080
+      crowdsecLapiKey: "<YOUR_BOUNCER_KEY>"
+```
+
+### With Ingrees Nginx
+
+Following [this documentation](https://docs.crowdsec.net/u/bouncers/ingress-nginx).
+
+In the nginx ingress `upgrade-values.yaml`, you need to add the following configuration:
+
+```
+controller:
+  extraInitContainers:
+    - name: init-clone-crowdsec-bouncer
+      env:
+        - name: APPSEC_URL
+          value: "http://crowdsec-appsec-service.default.svc.cluster.local:7422"
+        - name: APPSEC_FAILURE_ACTION
+          value: "passthrough"
+        - name: APPSEC_CONNECT_TIMEOUT
+          value: "100"
+        - name: APPSEC_SEND_TIMEOUT
+          value: "100"
+        - name: APPSEC_PROCESS_TIMEOUT
+          value: "1000"
+        - name: ALWAYS_SEND_TO_APPSEC
+          value: "false"
+        - name: SSL_VERIFY
+          value: "true"
+```
+
 ## Values
 
 | Key | Type | Default | Description |
@@ -213,4 +354,3 @@ lapi:
 | appsec.resources | object | `{"limits":{"cpu":"500m","memory":"250Mi"},"requests":{"cpu":"500m","memory":"250Mi"}}` | resources for appsec deployment |
 | appsec.metrics | object | `{"enabled":true,"serviceMonitor":{"additionalLabels":{},"enabled":false}}` | Enable service monitoring (exposes "metrics" port "6060" for Prometheus and "7422" for AppSec)  |
 | appsec.metrics.serviceMonitor | object | `{"additionalLabels":{},"enabled":false}` | See also: https://github.com/prometheus-community/helm-charts/issues/106#issuecomment-700847774 |
-
