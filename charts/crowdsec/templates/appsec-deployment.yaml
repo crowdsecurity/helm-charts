@@ -15,12 +15,12 @@ metadata:
   {{ toYaml .Values.appsec.deployAnnotations | trim | indent 4 }}
   {{- end }}
 spec:
-  replicas: 1
+  replicas: {{ .Values.appsec.replicas }}
+  strategy: {{- toYaml .Values.appsec.strategy | nindent 4 }}
   selector:
     matchLabels:
       k8s-app: {{ .Release.Name }}
       type: appsec
-  strategy: {{- toYaml .Values.appsec.strategy | nindent 4 }}
   template:
     metadata:
       annotations:
@@ -100,6 +100,38 @@ spec:
         {{- with .Values.appsec.env }}
           {{- toYaml . | nindent 10 }}
         {{- end }}
+        resources:
+          {{- toYaml .Values.appsec.resources | nindent 10 }}
+        ports:
+          - name: appsec
+            containerPort: 7422
+            protocol: TCP
+          {{- if .Values.appsec.metrics.enabled }}
+          - name: metrics
+            containerPort: 6060
+            protocol: TCP
+
+        {{/* Probes depend on the metrics port, there is no other service on the log processor */}}
+
+        {{ if .Values.appsec.livenessProbe }}
+        livenessProbe:
+{{ toYaml .Values.appsec.livenessProbe | indent 10 }}
+        {{ end }}
+        {{ if .Values.appsec.readinessProbe }}
+        readinessProbe:
+{{ toYaml .Values.appsec.readinessProbe | indent 10 }}
+        {{ end }}
+        {{ if .Values.appsec.startupProbe }}
+        startupProbe:
+{{ toYaml .Values.appsec.startupProbe | indent 10 }}
+        {{ end }}
+
+        {{ end }}
+
+        securityContext:
+          allowPrivilegeEscalation: false
+          privileged: false
+          
         volumeMounts:
           - name: crowdsec-config
             mountPath: /tmp_config
@@ -120,58 +152,12 @@ spec:
             subPath: {{ $fileName }}
           {{- end }}
           {{- end }}
-        resources:
-          {{- toYaml .Values.appsec.resources | nindent 10 }}
-        ports:
-          - name: appsec
-            containerPort: 7422
-            protocol: TCP
-          {{- if .Values.appsec.metrics.enabled }}
-          - name: metrics
-            containerPort: 6060
-            protocol: TCP
+          {{- if .Values.appsec.extraVolumeMounts }}
+          {{ toYaml .Values.appsec.extraVolumeMounts | nindent 10 }}
           {{- end }}
-
-        livenessProbe:
-          failureThreshold: 3
-          periodSeconds: 10
-          successThreshold: 1
-          timeoutSeconds: 5
-          tcpSocket:
-            port: appsec
-        readinessProbe:
-          failureThreshold: 3
-          periodSeconds: 10
-          successThreshold: 1
-          timeoutSeconds: 5
-          tcpSocket:
-            port: appsec
-        startupProbe:
-          failureThreshold: 30
-          periodSeconds: 10
-          successThreshold: 1
-          timeoutSeconds: 5
-          tcpSocket:
-            port: appsec
-
-        securityContext:
-          allowPrivilegeEscalation: false
-          privileged: false
 
         terminationGracePeriodSeconds: 30
 
-       {{- with .Values.appsec.nodeSelector }}
-        nodeSelector:
-          {{- toYaml . | nindent 8 }}
-        {{- end }}
-        {{- with .Values.appsec.affinity }}
-        affinity:
-          {{- toYaml . | nindent 8 }}
-        {{- end }}
-        {{- if .Values.appsec.priorityClassName }}
-        priorityClassName: {{ .Values.appsec.priorityClassName }}
-        {{- end}}
-      
       volumes:
       - name: appsec-acquis-config-volume
         configMap:
@@ -198,4 +184,16 @@ spec:
             path: {{ $fileName }}
       {{- end }}
       {{- end }}
+      {{- if .Values.appsec.extraVolumes }}
+      {{ toYaml .Values.appsec.extraVolumes | nindent 6 }}
+      {{- end }}
+      {{- with .Values.appsec.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.appsec.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      priorityClassName: {{ .Values.appsec.priorityClassName }}
 {{- end }}
