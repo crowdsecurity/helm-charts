@@ -85,7 +85,7 @@ config:
     #   |
     # api:
     #   server:
-    #     auto_registration: # Activate if using Appsec
+    #     auto_registration: # Activate if not using TLS for authentication or when using Appsec
     #       enabled: true
     #       token: "${REGISTRATION_TOKEN}" # /!\ Do not modify this variable (auto-generated and handled by the chart)
     #       allowed_ranges:
