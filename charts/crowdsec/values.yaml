@@ -560,7 +560,7 @@ appsec:
   # -- priorityClassName for appsec pods
   priorityClassName: ""
   # -- Annotations to be added to appsec deployment
-  deploymentAnnotations: {}
+  deployAnnotations: {}
   # -- podAnnotations for appsec pods
   podAnnotations: {}
   # -- podLabels for appsec pods

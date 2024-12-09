@@ -10,9 +10,9 @@ metadata:
     k8s-app: {{ .Release.Name }}
     type: appsec
     version: v1
-  {{- if .Values.appsec.deploymentAnnotations }}
+  {{- if .Values.appsec.deployAnnotations }}
   annotations:
-  {{ toYaml .Values.appsec.deploymentAnnotations | trim | indent 4 }}
+  {{ toYaml .Values.appsec.deployAnnotations | trim | indent 4 }}
   {{- end }}
 spec:
   replicas: {{ .Values.appsec.replicas }}
