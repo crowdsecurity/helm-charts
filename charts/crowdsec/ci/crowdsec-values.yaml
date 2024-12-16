@@ -29,12 +29,6 @@ agent:
         - "_SYSTEMD_UNIT=sshd.service"
       labels:
         type: syslog
-    - source: cloudwatch
-      group_name: /aws/my/group
-      aws_profile: monitoring
-      stream_regexp: "^stream[0-9]+$"
-      labels:
-        type: apigateway
     - source: kinesis
       stream_arn: arn:aws:kinesis:eu-west-1:123456789012:stream/my-stream
       use_enhanced_fanout: true
