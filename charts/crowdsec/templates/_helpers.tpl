@@ -2,34 +2,6 @@
 ---
 
 {{/*
-Generate username if not specified in values
-*/}}
-{{ define "agent.username" }}
-{{- if .Values.secrets.username }}
-  {{- .Values.secrets.username -}}
-{{- else if (lookup "v1" "Secret" .Release.Namespace "agent-credentials").data }}
-  {{- $obj := (lookup "v1" "Secret" .Release.Namespace "agent-credentials").data -}}
-  {{- index $obj "username" | b64dec -}}
-{{- else -}}
-  {{- randAlphaNum 48 -}}
-{{- end -}}
-{{- end -}}
-
-{{/*
-Generate password if not specified in values
-*/}}
-{{ define "agent.password" }}
-{{- if .Values.secrets.password }}
-  {{- .Values.secrets.password -}}
-{{- else if (lookup "v1" "Secret" .Release.Namespace "agent-credentials").data }}
-  {{- $obj := (lookup "v1" "Secret" .Release.Namespace "agent-credentials").data -}}
-  {{- index $obj "password" | b64dec -}}
-{{- else -}}
-  {{- randAlphaNum 48 -}}
-{{- end -}}
-{{- end -}}
-
-{{/*
 Generate CS_LAPI_SECRET if not specified in values
 */}}
 {{ define "lapi.csLapiSecret" }}
@@ -40,6 +12,20 @@ Generate CS_LAPI_SECRET if not specified in values
   {{- index $obj "csLapiSecret" | b64dec -}}
 {{- else -}}
   {{- randAscii 64 -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Generate registrationToken if not specified in values
+*/}}
+{{ define "lapi.registrationToken" }}
+{{- if .Values.lapi.secrets.registrationToken }}
+  {{- .Values.lapi.secrets.registrationToken -}}
+{{- else if (lookup "v1" "Secret" .Release.Namespace "crowdsec-lapi-secrets").data }}
+  {{- $obj := (lookup "v1" "Secret" .Release.Namespace "crowdsec-lapi-secrets").data -}}
+  {{- index $obj "registrationToken" | b64dec -}}
+{{- else -}}
+  {{- randAlphaNum 48 -}}
 {{- end -}}
 {{- end -}}
 
