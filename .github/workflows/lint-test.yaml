@@ -4,10 +4,6 @@ on:
   pull_request:
     branches:
       - main
-    paths:
-      - 'charts/crowdsec/values.yaml'
-      - 'charts/crowdsec/Chart.yaml'
-      - 'charts/crowdsec/templates/**.yaml'
 
 jobs:
   kind:
