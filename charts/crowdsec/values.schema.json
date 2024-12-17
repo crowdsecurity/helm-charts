@@ -64,6 +64,9 @@
                             },
                             {
                                 "$ref": "#/definitions/HttpSource"
+                            },
+                            {
+                                "$ref": "#/definitions/KubernetesSource"
                             }
                         ]
                     }
@@ -815,6 +818,37 @@
                 }
             },
             "required": ["source", "url", "query"]
+        },
+        "KubernetesSource": {
+            "type": "object",
+            "description": "https://docs.crowdsec.net/docs/next/log_processor/data_sources/kubernetes_audit",
+            "additionalProperties": false,
+            "properties": {
+                "source": {
+                    "const": "k8s-audit"
+                },
+                "labels": {
+                    "$ref": "#/definitions/Labels"
+                },
+                "listen_addr": {
+                    "type": "string",
+                    "default": "127.0.0.1",
+                    "description": "Address on which the syslog will listen."
+                },
+                "listen_port": {
+                    "type": "number",
+                    "default": 9876,
+                    "description": "The port on which the datasource will listen."
+                },
+                "webhook_path": {
+                    "type": "string",
+                    "default": "/webhook",
+                    "description": "The path on which the datasource will accept requests from kubernetes."
+                }
+            },
+            "required": [
+                "source"
+            ]
         }
     }
 }
