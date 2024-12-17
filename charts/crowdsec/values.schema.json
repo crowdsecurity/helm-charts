@@ -164,7 +164,7 @@
         },
         "FileSource": {
             "type": "object",
-            "description": "https://docs.crowdsec.net/docs/next/data_sources/file/",
+            "description": "https://docs.crowdsec.net/docs/next/log_processor/data_sources/file/",
             "additionalProperties": false,
             "properties": {
                 "source": {
@@ -213,7 +213,7 @@
         },
         "JournaldSource": {
             "type": "object",
-            "description": "https://docs.crowdsec.net/docs/next/data_sources/journald/",
+            "description": "https://docs.crowdsec.net/docs/next/log_processor/data_sources/journald/",
             "additionalProperties": false,
             "properties": {
                 "source": {
@@ -237,7 +237,7 @@
         },
         "CloudwatchSource": {
             "type": "object",
-            "description": "https://docs.crowdsec.net/docs/next/data_sources/cloudwatch/",
+            "description": "https://docs.crowdsec.net/docs/next/log_processor/data_sources/cloudwatch/",
             "additionalProperties": false,
             "properties": {
                 "source": {
@@ -302,7 +302,7 @@
         },
         "DockerSource": {
             "type": "object",
-            "description": "https://docs.crowdsec.net/docs/next/data_sources/docker/",
+            "description": "https://docs.crowdsec.net/docs/next/log_processor/data_sources/docker/",
             "additionalProperties": false,
             "properties": {
                 "source": {
@@ -397,7 +397,7 @@
         },
         "KinesisSource": {
             "type": "object",
-            "description": "https://docs.crowdsec.net/docs/next/data_sources/kinesis/",
+            "description": "https://docs.crowdsec.net/docs/next/log_processor/data_sources/kinesis/",
             "additionalProperties": false,
             "allOf": [
                 {
@@ -493,7 +493,7 @@
         },
         "SyslogSource": {
             "type": "object",
-            "description": "https://docs.crowdsec.net/docs/next/data_sources/syslog/",
+            "description": "https://docs.crowdsec.net/docs/next/log_processor/data_sources/syslog/",
             "additionalProperties": false,
             "properties": {
                 "source": {
@@ -524,7 +524,7 @@
         },
         "HttpSource": {
             "type": "object",
-            "description": "https://docs.crowdsec.net/docs/next/data_sources/http/",
+            "description": "https://docs.crowdsec.net/docs/next/log_processor/data_sources/http/",
             "additionalProperties": false,
             "properties": {
                 "source": {
@@ -617,7 +617,7 @@
         },
         "KafkaSource": {
             "type": "object",
-            "description": "https://docs.crowdsec.net/docs/next/data_sources/kafka/",
+            "description": "https://docs.crowdsec.net/docs/next/log_processor/data_sources/kafka",
             "additionalProperties": false,
             "properties": {
                 "source": {
@@ -670,7 +670,7 @@
         },
         "WinEventLogSource": {
             "type": "object",
-            "description": "https://docs.crowdsec.net/docs/next/data_sources/windows_evt_log/",
+            "description": "https://docs.crowdsec.net/docs/next/log_processor/data_sources/windows_evt_log/",
             "additionalProperties": false,
             "allOf": [
                 {
@@ -761,7 +761,7 @@
         },
         "LokiSource": {
             "type": "object",
-            "description": "https://docs.crowdsec.net/docs/next/data_sources/loki",
+            "description": "https://docs.crowdsec.net/docs/next/log_processor/data_sources/loki/",
             "properties": {
                 "source": {
                     "const": "loki"
@@ -821,7 +821,7 @@
         },
         "KubernetesSource": {
             "type": "object",
-            "description": "https://docs.crowdsec.net/docs/next/log_processor/data_sources/kubernetes_audit",
+            "description": "https://docs.crowdsec.net/docs/next/log_processor/data_sources/kubernetes_audit/",
             "additionalProperties": false,
             "properties": {
                 "source": {
