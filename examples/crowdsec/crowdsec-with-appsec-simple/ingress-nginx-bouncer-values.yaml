@@ -1,0 +1,36 @@
+controller:
+  extraVolumes:
+  - name: crowdsec-bouncer-plugin
+    emptyDir: {}
+  extraInitContainers:
+  - name: init-clone-crowdsec-bouncer
+    image: crowdsecurity/lua-bouncer-plugin
+    imagePullPolicy: IfNotPresent
+    env:
+      - name: API_URL
+        value: "http://crowdsec-service.default.svc.cluster.local:8080" # crowdsec lapi service-name
+      - name: API_KEY
+        value: "abcdefgh<MY_BOUNCER_KEY>abcdefgh" # generated with `cscli bouncers add -n <bouncer_name>
+      - name: BOUNCER_CONFIG
+        value: "/crowdsec/crowdsec-bouncer.conf"
+      - name: BAN_TEMPLATE_PATH
+        value: /etc/nginx/lua/plugins/crowdsec/templates/ban.html
+      - name: CAPTCHA_TEMPLATE_PATH
+        value: /etc/nginx/lua/plugins/crowdsec/templates/captcha.html
+      - name: APPSEC_ENABLED
+        value: "true"
+      - name: APPSEC_URL
+        value: "http://crowdsec-appsec-service.default.svc.cluster.local:7422" # crowdsec appsec service-name
+    command: ['sh', '-c', "sh /docker_start.sh; mkdir -p /lua_plugins/crowdsec/; cp -R /crowdsec/* /lua_plugins/crowdsec/"]
+    volumeMounts:
+    - name: crowdsec-bouncer-plugin
+      mountPath: /lua_plugins
+  extraVolumeMounts:
+  - name: crowdsec-bouncer-plugin
+    mountPath: /etc/nginx/lua/plugins/crowdsec
+    subPath: crowdsec
+  config:
+    plugins: "crowdsec"
+    lua-shared-dicts: "crowdsec_cache: 50m"
+    server-snippet : |
+      resolver local=on ipv6=off;
