@@ -73,7 +73,7 @@ helm upgrade -n ingress-nginx ingress-nginx ingress-nginx/ingress-nginx -f ingre
 
 ## Retest the vulnerability
 
-Thanks to the crowdsec WAF, and to the [in-band rule](https://app.crowdsec.net/hub/author/crowdsecurity/appsec-rules/vpatch-CVE-2024-1071) that blocks requests to the vulnerable endpoint, the request will be blocked.
+Thanks to the crowdsec WAF, and to the [in-band rule](https://app.crowdsec.net/hub/author/crowdsecurity/appsec-rules/vpatch-CVE-2024-1071) that blocks requests to the vulnerable endpoint, the request will be blocked. This rule is part of the [appsec-wordpress collection](https://app.crowdsec.net/hub/author/crowdsecurity/collections/appsec-wordpress) we installed earlier in the `crowdsec-values.yaml` file.
 
 ```
 $ nuclei -u http://mywp.local:31669 -t /tmp/CVE-2024-1071.yaml --debug
