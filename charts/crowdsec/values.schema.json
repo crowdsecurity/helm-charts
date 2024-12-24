@@ -847,7 +847,10 @@
                 }
             },
             "required": [
-                "source"
+                "source",
+                "listen_addr",
+                "listen_port",
+                "webhook_path"
             ]
         }
     }
