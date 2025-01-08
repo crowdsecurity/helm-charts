@@ -1,10 +1,10 @@
-# vim: set ft=gotmpl:
----
-
 {{/*
 Generate CS_LAPI_SECRET if not specified in values
 */}}
 {{ define "lapi.csLapiSecret" }}
+{{- if and (not .Values.lapi.enabled) (not .Values.lapi.secrets.csLapiSecret) }}
+  {{- fail "lapi.enabled is false, but no lapi.secrets.csLapiSecret provided" }}
+{{- end }}
 {{- if .Values.lapi.secrets.csLapiSecret }}
   {{- .Values.lapi.secrets.csLapiSecret -}}
 {{- else if (lookup "v1" "Secret" .Release.Namespace "crowdsec-lapi-secrets").data }}
@@ -19,6 +19,9 @@ Generate CS_LAPI_SECRET if not specified in values
 Generate registrationToken if not specified in values
 */}}
 {{ define "lapi.registrationToken" }}
+{{- if and (not .Values.lapi.enabled) (not .Values.lapi.secrets.registrationToken) }}
+  {{- fail "lapi.enabled is false, but no lapi.secrets.registrationToken provided" }}
+{{- end }}
 {{- if .Values.lapi.secrets.registrationToken }}
   {{- .Values.lapi.secrets.registrationToken -}}
 {{- else if (lookup "v1" "Secret" .Release.Namespace "crowdsec-lapi-secrets").data }}

@@ -1,0 +1,24 @@
+container_runtime: containerd
+image:
+  tag: v1.6.4
+
+agent:
+  lapiURL: http://crowdsec-service.cslapi.svc.cluster.local:8080
+  lapiHost: crowdsec-service.cslapi.svc.cluster.local
+  lapiPort: 8080
+  acquisition:
+    - namespace: ingress-nginx
+      podName: ingress-nginx-controller-*
+      program: nginx
+  env:
+    - name: DISABLE_PARSERS
+      value: "crowdsecurity/whitelists"
+    - name: PARSERS
+      value: "crowdsecurity/cri-logs"
+    - name: COLLECTIONS
+      value: "crowdsecurity/nginx"
+lapi:
+  enabled: false
+  secrets:
+    registrationToken: "mNfQd9nWbbwCYY4CMKay9HooRUx3AYkkNfLDQUrCTjHJvnmnzYadpYgxyxrPiv2j"
+    csLapiSecret: "mNfQd9nWbbwCYY4CMKay9HooRUx3AYkkNfLDQUrCTjHJvnmnzYadpYgxyxrPiv2j"

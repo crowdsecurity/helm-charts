@@ -1,3 +1,4 @@
+{{- if .Values.lapi.enabled }}
 {{- if not (eq (include "IsOnlineAPIDisabled" .) "true") }}
 {{- if eq (include "StoreCAPICredentialsInSecret" .) "true" }}
 apiVersion: rbac.authorization.k8s.io/v1
@@ -18,5 +19,6 @@ rules:
       resources: ["secrets"]
       resourceNames: ["{{ .Release.Name }}-capi-credentials"]
       verbs: ["get", "patch"]
+{{- end }}
 {{- end }}
 {{- end }}

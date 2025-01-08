@@ -1,7 +1,4 @@
-# vim: set ft=gotmpl:
----
-
-{{- if and .Values.agent.persistentVolume.config.enabled (not .Values.agent.persistentVolume.config.existingClaim)}}
+{{- if and (.Values.agent.enabled) (.Values.agent.persistentVolume.config.enabled) (not .Values.agent.persistentVolume.config.existingClaim)}}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -28,3 +25,4 @@ spec:
     requests:
       storage: "{{ .Values.agent.persistentVolume.config.size }}"
 {{ end }}
+

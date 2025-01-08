@@ -1,6 +1,4 @@
-# vim: set ft=gotmpl:
----
-{{- if .Values.agent.isDeployment}}
+{{- if and (.Values.agent.enabled) (.Values.agent.isDeployment) }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -59,7 +57,7 @@ spec:
       - name: wait-for-lapi
         image: "{{ .Values.agent.wait_for_lapi.image.repository }}:{{ .Values.agent.wait_for_lapi.image.tag }}"
         imagePullPolicy: {{ .Values.agent.wait_for_lapi.image.pullPolicy }}
-        command: ['sh', '-c', "until nc {{ .Release.Name }}-service.{{ .Release.Namespace }} 8080 -z; do echo waiting for lapi to start; sleep 5; done"]
+        command: ['sh', '-c', "until nc "$LAPI_HOST" "$LAPI_PORT" -z; do echo waiting for lapi to start; sleep 5; done"]
       {{- end }}
         resources:
           limits:
@@ -85,11 +83,11 @@ spec:
               fieldRef:
                 fieldPath: metadata.name
           - name: LAPI_URL
-            value: http://{{ .Release.Name }}-service.{{ .Release.Namespace }}:8080
+            value: "{{ .Values.agent.lapiURL | default (printf "http://%s-service.%s:8080" .Release.Name .Release.Namespace) }}"
           - name: LAPI_HOST
-            value: "{{ .Release.Name }}-service.{{ .Release.Namespace }}"
+            value: "{{ .Values.agent.lapiHost | default (printf "%s-service.%s" .Release.Name .Release.Namespace) }}"
           - name: LAPI_PORT
-            value: "8080"
+            value: "{{ .Values.agent.lapiPort | default "8080" }}"
         {{- end }}
       {{- if .Values.agent.extraInitContainers }}
       {{- toYaml .Values.agent.extraInitContainers | nindent 6 }}
@@ -111,7 +109,7 @@ spec:
 
           {{- if .Values.tls.enabled }}
           - name: LOCAL_API_URL
-            value: https://{{ .Release.Name }}-service.{{ .Release.Namespace }}:8080
+            value: "{{ .Values.agent.lapiURL | default (printf "https://%s-service.%s:8080" .Release.Name .Release.Namespace) }}"
           - name: USE_TLS
             value: "true"
           {{- if .Values.tls.agent.tlsClientAuth }}
@@ -126,7 +124,7 @@ spec:
           {{- end }}
           {{- else }}
           - name: LOCAL_API_URL
-            value: http://{{ .Release.Name }}-service.{{ .Release.Namespace }}:8080
+            value: "{{ .Values.agent.lapiURL | default (printf "http://%s-service.%s:8080" .Release.Name .Release.Namespace) }}"
           {{- end }}
           {{- if .Values.tls.insecureSkipVerify }}
           - name: INSECURE_SKIP_VERIFY

@@ -1,6 +1,4 @@
-# vim: set ft=gotmpl:
----
-
+{{- if .Values.lapi.enabled }}
 apiVersion: v1
 kind: Service
 metadata:
@@ -50,3 +48,4 @@ spec:
     k8s-app: {{ .Release.Name }}
     type: lapi
     version: v1
+{{- end }}

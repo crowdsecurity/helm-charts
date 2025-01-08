@@ -1,6 +1,7 @@
-# vim: set ft=gotmpl:
----
-
+{{- if .Values.agent.enabled }}
+{{- if and (not .Values.lapi.enabled) (or (not .Values.agent.lapiURL) (not .Values.agent.lapiHost) (not .Values.agent.lapiPort)) }}
+  {{- fail "LAPI is not enabled, but agent.lapiURL, agent.lapiHost or agent.lapiPort is not set" }}
+{{- end }}
 {{- if or .Values.agent.service.ports .Values.agent.metrics.enabled }}
 apiVersion: v1
 kind: Service
@@ -44,4 +45,5 @@ spec:
     k8s-app: {{ .Release.Name }}
     type: agent
     version: v1
+{{- end -}}
 {{- end -}}

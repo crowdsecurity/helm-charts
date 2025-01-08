@@ -1,5 +1,4 @@
-# vim: set ft=gotmpl:
----
+{{- if .Values.lapi.enabled }}
 {{- if index .Values.config "profiles.yaml" -}}
 apiVersion: v1
 kind: ConfigMap
@@ -51,5 +50,6 @@ data:
 {{ printf "%s: |" $fileName | indent 2 }}
 {{ $content | indent 4 }}
 {{ end }}
+{{- end }}
 {{- end }}
 {{- end }}

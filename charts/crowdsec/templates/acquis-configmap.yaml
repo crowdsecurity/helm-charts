@@ -1,5 +1,4 @@
-# vim: set ft=gotmpl:
----
+{{- if .Values.agent.enabled }}
 
 apiVersion: v1
 kind: ConfigMap
@@ -25,3 +24,5 @@ data:
     {{- if and (not .Values.agent.acquisition) (not .Values.agent.additionalAcquisition) }}
     {{ fail "No acquisition or additionalAcquisition configured" }}
     {{- end }}
+
+{{- end }}

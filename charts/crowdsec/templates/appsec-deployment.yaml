@@ -1,7 +1,7 @@
-# vim: set ft=gotmpl:
----
-
 {{- if .Values.appsec.enabled }}
+{{- if and (not .Values.lapi.enabled) (or (not .Values.appsec.lapiURL) (not .Values.appsec.lapiHost) (not .Values.appsec.lapiPort)) }}
+  {{- fail "LAPI is not enabled, but appsec.lapiURL, appsec.lapiHost or appsec.lapiPort is not set" }}
+{{- end }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -77,11 +77,11 @@ spec:
               fieldRef:
                 fieldPath: metadata.name
           - name: LAPI_URL
-            value: http://{{ .Release.Name }}-service.{{ .Release.Namespace }}:8080
+            value: "{{ .Values.appsec.lapiURL | default (printf "http://%s-service.%s:8080" .Release.Name .Release.Namespace) }}"
           - name: LAPI_HOST
-            value: "{{ .Release.Name }}-service.{{ .Release.Namespace }}"
+            value: "{{ .Values.appsec.lapiHost | default (printf "%s-service.%s" .Release.Name .Release.Namespace) }}"
           - name: LAPI_PORT
-            value: "8080"
+            value: "{{ .Values.appsec.lapiPort | default "8080" }}"
       {{- if .Values.appsec.extraInitContainers }}
       {{- toYaml .Values.appsec.extraInitContainers | nindent 6 }}
       {{- end }}
@@ -96,7 +96,7 @@ spec:
           - name: DISABLE_ONLINE_API
             value: "true"
           - name: LOCAL_API_URL
-            value: http://{{ .Release.Name }}-service.{{ .Release.Namespace }}:8080
+            value: "{{ .Values.agent.lapiURL | default (printf "http://%s-service.%s:8080" .Release.Name .Release.Namespace) }}"
         {{- with .Values.appsec.env }}
           {{- toYaml . | nindent 10 }}
         {{- end }}

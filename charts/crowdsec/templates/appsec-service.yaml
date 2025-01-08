@@ -1,5 +1,3 @@
-# vim: set ft=gotmpl:
----
 {{- if .Values.appsec.enabled }}
 apiVersion: v1
 kind: Service

@@ -1,6 +1,4 @@
-# vim: set ft=gotmpl:
----
-{{ if and (.Values.tls.enabled) (.Values.tls.certManager.enabled) }}
+{{ if and (.Values.agent.enabled) (.Values.tls.enabled) (.Values.tls.certManager.enabled) }}
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:

@@ -1,11 +1,16 @@
 Thank you for installing {{ .Chart.Name }}.
 
+{{- if .Values.lapi.enabled }}
 ## Local API URL
 {{- if .Values.lapi.ingress.enabled }}
 http://{{ .Values.lapi.ingress.host }}
 {{- else }}
 http://{{ .Release.Name }}-service:8080
 {{- end }}
+{{- else }}
+## Local API is disabled
+{{- end }}
+
 
 {{- if .Values.appsec.enabled }}
 ## AppSec URL
@@ -31,8 +36,10 @@ http://{{ .Release.Name }}-service
 {{- end }}
 {{- end }}
 
+{{- if .Values.lapi.enabled }}
 The default credentials are : 
 login : crowdsec@crowdsec.net
 password : !!Cr0wdS3c_M3t4b4s3??
 
 Please update the password when you connect to metabase for the first time.
+{{- end }}
