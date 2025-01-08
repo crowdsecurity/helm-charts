@@ -116,13 +116,13 @@ spec:
             value: "true"
           {{- if .Values.tls.agent.tlsClientAuth }}
           - name: CLIENT_CERT_FILE
-            value: /etc/ssl/crowdsec-agent/tls.crt
+            value: /etc/ssl/crowdsec-appsec/tls.crt
           - name: CLIENT_KEY_FILE
-            value: /etc/ssl/crowdsec-agent/tls.key
+            value: /etc/ssl/crowdsec-appsec/tls.key
           {{- end }}
           {{- if .Values.tls.caBundle }}
           - name: CACERT_FILE
-            value: /etc/ssl/crowdsec-agent/ca.crt
+            value: /etc/ssl/crowdsec-appsec/ca.crt
           {{- end }}
           {{- else }}
           - name: LOCAL_API_URL
@@ -188,8 +188,8 @@ spec:
           {{- end }}
           {{- end }}
           {{- if .Values.tls.enabled }}
-          - name: crowdsec-agent-tls
-            mountPath: /etc/ssl/crowdsec-agent
+          - name: crowdsec-appsec-tls
+            mountPath: /etc/ssl/crowdsec-appsec
           {{- end }}
           {{- if .Values.appsec.extraVolumeMounts }}
           {{ toYaml .Values.appsec.extraVolumeMounts | nindent 10 }}
@@ -224,9 +224,9 @@ spec:
       {{- end }}
       {{- end }}
       {{- if .Values.tls.enabled }}
-      - name: crowdsec-agent-tls
+      - name: crowdsec-appsec-tls
         secret:
-          secretName: {{ .Release.Name }}-agent-tls
+          secretName: {{ .Release.Name }}-appsec-tls
       {{- end }}
       {{- if .Values.appsec.extraVolumes }}
       {{ toYaml .Values.appsec.extraVolumes | nindent 6 }}
