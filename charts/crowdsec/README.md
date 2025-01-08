@@ -252,6 +252,7 @@ controller:
 | tls.lapi.secret | string | `"{{ .Release.Name }}-lapi-tls"` |  |
 | secrets.username | string | `""` | agent username (default is generated randomly) |
 | secrets.password | string | `""` | agent password (default is generated randomly) |
+| lapi.enabled | bool | `true` | enable lapi (by default enabled) |
 | lapi.replicas | int | `1` | replicas for local API |
 | lapi.env | list | `[]` | environment variables from crowdsecurity/crowdsec docker image |
 | lapi.envFrom | list | `[]` |  |
@@ -295,7 +296,11 @@ controller:
 | lapi.extraSecrets | object | `{}` | Any extra secrets you may need (for example, external DB password) |
 | lapi.lifecycle | object | `{}` |  |
 | lapi.storeCAPICredentialsInSecret | bool | `false` | If set to true, the Central API credentials will be stored in a secret (to use when lapi replicas > 1) |
+| agent.enabled | bool | `true` | enable agent (by default enabled) |
 | agent.isDeployment | bool | `false` | Switch to Deployment instead of DaemonSet (In some cases, you may want to deploy the agent as a Deployment) |
+| agent.lapiURL | string | `""` | lapiURL for agent to connect to (default is the lapi service URL) |
+| agent.lapiHost | string | `""` | lapiHost for agent to connect to (default is the lapi service) |
+| agent.lapiPort | int | `8080` | lapiPort for agent to connect to (default is the lapi service port) |
 | agent.replicas | int | `1` | replicas for agent if isDeployment is set to true |
 | agent.strategy | object | `{"type":"Recreate"}` | strategy for agent if isDeployment is set to true |
 | agent.ports | list | `[]` | add your custom ports here, by default we expose port 6060 for metrics if metrics is enabled |
@@ -337,8 +342,11 @@ controller:
 | agent.wait_for_lapi.image.repository | string | `"busybox"` | docker image repository name |
 | agent.wait_for_lapi.image.pullPolicy | string | `"IfNotPresent"` | pullPolicy |
 | agent.wait_for_lapi.image.tag | string | `"1.28"` | docker image tag |
-| appsec | object | `{"acquisitions":[],"affinity":{},"configs":{},"deployAnnotations":{},"enabled":false,"env":[],"extraInitContainers":[],"extraVolumeMounts":[],"extraVolumes":[],"livenessProbe":{"failureThreshold":3,"httpGet":{"path":"/metrics","port":"metrics","scheme":"HTTP"},"periodSeconds":10,"successThreshold":1,"timeoutSeconds":5},"metrics":{"enabled":true,"serviceMonitor":{"additionalLabels":{},"enabled":false}},"nodeSelector":{},"podAnnotations":{},"podLabels":{},"priorityClassName":"","readinessProbe":{"failureThreshold":3,"httpGet":{"path":"/metrics","port":"metrics","scheme":"HTTP"},"periodSeconds":10,"successThreshold":1,"timeoutSeconds":5},"replicas":1,"resources":{"limits":{"cpu":"500m","memory":"250Mi"},"requests":{"cpu":"500m","memory":"250Mi"}},"rules":{},"service":{"annotations":{},"externalIPs":[],"externalTrafficPolicy":"Cluster","labels":{},"loadBalancerClass":null,"loadBalancerIP":null,"type":"ClusterIP"},"startupProbe":{"failureThreshold":30,"httpGet":{"path":"/metrics","port":"metrics","scheme":"HTTP"},"periodSeconds":10,"successThreshold":1,"timeoutSeconds":5},"strategy":{"type":"Recreate"},"tolerations":[]}` | Enable AppSec (https://docs.crowdsec.net/docs/next/appsec/intro) |
+| appsec | object | `{"acquisitions":[],"affinity":{},"configs":{},"deployAnnotations":{},"enabled":false,"env":[],"extraInitContainers":[],"extraVolumeMounts":[],"extraVolumes":[],"lapiHost":"","lapiPort":8080,"lapiURL":"","livenessProbe":{"failureThreshold":3,"httpGet":{"path":"/metrics","port":"metrics","scheme":"HTTP"},"periodSeconds":10,"successThreshold":1,"timeoutSeconds":5},"metrics":{"enabled":true,"serviceMonitor":{"additionalLabels":{},"enabled":false}},"nodeSelector":{},"podAnnotations":{},"podLabels":{},"priorityClassName":"","readinessProbe":{"failureThreshold":3,"httpGet":{"path":"/metrics","port":"metrics","scheme":"HTTP"},"periodSeconds":10,"successThreshold":1,"timeoutSeconds":5},"replicas":1,"resources":{"limits":{"cpu":"500m","memory":"250Mi"},"requests":{"cpu":"500m","memory":"250Mi"}},"rules":{},"service":{"annotations":{},"externalIPs":[],"externalTrafficPolicy":"Cluster","labels":{},"loadBalancerClass":null,"loadBalancerIP":null,"type":"ClusterIP"},"startupProbe":{"failureThreshold":30,"httpGet":{"path":"/metrics","port":"metrics","scheme":"HTTP"},"periodSeconds":10,"successThreshold":1,"timeoutSeconds":5},"strategy":{"type":"Recreate"},"tolerations":[]}` | Enable AppSec (https://docs.crowdsec.net/docs/next/appsec/intro) |
 | appsec.enabled | bool | `false` | Enable AppSec (by default disabled) |
+| appsec.lapiURL | string | `""` | lapiURL for agent to connect to (default is the lapi service URL) |
+| appsec.lapiHost | string | `""` | lapiHost for agent to connect to (default is the lapi service) |
+| appsec.lapiPort | int | `8080` | lapiPort for agent to connect to (default is the lapi service port) |
 | appsec.replicas | int | `1` | replicas for Appsec |
 | appsec.strategy | object | `{"type":"Recreate"}` | strategy for appsec deployment |
 | appsec.acquisitions | list | `[]` | Additional acquisitions for AppSec |
