@@ -1,3 +1,4 @@
+{{- if .Values.lapi.enabled }}
 apiVersion: v1
 kind: Pod
 metadata:
@@ -15,3 +16,4 @@ spec:
       - |
         curl -XGET http://{{ .Release.Name }}-service:8080/health
   restartPolicy: Never
+{{- end }}

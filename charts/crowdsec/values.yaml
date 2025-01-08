@@ -153,6 +153,8 @@ secrets:
 
 # lapi will deploy pod with crowdsec lapi and dashboard as deployment
 lapi:
+  # -- enable lapi (by default enabled)
+  enabled: true
   # -- replicas for local API
   replicas: 1
   # -- environment variables from crowdsecurity/crowdsec docker image
@@ -319,8 +321,16 @@ lapi:
 
 # agent will deploy pod on every node as daemonSet to read wanted pods logs
 agent:
+  # -- enable agent (by default enabled)
+  enabled: true
   # -- Switch to Deployment instead of DaemonSet (In some cases, you may want to deploy the agent as a Deployment)
   isDeployment: false
+  # -- lapiURL for agent to connect to (default is the lapi service URL)
+  lapiURL: ""
+  # -- lapiHost for agent to connect to (default is the lapi service)
+  lapiHost: ""
+  # -- lapiPort for agent to connect to (default is the lapi service port)
+  lapiPort: 8080
   # -- replicas for agent if isDeployment is set to true
   replicas: 1
   # -- strategy for agent if isDeployment is set to true
@@ -507,6 +517,12 @@ agent:
 appsec:
   # -- Enable AppSec (by default disabled)
   enabled: false
+  # -- lapiURL for agent to connect to (default is the lapi service URL)
+  lapiURL: ""
+  # -- lapiHost for agent to connect to (default is the lapi service)
+  lapiHost: ""
+  # -- lapiPort for agent to connect to (default is the lapi service port)
+  lapiPort: 8080
   # -- replicas for Appsec
   replicas: 1
   # -- strategy for appsec deployment

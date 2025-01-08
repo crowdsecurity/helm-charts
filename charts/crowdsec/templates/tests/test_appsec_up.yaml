@@ -1,3 +1,4 @@
+{{- if .Values.appsec.enabled }}
 apiVersion: v1
 kind: Pod
 metadata:
@@ -16,3 +17,4 @@ spec:
         curl -XGET http://{{ .Release.Name }}-appsec-service:7422/
         curl -XGET http://{{ .Release.Name }}-appsec-service:6060/metrics
   restartPolicy: Never
+{{- end }}

@@ -1,5 +1,6 @@
-{{- if not (eq (include "IsOnlineAPIDisabled" .) "true") }}
-{{- if eq (include "StoreCAPICredentialsInSecret" .) "true" }}
+{{- if .Values.lapi.enabled }}
+  {{- if not (eq (include "IsOnlineAPIDisabled" .) "true") }}
+    {{- if eq (include "StoreCAPICredentialsInSecret" .) "true" }}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -55,5 +56,6 @@ spec:
             - name: {{ .Release.Name }}-capi-credentials-volume
               mountPath: /etc/crowdsec/online_api_credentials.yaml
               subPath: online_api_credentials.yaml
-{{- end }}
+    {{- end }}
+  {{- end }}
 {{- end }}

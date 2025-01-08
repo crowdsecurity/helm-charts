@@ -4,7 +4,7 @@ config:
       server:
         auto_registration:
           enabled: true
-          token: "${REGISTRATION_TOKEN}"
+          token: "${REGISTRATION_TOKEN}" # /!\ Do not modify this variable (auto-generated and handled by the chart)
           allowed_ranges:
             - "127.0.0.1/32"
             - "192.168.0.0/16"

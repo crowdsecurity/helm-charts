@@ -1,5 +1,4 @@
-# vim: set ft=gotmpl:
----
+{{- if .Values.agent.enabled }}
 
 {{- if index .Values.config "simulation.yaml" -}}
 apiVersion: v1
@@ -57,3 +56,5 @@ data:
 {{- end }}
 {{ end }}
 {{ end -}}
+
+{{- end }}

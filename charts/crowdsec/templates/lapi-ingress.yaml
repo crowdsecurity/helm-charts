@@ -1,6 +1,4 @@
-# vim: set ft=gotmpl:
----
-
+{{- if .Values.lapi.enabled }}
 {{- if .Values.lapi.ingress.enabled }}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
@@ -33,4 +31,5 @@ spec:
   tls:
     {{- tpl (toYaml .Values.lapi.ingress.tls | nindent 4) . }}
   {{- end -}}
+{{- end -}}
 {{- end -}}

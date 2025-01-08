@@ -10,11 +10,23 @@
                 },
                 "config": {
                     "$ref": "#/definitions/Config"
+                },
+                "lapi": {
+                    "$ref": "#/definitions/Lapi"
+                },
+                "container_runtime": {
+                    "$ref": "#/definitions/containerRuntime"
+                },
+                "image": {
+                    "$ref": "#/definitions/image"
                 }
             },
             "required": [
                 "agent",
-                "config"
+                "config",
+                "lapi",
+                "container_runtime",
+                "image"
             ],
             "title": "values"
         },
@@ -22,9 +34,45 @@
             "type": "string",
             "minLength": 1
         },
+        "image": {
+            "type": "object",
+            "properties": {
+                "repository": {
+                    "type": "string"
+                },
+                "tag": {
+                    "type": "string"
+                },
+                "pullPolicy": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "repository",
+                "pullPolicy"
+            ]
+        },
+        "containerRuntime": {
+            "type": "string",
+            "enum": [
+                "docker",
+                "containerd"
+            ]
+        },
+        "Lapi": {
+            "type": "object",
+            "properties": {
+                "enabled": {
+                    "type": "boolean"
+                }
+            }
+        },
         "Agent": {
             "type": "object",
             "properties": {
+                "enabled": {
+                    "type": "boolean"
+                },
                 "acquisition": {
                     "type": "array",
                     "items": {
@@ -72,7 +120,10 @@
                     }
                 }
             },
-            "title": "Agent"
+            "title": "Agent",
+            "required": [
+                "acquisition"
+            ]
         },
         "Acquisition": {
             "type": "object",

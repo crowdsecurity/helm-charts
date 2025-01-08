@@ -1,5 +1,4 @@
-# vim: set ft=gotmpl:
----
+{{- if .Values.lapi.enabled }}
 {{- if .Values.lapi.persistentVolume.config.enabled }}
 {{- if .Values.lapi.storeCAPICredentialsInSecret }}
 {{- fail "lapi.persistentVolume.config.enabled and lapi.storeCAPICredentialsInSecret values are mutually exclusive" }}
@@ -416,3 +415,4 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       priorityClassName: {{ .Values.lapi.priorityClassName }}
+{{- end }}
