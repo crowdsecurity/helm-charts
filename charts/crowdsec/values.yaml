@@ -140,6 +140,11 @@ tls:
     secret: "{{ .Release.Name }}-agent-tls"
     reflector:
       namespaces: []
+  appsec:
+    tlsClientAuth: true
+    secret: "{{ .Release.Name }}-agent-tls"
+    reflector:
+      namespaces: []
   lapi:
     secret: "{{ .Release.Name }}-lapi-tls"
 
@@ -672,3 +677,14 @@ appsec:
     loadBalancerIP: null
     loadBalancerClass: null
     externalTrafficPolicy: Cluster
+
+  # -- wait-for-lapi init container
+  wait_for_lapi:
+    image:
+      # -- docker image repository name
+      repository: busybox
+      # -- pullPolicy
+      pullPolicy: IfNotPresent
+      # -- docker image tag
+      tag: "1.28"
+
