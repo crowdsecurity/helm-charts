@@ -97,7 +97,15 @@ spec:
         image: "{{ .Values.image.repository | default "crowdsecurity/crowdsec" }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         {{- if or (not .Values.tls.enabled) (not .Values.tls.agent.tlsClientAuth) }}
-        command: ['sh', '-c', 'cp /tmp_config/local_api_credentials.yaml /staging/etc/crowdsec/local_api_credentials.yaml && ./docker_start.sh']
+          {{- if .Values.agent.persistentVolume.config.enabled }}
+            command: ['sh', '-c', 'cp /tmp_config/local_api_credentials.yaml /staging/etc/crowdsec/local_api_credentials.yaml && mv -n /staging/etc/crowdsec/* /etc/crowdsec_data/ && rm -rf /staging/etc/crowdsec && ln -s /etc/crowdsec_data /etc/crowdsec && ./docker_start.sh']
+          {{- else }}
+            command: ['sh', '-c', 'cp /tmp_config/local_api_credentials.yaml /staging/etc/crowdsec/local_api_credentials.yaml && ./docker_start.sh']
+          {{- end }}
+        {{- else }}
+          {{- if .Values.agent.persistentVolume.config.enabled }}
+            command: ['sh', '-c', 'mv -n /staging/etc/crowdsec/* /etc/crowdsec_data/ && rm -rf /staging/etc/crowdsec && ln -s /etc/crowdsec_data /etc/crowdsec && ./docker_start.sh']
+          {{- end }}
         {{- end }}
         env:
           - name: DISABLE_LOCAL_API
@@ -163,9 +171,6 @@ spec:
           allowPrivilegeEscalation: false
           privileged: false
 
-        {{- if .Values.agent.persistentVolume.config.enabled }}
-        command: ['sh', '-c', 'mv -n /staging/etc/crowdsec/* /etc/crowdsec_data/ && rm -rf /staging/etc/crowdsec && ln -s /etc/crowdsec_data /etc/crowdsec && ./docker_start.sh']
-        {{- end }}
         volumeMounts:
           {{- if or (not .Values.tls.enabled) (not .Values.tls.agent.tlsClientAuth) }}
           - name: crowdsec-config
