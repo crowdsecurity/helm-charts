@@ -115,6 +115,9 @@
                             },
                             {
                                 "$ref": "#/definitions/KubernetesSource"
+                            },
+                            {
+                                "$ref": "#/definitions/VictoriaLogsSource"
                             }
                         ]
                     }
@@ -902,6 +905,73 @@
                 "listen_addr",
                 "listen_port",
                 "webhook_path"
+            ]
+        },
+        "VictoriaLogsSource": {
+            "type": "object",
+            "description": "https://docs.crowdsec.net/docs/next/data_sources/victorialogs",
+            "properties": {
+                "source": {
+                    "const": "victorialogs"
+                },
+                "url": {
+                    "type": "string",
+                    "format": "uri",
+                    "description": "The URL of the VictoriaLogs instance"
+                },
+                "limit": {
+                    "type": "integer",
+                    "description": "The maximum number of log entries to fetch in one query"
+                },
+                "prefix": {
+                    "type": "string",
+                    "description": "Prefix for the VictoriaLogs API endpoints"
+                },
+                "headers": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    },
+                    "description": "HTTP headers to include in requests to VictoriaLogs"
+                },
+                "wait_for_ready": {
+                    "type": "string",
+                    "description": "The retry interval at startup before giving on VictoriaLogs."
+                },
+                "query": {
+                    "type": "string",
+                    "description": "https://docs.victoriametrics.com/victorialogs/logsql/"
+                },
+                "auth": {
+                    "type": "object",
+                    "properties": {
+                        "username": {
+                            "type": "string",
+                            "description": "Username for authentication with VictoriaLogs"
+                        },
+                        "password": {
+                            "type": "string",
+                            "description": "Password for authentication with VictoriaLogs"
+                        }
+                    },
+                    "required": [
+                        "username",
+                        "password"
+                    ],
+                    "description": "Authentication credentials for VictoriaLogs"
+                },
+                "max_failure_duration": {
+                    "type": "string",
+                    "description": "The maximum duration VictoriaLogs is allowed to be unavailable (once startup is successful) before giving up on the data source."
+                },
+                "labels": {
+                    "$ref": "#/definitions/Labels"
+                }
+            },
+            "required": [
+                "source",
+                "url",
+                "query"
             ]
         }
     }
