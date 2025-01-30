@@ -1,26 +1,24 @@
-{{ if and (.Values.agent.enabled) (.Values.tls.enabled) (.Values.tls.certManager.enabled) }}
+{{ if and (.Values.appsec.enabled) (.Values.tls.enabled) (.Values.tls.certManager.enabled) }}
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
-  name: {{ .Release.Name }}-agent
+  name: {{ .Release.Name }}-appsec
   namespace: {{ .Release.Namespace }}
 spec:
-  commonName: CrowdSec Agent
-  secretName: {{ .Release.Name }}-agent-tls
+  commonName: CrowdSec Appsec
+  secretName: {{ .Release.Name }}-appsec-tls
   duration: {{ .Values.tls.certManager.duration }}
   renewBefore: {{ .Values.tls.certManager.renewBefore }}
   secretTemplate:
-    {{ if or .Values.tls.agent.reflector.namespaces .Values.tls.certManager.secretTemplate.annotations }}
     annotations:
-      {{ if .Values.tls.agent.reflector.namespaces }}
+      {{ if .Values.tls.appsec.reflector.namespaces }}
       reflector.v1.k8s.emberstack.com/reflection-allowed: "true"
-      reflector.v1.k8s.emberstack.com/reflection-allowed-namespaces: {{ join "," .Values.tls.agent.reflector.namespaces }}
+      reflector.v1.k8s.emberstack.com/reflection-allowed-namespaces: {{ join "," .Values.tls.appsec.reflector.namespaces }}
       reflector.v1.k8s.emberstack.com/reflection-auto-enabled: "true"
       {{ end }}
       {{ if .Values.tls.certManager.secretTemplate.annotations }}
       {{ toYaml .Values.tls.certManager.secretTemplate.annotations | nindent 6 }}
       {{ end }}
-    {{ end }}
     {{ if .Values.tls.certManager.secretTemplate.labels }}
     labels:
     {{ toYaml .Values.tls.certManager.secretTemplate.labels | nindent 6 }}
@@ -34,5 +32,5 @@ spec:
     {{ end }}
   subject:
     organizationalUnits:
-      - agent-ou
+      - appsec-ou
 {{ end }}
