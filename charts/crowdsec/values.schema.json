@@ -942,6 +942,10 @@
                     "type": "string",
                     "description": "https://docs.victoriametrics.com/victorialogs/logsql/"
                 },
+                "since": {
+                    "type": "string",
+                    "description": "Read logs since timestamp (e.g. 2013-01-02T13:23:37Z) or relative (e.g. 42m for 42 minutes)."
+                },
                 "auth": {
                     "type": "object",
                     "properties": {
