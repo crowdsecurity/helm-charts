@@ -31,9 +31,65 @@ helm install crowdsec crowdsec/crowdsec -f crowdsec-values.yaml -n crowdsec
 helm delete crowdsec -n crowdsec
 ```
 
-## Setup for High Availability
+## Authentication
 
-Below a basic configuration for High availability
+This charts support two types of authentication between the agents / appsec pods and the LAPI: an auto registration token and TLS client authentication.
+
+### Auto registration token
+
+By default, this chart makes use of an auto registration token completely handled by the chart.
+This is setup with the following part in the `values.yaml` file. Make sure to adapt to the pod IP ranges used by your cluster.
+
+Also, when you modify the `config.config.yaml.local` entry in your own `values.yaml` make sure to put this piece in it as well.
+
+```
+config:
+  config.yaml.local: |
+    api:
+      server:
+        auto_registration: # Activate if not using TLS for authentication
+          enabled: true
+          token: "${REGISTRATION_TOKEN}" # /!\ Do not modify this variable (auto-generated and handled by the chart)
+          allowed_ranges: # /!\ Make sure to adapt to the pod IP ranges used by your cluster
+            - "127.0.0.1/32"
+            - "192.168.0.0/16"
+            - "10.0.0.0/8"
+            - "172.16.0.0/12"
+```
+
+### TLS client authentication
+
+Currently TLS authentication is only possible between the agent and the LAPI as appsec doesn't support HTTPS yet.
+The below configuration will activate TLS on the LAPI and TLS client authentication for the agent.
+Certificates are renewed by default with [cert-manager](https://github.com/cert-manager/cert-manager).
+
+```
+tls:
+  enabled: true
+  agent:
+    tlsClientAuth: true
+```
+
+### Cleaning of stale agents / appsec registration in the LAPI
+
+Both methods add a machine per pod in the LAPI. These aren't automatically cleaned and the list of machines can become large over time.
+Crowdsec offers a [flush option](https://docs.crowdsec.net/docs/next/configuration/crowdsec_configuration/#flush) to clean them up.
+Add the `flush:` part to your `db_config`.
+
+```
+config:
+  config.yaml.local: |
+    db_config:
+      flush:
+        agents_autodelete:
+          cert: 60m # This is TLS client authentication
+          login_password: 60m # This includes the auto registration token as well
+        ## Flush both login types if the machine has not logged in for 60 minutes or more
+```
+
+## Setup for LAPI High Availability
+
+Below a basic configuration for high availability of the LAPI
 
 ```
 # your-values.yaml
@@ -93,20 +149,6 @@ appsec:
   env:
     - name: COLLECTIONS
       value: "crowdsecurity/appsec-virtual-patching"
-
-# This allows the LAPI pod to register and communicate with the appsec pod
-config:
-  config.yaml.local: |
-    api:
-      server:
-        auto_registration:
-          enabled: true
-          token: "${REGISTRATION_TOKEN}" # /!\ Do not modify this variable (auto-generated and handled by the chart)
-          allowed_ranges:
-            - "127.0.0.1/32"
-            - "192.168.0.0/16"
-            - "10.0.0.0/8"
-            - "172.16.0.0/12"
 ```
 
 Or you can also use your own custom configurations and rules for AppSec:
@@ -135,25 +177,11 @@ appsec:
   env:
     - name: COLLECTIONS
       value: "crowdsecurity/appsec-virtual-patching crowdsecurity/appsec-crs"
-
-# This allows the LAPI pod to register and communicate with the appsec pod
-config:
-  config.yaml.local: |
-    api:
-      server:
-        auto_registration:
-          enabled: true
-          token: "${REGISTRATION_TOKEN}" # /!\ Do not modify this variable (auto-generated and handled by the chart)
-          allowed_ranges:
-            - "127.0.0.1/32"
-            - "192.168.0.0/16"
-            - "10.0.0.0/8"
-            - "172.16.0.0/12"
 ```
 
 ### With Traefik
 
-In the traefik `values.yaml`, you need to add the following configuration:
+In the Traefik `values.yaml`, you need to add the following configuration:
 
 ```
 # traefik-values.yaml
@@ -189,7 +217,7 @@ spec:
       crowdsecLapiKey: "<YOUR_BOUNCER_KEY>"
 ```
 
-### With Ingrees Nginx
+### With Nginx
 
 Following [this documentation](https://docs.crowdsec.net/u/bouncers/ingress-nginx).
 
@@ -234,7 +262,7 @@ controller:
 | config."console.yaml" | string | `""` |  |
 | config."capi_whitelists.yaml" | string | `""` |  |
 | config."profiles.yaml" | string | `""` | Profiles configuration (https://docs.crowdsec.net/docs/next/profiles/format/#profile-configuration-example) |
-| config."config.yaml.local" | string | `""` | General configuration (https://docs.crowdsec.net/docs/configuration/crowdsec_configuration/#configuration-example) |
+| config."config.yaml.local" | string | `"api:\n  server:\n    auto_registration: # Activate if not using TLS for authentication\n      enabled: true\n      token: \"${REGISTRATION_TOKEN}\" # /!\\ Do not modify this variable (auto-generated and handled by the chart)\n      allowed_ranges: # /!\\ Make sure to adapt to the pod IP ranges used by your cluster\n        - \"127.0.0.1/32\"\n        - \"192.168.0.0/16\"\n        - \"10.0.0.0/8\"\n        - \"172.16.0.0/12\"\n# db_config:\n#   type:     postgresql\n#   user:     crowdsec\n#   password: ${DB_PASSWORD}\n#   db_name:  crowdsec\n#   host:     192.168.0.2\n#   port:     5432\n#   sslmode:  require\n"` | General configuration (https://docs.crowdsec.net/docs/configuration/crowdsec_configuration/#configuration-example) |
 | config.notifications | object | `{}` | notifications configuration (https://docs.crowdsec.net/docs/next/notification_plugins/intro) |
 | tls.enabled | bool | `false` |  |
 | tls.caBundle | bool | `true` |  |
