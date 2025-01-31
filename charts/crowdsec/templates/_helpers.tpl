@@ -19,16 +19,16 @@ Generate CS_LAPI_SECRET if not specified in values
 Generate registrationToken if not specified in values
 */}}
 {{ define "lapi.registrationToken" }}
-{{- if and (not .Values.lapi.enabled) (not .Values.lapi.secrets.registrationToken) }}
+{{- if and (not .Values.lapi.enabled) (empty .Values.lapi.secrets.registrationToken) }}
   {{- fail "lapi.enabled is false, but no lapi.secrets.registrationToken provided" }}
 {{- end }}
-{{- if .Values.lapi.secrets.registrationToken }}
-  {{- .Values.lapi.secrets.registrationToken -}}
+{{- if empty .Values.lapi.secrets.registrationToken }}
+  {{- randAlphaNum 48 -}}
 {{- else if (lookup "v1" "Secret" .Release.Namespace "crowdsec-lapi-secrets").data }}
   {{- $obj := (lookup "v1" "Secret" .Release.Namespace "crowdsec-lapi-secrets").data -}}
   {{- index $obj "registrationToken" | b64dec -}}
 {{- else -}}
-  {{- randAlphaNum 48 -}}
+  {{- .Values.lapi.secrets.registrationToken -}}
 {{- end -}}
 {{- end -}}
 
