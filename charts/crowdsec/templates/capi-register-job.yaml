@@ -9,6 +9,9 @@ metadata:
     k8s-app: {{ .Release.Name }}
     type: capi-register-job
     version: v1
+    {{- if .Values.podLabels }}
+{{ toYaml .Values.podLabels | trim | indent 4 }}
+    {{- end }}
   annotations:
     "helm.sh/hook": "pre-install,pre-upgrade"
     "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
