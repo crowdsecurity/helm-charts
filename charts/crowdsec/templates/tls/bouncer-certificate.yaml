@@ -10,7 +10,7 @@ spec:
   duration: {{ .Values.tls.certManager.duration }}
   renewBefore: {{ .Values.tls.certManager.renewBefore }}
   secretTemplate:
-    {{ if or .Values.tls.agent.reflector.namespaces .Values.tls.certManager.secretTemplate.annotations }}
+    {{ if or .Values.tls.bouncer.reflector.namespaces .Values.tls.certManager.secretTemplate.annotations }}
     annotations:
       {{ if .Values.tls.bouncer.reflector.namespaces }}
       reflector.v1.k8s.emberstack.com/reflection-allowed: "true"
