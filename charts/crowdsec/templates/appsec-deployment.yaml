@@ -76,7 +76,7 @@ spec:
             mountPath: /tmp_config
         {{- end }}
         env:
-          {{- if or (not .Values.tls.enabled) (not .Values.tls.agent.tlsClientAuth) }}
+          {{- if or (not .Values.tls.enabled) (not .Values.tls.appsec.tlsClientAuth) }}
           - name: REGISTRATION_TOKEN
             valueFrom:
               secretKeyRef:
