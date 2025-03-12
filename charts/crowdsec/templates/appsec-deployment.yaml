@@ -74,6 +74,10 @@ spec:
         volumeMounts:
           - name: crowdsec-config
             mountPath: /tmp_config
+          {{- if .Values.tls.enabled }}
+          - name: crowdsec-appsec-client-tls
+            mountPath: /etc/ssl/crowdsec-appsec-client
+          {{- end }}
         {{- end }}
         env:
           {{- if or (not .Values.tls.enabled) (not .Values.tls.appsec.tlsClientAuth) }}
@@ -92,6 +96,10 @@ spec:
             {{- else }}
             value: "{{ .Values.appsec.lapiURL | default (printf "http://%s-service.%s:8080" .Release.Name .Release.Namespace) }}"
             {{- end }}
+          {{- end }}
+          {{- if .Values.tls.caBundle }}
+          - name: SSL_CERT_FILE
+            value: /etc/ssl/crowdsec-appsec-client/ca.crt
           {{- end }}
           - name: LAPI_HOST
             value: "{{ .Values.appsec.lapiHost | default (printf "%s-service.%s" .Release.Name .Release.Namespace) }}"
