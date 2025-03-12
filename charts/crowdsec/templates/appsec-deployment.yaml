@@ -199,7 +199,7 @@ spec:
           {{ toYaml .Values.appsec.extraVolumeMounts | nindent 10 }}
           {{- end }}
 
-        terminationGracePeriodSeconds: 30
+      terminationGracePeriodSeconds: 30
 
       volumes:
       - name: appsec-acquis-config-volume
