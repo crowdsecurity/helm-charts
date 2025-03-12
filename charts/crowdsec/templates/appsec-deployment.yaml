@@ -87,7 +87,11 @@ spec:
               fieldRef:
                 fieldPath: metadata.name
           - name: LAPI_URL
+            {{- if .Values.tls.enabled }}
+            value: "{{ .Values.appsec.lapiURL | default (printf "https://%s-service.%s:8080" .Release.Name .Release.Namespace) }}"
+            {{- else }}
             value: "{{ .Values.appsec.lapiURL | default (printf "http://%s-service.%s:8080" .Release.Name .Release.Namespace) }}"
+            {{- end }}
           {{- end }}
           - name: LAPI_HOST
             value: "{{ .Values.appsec.lapiHost | default (printf "%s-service.%s" .Release.Name .Release.Namespace) }}"
