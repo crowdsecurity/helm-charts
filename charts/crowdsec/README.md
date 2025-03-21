@@ -1,6 +1,6 @@
 # crowdsec
 
-![Version: 0.18.1](https://img.shields.io/badge/Version-0.18.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v1.6.6](https://img.shields.io/badge/AppVersion-v1.6.6-informational?style=flat-square)
+![Version: 0.19.0](https://img.shields.io/badge/Version-0.19.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v1.6.6](https://img.shields.io/badge/AppVersion-v1.6.6-informational?style=flat-square)
 
 Crowdsec helm chart is an open-source, lightweight agent to detect and respond to bad behaviours.
 
@@ -281,6 +281,7 @@ controller:
 | tls.appsec.secret | string | `"{{ .Release.Name }}-agent-tls"` |  |
 | tls.appsec.reflector.namespaces | list | `[]` |  |
 | tls.lapi.secret | string | `"{{ .Release.Name }}-lapi-tls"` |  |
+| tls.lapi.reflector.namespaces | list | `[]` |  |
 | secrets.username | string | `""` | agent username (default is generated randomly) |
 | secrets.password | string | `""` | agent password (default is generated randomly) |
 | lapi.enabled | bool | `true` | enable lapi (by default enabled) |
