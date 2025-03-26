@@ -1,2 +1,3 @@
 owner: crowdsecurity
 git-base-url: https://api.github.com/
+generate-release-notes: true
