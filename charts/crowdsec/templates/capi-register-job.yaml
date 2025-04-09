@@ -47,6 +47,7 @@ spec:
                 sed -i /etc/crowdsec/config.yaml -e 's/#credentials_path/  credentials_path/'
 
                 cscli capi register -f /tmp/online_api_credentials.yaml
+                yq -i '.papi_url="https://papi.api.crowdsec.net/"' /tmp/online_api_credentials.yaml
                 echo "Creating secret {{ .Release.Name }}-capi-credentials..."
                 kubectl create secret generic {{ .Release.Name }}-capi-credentials \
                   -n {{ .Release.Namespace }} \
