@@ -42,8 +42,10 @@ spec:
                 fi
 
                 echo "Secret does not exist. Registering instance to Central API."
+                mkdir -p /etc/crowdsec
                 cp /staging/etc/crowdsec/config.yaml /etc/crowdsec/config.yaml
                 cp /staging/etc/crowdsec/profiles.yaml /etc/crowdsec/profiles.yaml
+                touch /etc/crowdsec/online_api_credentials.yaml
                 sed -i /etc/crowdsec/config.yaml -e 's/#credentials_path/  credentials_path/'
 
                 cscli capi register -f /tmp/online_api_credentials.yaml
@@ -52,7 +54,6 @@ spec:
                 kubectl create secret generic {{ .Release.Name }}-capi-credentials \
                   -n {{ .Release.Namespace }} \
                   --from-file=online_api_credentials.yaml=/tmp/online_api_credentials.yaml
-                fi
     {{- end }}
   {{- end }}
 {{- end }}
