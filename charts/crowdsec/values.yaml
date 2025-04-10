@@ -146,6 +146,8 @@ tls:
       namespaces: []
   lapi:
     secret: "{{ .Release.Name }}-lapi-tls"
+    reflector:
+      namespaces: []
 
 # If you want to specify secrets that will be used for all your crowdsec-agents
 # secrets can be provided as env variables

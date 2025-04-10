@@ -54,7 +54,7 @@ spec:
       - name: wait-for-lapi-and-register
         image: "{{ .Values.image.repository | default "crowdsecurity/crowdsec" }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
-        command: ['sh', '-c', 'until nc "$LAPI_HOST" "$LAPI_PORT" -z; do echo waiting for lapi to start; sleep 5; done; ln -s /staging/etc/crowdsec /etc/crowdsec && cscli lapi register --machine "$USERNAME" -u $LAPI_URL --token "$REGISTRATION_TOKEN" && cp /etc/crowdsec/local_api_credentials.yaml /tmp_config/local_api_credentials.yaml']
+        command: ['sh', '-c', 'until nc "$LAPI_HOST" "$LAPI_PORT" -z; do echo waiting for lapi to start; sleep 5; done; ln -s /staging/etc/crowdsec /etc/crowdsec && cscli lapi register --machine "$USERNAME" -u "$LAPI_URL" --token "$REGISTRATION_TOKEN" && cp /etc/crowdsec/local_api_credentials.yaml /tmp_config/local_api_credentials.yaml']
       {{- else }}
       - name: wait-for-lapi
         image: "{{ .Values.appsec.wait_for_lapi.image.repository }}:{{ .Values.appsec.wait_for_lapi.image.tag }}"
@@ -74,6 +74,10 @@ spec:
         volumeMounts:
           - name: crowdsec-config
             mountPath: /tmp_config
+          {{- if .Values.tls.enabled }}
+          - name: crowdsec-appsec-client-tls
+            mountPath: /etc/ssl/crowdsec-appsec-client
+          {{- end }}
         {{- end }}
         env:
           {{- if or (not .Values.tls.enabled) (not .Values.tls.appsec.tlsClientAuth) }}
@@ -87,7 +91,15 @@ spec:
               fieldRef:
                 fieldPath: metadata.name
           - name: LAPI_URL
+            {{- if .Values.tls.enabled }}
+            value: "{{ .Values.appsec.lapiURL | default (printf "https://%s-service.%s:8080" .Release.Name .Release.Namespace) }}"
+            {{- else }}
             value: "{{ .Values.appsec.lapiURL | default (printf "http://%s-service.%s:8080" .Release.Name .Release.Namespace) }}"
+            {{- end }}
+          {{- end }}
+          {{- if .Values.tls.caBundle }}
+          - name: SSL_CERT_FILE
+            value: /etc/ssl/crowdsec-appsec-client/ca.crt
           {{- end }}
           - name: LAPI_HOST
             value: "{{ .Values.appsec.lapiHost | default (printf "%s-service.%s" .Release.Name .Release.Namespace) }}"
@@ -118,13 +130,13 @@ spec:
             value: "true"
           {{- if .Values.tls.appsec.tlsClientAuth }}
           - name: CLIENT_CERT_FILE
-            value: /etc/ssl/crowdsec-appsec/tls.crt
+            value: /etc/ssl/crowdsec-appsec-client/tls.crt
           - name: CLIENT_KEY_FILE
-            value: /etc/ssl/crowdsec-appsec/tls.key
+            value: /etc/ssl/crowdsec-appsec-client/tls.key
           {{- end }}
           {{- if .Values.tls.caBundle }}
           - name: CACERT_FILE
-            value: /etc/ssl/crowdsec-appsec/ca.crt
+            value: /etc/ssl/crowdsec-appsec-client/ca.crt
           {{- end }}
           {{- else }}
           - name: LOCAL_API_URL
@@ -190,14 +202,16 @@ spec:
           {{- end }}
           {{- end }}
           {{- if .Values.tls.enabled }}
-          - name: crowdsec-appsec-tls
-            mountPath: /etc/ssl/crowdsec-appsec
+          - name: crowdsec-appsec-client-tls
+            mountPath: /etc/ssl/crowdsec-appsec-client
+          - name: crowdsec-appsec-server-tls
+            mountPath: /etc/ssl/crowdsec-appsec-server
           {{- end }}
           {{- if .Values.appsec.extraVolumeMounts }}
           {{ toYaml .Values.appsec.extraVolumeMounts | nindent 10 }}
           {{- end }}
 
-        terminationGracePeriodSeconds: 30
+      terminationGracePeriodSeconds: 30
 
       volumes:
       - name: appsec-acquis-config-volume
@@ -226,9 +240,12 @@ spec:
       {{- end }}
       {{- end }}
       {{- if .Values.tls.enabled }}
-      - name: crowdsec-appsec-tls
+      - name: crowdsec-appsec-client-tls
         secret:
-          secretName: {{ .Release.Name }}-appsec-tls
+          secretName: {{ .Release.Name }}-appsec-client-tls
+      - name: crowdsec-appsec-server-tls
+        secret:
+          secretName: {{ .Release.Name }}-appsec-server-tls
       {{- end }}
       {{- if .Values.appsec.extraVolumes }}
       {{ toYaml .Values.appsec.extraVolumes | nindent 6 }}
