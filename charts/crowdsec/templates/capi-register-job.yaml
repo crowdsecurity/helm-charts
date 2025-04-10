@@ -18,6 +18,14 @@ metadata:
     "helm.sh/hook-weight": "0"
 spec:
   template:
+    metadata:
+      labels:
+        k8s-app: {{ .Release.Name }}
+        type: capi-register-job
+        version: v1
+        {{- if .Values.podLabels }}
+{{ toYaml .Values.podLabels | trim | indent 8 }}
+        {{- end }}
     spec:
       serviceAccountName: {{ .Release.Name }}-configmap-updater-sa
       restartPolicy: OnFailure
