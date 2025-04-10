@@ -21,10 +21,6 @@ spec:
     spec:
       serviceAccountName: {{ .Release.Name }}-configmap-updater-sa
       restartPolicy: OnFailure
-      volumes:
-        - name: {{ .Release.Name }}-capi-credentials-volume
-          secret:
-            secretName: {{ .Release.Name }}-capi-credentials
       containers:
         - name: capi-register
           {{- if .Values.image.pullSecrets }}
@@ -38,33 +34,24 @@ spec:
             - "-c"
             - |
                 apk update && apk add kubectl
-                set -x
-                echo "check if the Central API credentials are already present"
-                cp /staging/etc/crowdsec/config.yaml /etc/crowdsec/config.yaml
-                cp /staging/etc/crowdsec/profiles.yaml /etc/crowdsec/profiles.yaml
-                sed -i /etc/crowdsec/config.yaml -e 's/#credentials_path/  credentials_path/'
-                if grep -q "placeholder" /etc/crowdsec/online_api_credentials.yaml; then
-                    echo "Registering this instance to the Central API"
-                    cscli capi register -f /tmp/online_api_credentials.yaml
-                    PATCH=$(
-                    yq -o json --null-input '
-                    [
-                      {
-                        "op": "replace",
-                        "path": "/data/online_api_credentials.yaml",
-                        "value": (load("/tmp/online_api_credentials.yaml") | .papi_url = "https://papi.api.crowdsec.net/" | to_yaml | @base64)
-                      }
-                    ]')
-                    echo "Updating the Central API credentials in the secret"
-                    kubectl -n {{ .Release.Namespace }} patch secret {{ .Release.Name }}-capi-credentials --type json -p "$PATCH"
-                else
-                    echo "Central API credentials are already present, skipping registration"
-                    exit 0
+                set -ex
+                echo "Checking if the secret {{ .Release.Name }}-capi-credentials already exists..."
+                if kubectl -n {{ .Release.Namespace }} get secret {{ .Release.Name }}-capi-credentials >/dev/null 2>&1; then
+                  echo "Secret already exists. Skipping registration."
+                  exit 0
                 fi
-          volumeMounts:
-            - name: {{ .Release.Name }}-capi-credentials-volume
-              mountPath: /etc/crowdsec/online_api_credentials.yaml
-              subPath: online_api_credentials.yaml
+
+                echo "Secret does not exist. Registering instance to Central API."
+                sed -i /staging/etc/crowdsec/config.yaml -e 's/#credentials_path/  credentials_path/'
+
+                yq -i '.api.server.online_client.credentials_path="/tmp/online_api_credentials.yaml" | .api.server.profiles_path="/staging/etc/crowdsec/profiles.yaml"' /staging/etc/crowdsec/config.yaml
+                touch /tmp/online_api_credentials.yaml
+                cscli -c /staging/etc/crowdsec/config.yaml capi register
+                yq -i '.papi_url="https://papi.api.crowdsec.net/"' /tmp/online_api_credentials.yaml
+                echo "Creating secret {{ .Release.Name }}-capi-credentials..."
+                kubectl create secret generic {{ .Release.Name }}-capi-credentials \
+                  -n {{ .Release.Namespace }} \
+                  --from-file=online_api_credentials.yaml=/tmp/online_api_credentials.yaml
     {{- end }}
   {{- end }}
 {{- end }}
