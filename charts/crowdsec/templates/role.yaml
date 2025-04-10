@@ -19,6 +19,9 @@ rules:
       resources: ["secrets"]
       resourceNames: ["{{ .Release.Name }}-capi-credentials"]
       verbs: ["get", "patch"]
+    - apiGroups: [""]
+      resources: ["secrets"]
+      verbs: ["create"]
 {{- end }}
 {{- end }}
 {{- end }}
