@@ -46,6 +46,7 @@ spec:
 
                 yq -i '.api.server.online_client.credentials_path="/tmp/online_api_credentials.yaml"' /staging/etc/crowdsec/config.yaml
                 cscli -c /staging/etc/crowdsec/config.yaml capi register
+                touch /tmp/online_api_credentials.yaml
                 yq -i '.papi_url="https://papi.api.crowdsec.net/"' /tmp/online_api_credentials.yaml
                 echo "Creating secret {{ .Release.Name }}-capi-credentials..."
                 kubectl create secret generic {{ .Release.Name }}-capi-credentials \
