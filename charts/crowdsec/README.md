@@ -4,9 +4,25 @@
 
 Crowdsec helm chart is an open-source, lightweight agent to detect and respond to bad behaviours.
 
-## Get Repo Info
+- [Chart Repository](#chart-repository)
+- [Installing the Chart](#installing-the-chart)
+- [Uninstalling the Chart](#uninstalling-the-chart)
+- [Authentication](#authentication)
+  - [Auto registration token](#auto-registration-token)
+  - [TLS client authentication](#tls-client-authentication)
+  - [Cleaning of stale agents / appsec registration in the LAPI](#cleaning-of-stale-agents--appsec-registration-in-the-lapi)
+- [HA configuration for the LAPI pods](#ha-configuration-for-the-lapi-pods)
+  - [Database setup](#database-setup)
+  - [CrowdSec setup](#crowdsec-setup)
+  - [HA Test](#ha-test)
+- [Setup for AppSec (WAF)](#setup-for-appsec-waf)
+  - [With Traefik](#with-traefik)
+  - [With Nginx](#with-nginx)
+- [Values](#values)
 
-```
+## Chart Repository
+
+```sh
 helm repo add crowdsec https://crowdsecurity.github.io/helm-charts
 helm repo update
 ```
@@ -18,7 +34,7 @@ So you can configure well the chart and being able to parse logs and detect atta
 
 Here is a [blog post](https://crowdsec.net/blog/kubernetes-crowdsec-integration/) about crowdsec in kubernetes.
 
-```
+```sh
 # Create namespace for crowdsec
 kubectl create ns crowdsec
 # Install helm chart with proper values.yaml config
@@ -27,7 +43,7 @@ helm install crowdsec crowdsec/crowdsec -f crowdsec-values.yaml -n crowdsec
 
 ## Uninstalling the Chart
 
-```
+```sh
 helm delete crowdsec -n crowdsec
 ```
 
@@ -42,7 +58,7 @@ This is setup with the following part in the `values.yaml` file. Make sure to ad
 
 Also, when you modify the `config.config.yaml.local` entry in your own `values.yaml` make sure to put this piece in it as well.
 
-```
+```yaml
 config:
   config.yaml.local: |
     api:
@@ -63,7 +79,7 @@ Currently TLS authentication is only possible between the agent and the LAPI as 
 The below configuration will activate TLS on the LAPI and TLS client authentication for the agent.
 Certificates are renewed by default with [cert-manager](https://github.com/cert-manager/cert-manager).
 
-```
+```yaml
 tls:
   enabled: true
   agent:
@@ -76,7 +92,7 @@ Both methods add a machine per pod in the LAPI. These aren't automatically clean
 Crowdsec offers a [flush option](https://docs.crowdsec.net/docs/next/configuration/crowdsec_configuration/#flush) to clean them up.
 Add the `flush:` part to your `db_config`.
 
-```
+```yaml
 config:
   config.yaml.local: |
     db_config:
@@ -87,49 +103,127 @@ config:
         ## Flush both login types if the machine has not logged in for 60 minutes or more
 ```
 
-## Setup for LAPI High Availability
+## HA configuration for the LAPI pods
 
-Below a basic configuration for high availability of the LAPI
+You can set up multiple LAPI instances so the failure of a node does not impact
+the availability of crowdsec.
 
+To do that, we define a replica count=2 and both instances will use the same
+database and CAPI credentials.
+
+The constraints of this setup are
+
+- no local database, but mysql or postgres (in or outside of the cluster)
+- no persistent volume for LAPI configuration or data
+
+### Database setup
+
+If you have an existing postgres/mysql/mariadb, create a user for crowdsec and
+take note of the credentials.
+
+In this tutorial we deploy a basic instance with:
+
+```sh
+$ helm repo add bitnami https://charts.bitnami.com/bitnami
+$ helm install \
+    mysql bitnami/mysql \
+    --create-namespace \
+    -n mysql \
+    --set auth.RootPassword=verysecretpassword \
+    --set auth.database=crowdsec \
+    --set auth.username=crowdsec \
+    --set auth.password=secretpassword
 ```
-# your-values.yaml
 
-# Configure external DB (https://docs.crowdsec.net/docs/configuration/crowdsec_configuration/#configuration-example)
-config:
-  config.yaml.local: |
-    db_config:
-      type:     postgresql
-      user:     crowdsec
-      password: ${DB_PASSWORD}
-      db_name:  crowdsec
-      host:     192.168.0.2
-      port:     5432
-      sslmode:  require
+The hostname of the DB will therefore be mysql.mysql.svc.cluster.local
 
+Now, copy your enrollment key at [https://app.crowdsec.net/security-engines](https://app.crowdsec.net/security-engines),
+by clicking 'Enroll command' and the "Kubernetes" tab. It is the same every time for your account so you can reuse it
+for multiple installations.
+
+### CrowdSec setup
+
+Create a `crowdsec-values.yaml` file, make sure to replace the db credentials and the enrollment key:
+
+```yaml
+container_runtime: containerd
+
+agent:
+  # we are not setting up traefik but the acquisition section is required.
+  acquisition:
+    - namespace: traefik
+      podName: traefik-*
+      program: traefik
 lapi:
-  # 2 or more replicas for HA
   replicas: 2
-  # You can specify your own CS_LAPI_SECRET, or let the chart generate one. Length must be >= 64
-  secrets:
-    csLapiSecret: <anyRandomSecret>
-  # Specify your external DB password here
   extraSecrets:
-    dbPassword: <externalDbPassword>
+    dbPassword: "secretpassword"
+  storeCAPICredentialsInSecret: true
   persistentVolume:
-    # When replicas for LAPI is greater than 1, two options, persistent volumes must be disabled, or in ReadWriteMany mode
     config:
       enabled: false
-    # data volume is not required, since SQLite isn't used
     data:
       enabled: false
-  # DB Password passed through environment variable
   env:
+    - name: ENROLL_KEY
+      value: "abcdefghijklmnopqrstuvwxy"
+    - name: ENROLL_INSTANCE_NAME
+      value: "my-k8s-cluster"
+    - name: ENROLL_TAGS
+      value: "k8s linux test"
     - name: DB_PASSWORD
       valueFrom:
         secretKeyRef:
           name: crowdsec-lapi-secrets
           key: dbPassword
+config:
+  config.yaml.local: |
+    db_config:
+      type:     mysql
+      user:     crowdsec
+      password: ${DB_PASSWORD}
+      db_name:  crowdsec
+      host:     mysql.mysql.svc.cluster.local
+      port:     3306
+    api:
+      server:
+        auto_registration: # Activate if not using TLS for authentication
+          enabled: true
+          token: "${REGISTRATION_TOKEN}"  # /!\ do not change
+          allowed_ranges: # /!\ adapt to the pod IP ranges used by your cluster
+            - "127.0.0.1/32"
+            - "192.168.0.0/16"
+            - "10.0.0.0/8"
+            - "172.16.0.0/12"
+
 ```
+
+and install the crowdsec chart.
+
+```sh
+helm install \
+    crowdsec crowdsec/crowdsec \
+    --create-namespace \
+    -n crowdsec \
+    -f crowdsec-values.yaml
+```
+
+Now you can return to the [console](https://app.crowdsec.net/) to accept the enrollment.
+
+### HA Test
+
+As you can see, the CAPI credentials are persisted in a k8s secret
+
+```
+$ kubectl -n crowdsec get secrets crowdsec-capi-credentials -o yaml | yq '.data."online_api_credentials.yaml"' | base64 -d
+url: https://api.crowdsec.net/
+login: ...
+password: ...
+papi_url: https://papi.api.crowdsec.net/
+```
+
+You can test crowdsec availability by removing any of the LAPI pods, possibly taint the remaining nodes so it won't spawn on them,
+and all the log processors will keep connecting randomly to any of the available LAPIs at any time.
 
 ## Setup for AppSec (WAF)
 
@@ -153,7 +247,7 @@ appsec:
 
 Or you can also use your own custom configurations and rules for AppSec:
 
-```
+```yaml
 # your-values.yaml (option 2)
 appsec:
   enabled: true
