@@ -25,6 +25,7 @@ A helloWorld chart for Kubernetes using ingress nginx
 | service.type | string | `"ClusterIP"` |  |
 | service.port | int | `5678` |  |
 | ingress.enabled | bool | `false` |  |
+| ingress.class | string | `"nginx"` |  |
 | ingress.annotations | object | `{}` |  |
 | ingress.hosts[0].host | string | `"helloworld.local"` |  |
 | ingress.hosts[0].paths[0].path | string | `"/"` |  |
