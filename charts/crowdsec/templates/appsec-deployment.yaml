@@ -26,10 +26,10 @@ spec:
       annotations:
         checksum/appsec-acquis-configmap: {{ include (print $.Template.BasePath "/appsec-configmap.yaml") . | sha256sum }}
         {{- if .Values.podAnnotations }}
-        {{- toYaml .Values.podAnnotations | trim | indent 8 }}
+{{ toYaml .Values.podAnnotations | trim | indent 8 }}
         {{- end }}
         {{- if .Values.appsec.podAnnotations }}
-        {{- toYaml .Values.appsec.podAnnotations | trim | indent 8 }}
+{{ toYaml .Values.appsec.podAnnotations | trim | indent 8 }}
         {{- end }}
       labels:
         k8s-app: {{ .Release.Name }}
