@@ -107,3 +107,36 @@ true
 false
 {{- end -}}
 {{- end -}}
+
+{{/**
+  Provide an external secret for LAPI
+*/}}
+{{ define "lapi.secretName" }}
+{{- if .Values.secrets.externalSecret.name -}}
+  {{- .Values.secrets.externalSecret.name -}}
+{{- else -}}
+crowdsec-lapi-secrets
+{{- end -}}
+{{- end -}}
+
+{{/**
+  Provide a name of the key in secret for csLapiSecret
+*/}}
+{{ define "lapi.csLapiSecretKey" }}
+{{- if and .Values.secrets.externalSecret.name .Values.secrets.externalSecret.csLapiSecretKey -}}
+  {{- .Values.secrets.externalSecret.csLapiSecretKey -}}
+{{- else -}}
+csLapiSecret
+{{- end -}}
+{{- end -}}
+
+{{/**
+  Provide a name of the key in secret for registrationToken
+*/}}
+{{ define "lapi.registrationTokenKey" }}
+{{- if and .Values.secrets.externalSecret.name .Values.secrets.externalSecret.registrationTokenKey -}}
+  {{- .Values.secrets.externalSecret.registrationTokenKey -}}
+{{- else -}}
+registrationToken
+{{- end -}}
+{{- end -}}

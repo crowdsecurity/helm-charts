@@ -156,6 +156,17 @@ secrets:
   username: ""
   # -- agent password (default is generated randomly)
   password: ""
+  # Use an external secret for csLapiSecret and registrationToken.
+  #
+  # When externalSecret.name is specified, lapi.secrets.csLapiSecret and
+  # lapi.secrets.registrationToken values are ignored
+  externalSecret:
+    # Name of the secret to use
+    name: ""
+    # The key in the secret that holds the csLapiSecret. Defaults to csLapiSecret
+    csLapiSecretKey: ""
+    # The key in the secret that holds the registrationToken. Defaults to registrationToken
+    registrationTokenKey: ""
 
 # lapi will deploy pod with crowdsec lapi and dashboard as deployment
 lapi:
