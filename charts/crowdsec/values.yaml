@@ -20,6 +20,9 @@ image:
 
 # -- Annotations to be added to pods
 podAnnotations: {}
+  # Uncomment the following lines if you use Prometheus Helm Chart rather than Prometheus Operator.
+  # prometheus.io/scrape: 'true'
+  # prometheus.io/port: '6060'
 
 # -- Labels to be added to pods
 podLabels: {}
@@ -301,6 +304,13 @@ lapi:
     serviceMonitor:
       enabled: false
       additionalLabels: {}
+    # -- Creates a PodMonitor so Prometheus will monitor all LAPI PODs
+    # -- Prometheus needs to be configured to watch on all namespaces for PodMonitors
+    # -- See the documentation: https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack#prometheusioscrape
+    # -- See also: https://github.com/prometheus-community/helm-charts/issues/106#issuecomment-700847774
+    podMonitor:
+      enabled: false
+      additionalLabels: {}
 
   strategy:
     type: Recreate
@@ -492,6 +502,13 @@ agent:
     serviceMonitor:
       enabled: false
       additionalLabels: {}
+    # -- Creates a PodMonitor so Prometheus will monitor all Agent PODs
+    # -- Prometheus needs to be configured to watch on all namespaces for PodMonitors
+    # -- See the documentation: https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack#prometheusioscrape
+    # -- See also: https://github.com/prometheus-community/helm-charts/issues/106#issuecomment-700847774
+    podMonitor:
+      enabled: false
+      additionalLabels: {}
 
   service:
     type: ClusterIP
@@ -667,6 +684,13 @@ appsec:
     # -- See the documentation: https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack#prometheusioscrape
     # -- See also: https://github.com/prometheus-community/helm-charts/issues/106#issuecomment-700847774
     serviceMonitor:
+      enabled: false
+      additionalLabels: {}
+    # -- Creates a PodMonitor so Prometheus will monitor all AppSec PODs
+    # -- Prometheus needs to be configured to watch on all namespaces for PodMonitors
+    # -- See the documentation: https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack#prometheusioscrape
+    # -- See also: https://github.com/prometheus-community/helm-charts/issues/106#issuecomment-700847774
+    podMonitor:
       enabled: false
       additionalLabels: {}
 

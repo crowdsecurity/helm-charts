@@ -1,0 +1,29 @@
+{{- if .Values.lapi.enabled }}
+{{- if and (.Values.lapi.metrics.enabled) (.Values.lapi.metrics.podMonitor.enabled) }}
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: {{ .Release.Name }}-lapi
+  namespace: {{ .Release.Namespace }}
+  {{- if .Values.lapi.metrics.podMonitor.additionalLabels }}
+  labels:
+{{ toYaml .Values.lapi.metrics.podMonitor.additionalLabels | indent 4 }}
+  {{- end }}
+spec:
+  selector:
+    matchLabels:
+      k8s-app: {{ .Release.Name }}
+      type: lapi
+  namespaceSelector:
+    matchNames: [{{ .Release.Namespace }}]
+  attachMetadata:
+    node: true
+  podMetricsEndpoints:
+    - port: metrics
+      relabelings:
+        - action: replace
+          sourceLabels:
+          - __meta_kubernetes_pod_node_name
+          targetLabel: machine
+{{ end }}
+{{- end }}
