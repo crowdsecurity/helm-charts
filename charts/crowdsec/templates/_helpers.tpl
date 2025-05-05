@@ -140,3 +140,33 @@ csLapiSecret
 registrationToken
 {{- end -}}
 {{- end -}}
+
+{{/**
+  Provide an external secret for Credential Encryption
+*/}}
+{{ define "config.encryptionSecretName" }}
+{{- if .Values.secrets.encryption.name -}}
+  {{- .Values.secrets.encryption.name -}}
+{{- else -}}
+{{ .Release.Name }}-config
+{{- end -}}
+{{- end -}}
+
+{{/*
+Generate ENCRYPTION_SECRET if not specified in values
+*/}}
+{{ define "config.encryptionSecretValue" }}
+{{- if .Values.secrets.encryption.value }}
+  {{- .Values.secrets.encryption.value -}}
+{{- else if (lookup "v1" "Secret" .Release.Namespace (include "config.encryptionSecretName" .)).data }}
+  {{- $obj := (lookup "v1" "Secret" .Release.Namespace (include "config.encryptionSecretName" .)).data -}}
+  {{- $val := index $obj "encryptionSecret" -}}
+  {{- if empty $val }}
+  {{- randAlphaNum 32 -}}
+  {{- else }}
+  {{- $val | b64dec -}}
+  {{- end -}}
+{{- else -}}
+  {{- randAlphaNum 32 -}}
+{{- end -}}
+{{- end -}}
