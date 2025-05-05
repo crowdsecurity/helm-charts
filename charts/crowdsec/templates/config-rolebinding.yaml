@@ -1,0 +1,17 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: {{ .Release.Name }}-config
+  labels:
+    k8s-app: {{ .Release.Name }}
+    type: config
+    version: v1
+roleRef:
+    apiGroup: rbac.authorization.k8s.io
+    kind: Role
+    name: {{ .Release.Name }}-config
+subjects:
+  - kind: ServiceAccount
+    name: {{ .Release.Name }}-config
+    namespace: {{ .Release.Namespace }}
