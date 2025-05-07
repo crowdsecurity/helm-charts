@@ -417,8 +417,9 @@ controller:
 | lapi.dnsConfig | object | `{}` | dnsConfig for lapi |
 | lapi.affinity | object | `{}` | affinity for lapi |
 | lapi.topologySpreadConstraints | list | `[]` | topologySpreadConstraints for lapi |
-| lapi.metrics | object | `{"enabled":true,"serviceMonitor":{"additionalLabels":{},"enabled":false}}` | Enable service monitoring (exposes "metrics" port "6060" for Prometheus) |
+| lapi.metrics | object | `{"enabled":true,"podMonitor":{"additionalLabels":{},"enabled":false},"serviceMonitor":{"additionalLabels":{},"enabled":false}}` | Enable service monitoring (exposes "metrics" port "6060" for Prometheus) |
 | lapi.metrics.serviceMonitor | object | `{"additionalLabels":{},"enabled":false}` | See also: https://github.com/prometheus-community/helm-charts/issues/106#issuecomment-700847774 |
+| lapi.metrics.podMonitor | object | `{"additionalLabels":{},"enabled":false}` | See also: https://github.com/prometheus-community/helm-charts/issues/106#issuecomment-700847774 |
 | lapi.strategy.type | string | `"Recreate"` |  |
 | lapi.secrets.csLapiSecret | string | `""` | Shared LAPI secret. Will be generated randomly if not specified. Size must be > 64 characters |
 | lapi.secrets.registrationToken | string | `""` | Registration Token for Appsec. Will be generated randomly if not specified. Size must be > 48 characters |
@@ -457,8 +458,9 @@ controller:
 | agent.livenessProbe | object | `{"failureThreshold":3,"httpGet":{"path":"/metrics","port":"metrics","scheme":"HTTP"},"periodSeconds":10,"successThreshold":1,"timeoutSeconds":5}` | livenessProbe for agent |
 | agent.readinessProbe | object | `{"failureThreshold":3,"httpGet":{"path":"/metrics","port":"metrics","scheme":"HTTP"},"periodSeconds":10,"successThreshold":1,"timeoutSeconds":5}` | readinessProbe for agent |
 | agent.startupProbe | object | `{"failureThreshold":30,"httpGet":{"path":"/metrics","port":"metrics","scheme":"HTTP"},"periodSeconds":10,"successThreshold":1,"timeoutSeconds":5}` | startupProbe for agent |
-| agent.metrics | object | `{"enabled":true,"serviceMonitor":{"additionalLabels":{},"enabled":false}}` | Enable service monitoring (exposes "metrics" port "6060" for Prometheus) |
+| agent.metrics | object | `{"enabled":true,"podMonitor":{"additionalLabels":{},"enabled":false},"serviceMonitor":{"additionalLabels":{},"enabled":false}}` | Enable service monitoring (exposes "metrics" port "6060" for Prometheus) |
 | agent.metrics.serviceMonitor | object | `{"additionalLabels":{},"enabled":false}` | See also: https://github.com/prometheus-community/helm-charts/issues/106#issuecomment-700847774 |
+| agent.metrics.podMonitor | object | `{"additionalLabels":{},"enabled":false}` | See also: https://github.com/prometheus-community/helm-charts/issues/106#issuecomment-700847774 |
 | agent.service.type | string | `"ClusterIP"` |  |
 | agent.service.labels | object | `{}` |  |
 | agent.service.annotations | object | `{}` |  |
@@ -471,7 +473,7 @@ controller:
 | agent.wait_for_lapi.image.repository | string | `"busybox"` | docker image repository name |
 | agent.wait_for_lapi.image.pullPolicy | string | `"IfNotPresent"` | pullPolicy |
 | agent.wait_for_lapi.image.tag | string | `"1.28"` | docker image tag |
-| appsec | object | `{"acquisitions":[],"affinity":{},"configs":{},"deployAnnotations":{},"enabled":false,"env":[],"extraInitContainers":[],"extraVolumeMounts":[],"extraVolumes":[],"lapiHost":"","lapiPort":8080,"lapiURL":"","livenessProbe":{"failureThreshold":3,"httpGet":{"path":"/metrics","port":"metrics","scheme":"HTTP"},"periodSeconds":10,"successThreshold":1,"timeoutSeconds":5},"metrics":{"enabled":true,"serviceMonitor":{"additionalLabels":{},"enabled":false}},"nodeSelector":{},"podAnnotations":{},"podLabels":{},"priorityClassName":"","readinessProbe":{"failureThreshold":3,"httpGet":{"path":"/metrics","port":"metrics","scheme":"HTTP"},"periodSeconds":10,"successThreshold":1,"timeoutSeconds":5},"replicas":1,"resources":{"limits":{"cpu":"500m","memory":"250Mi"},"requests":{"cpu":"500m","memory":"250Mi"}},"rules":{},"service":{"annotations":{},"externalIPs":[],"externalTrafficPolicy":"Cluster","labels":{},"loadBalancerClass":null,"loadBalancerIP":null,"type":"ClusterIP"},"startupProbe":{"failureThreshold":30,"httpGet":{"path":"/metrics","port":"metrics","scheme":"HTTP"},"periodSeconds":10,"successThreshold":1,"timeoutSeconds":5},"strategy":{"type":"Recreate"},"tolerations":[],"wait_for_lapi":{"image":{"pullPolicy":"IfNotPresent","repository":"busybox","tag":"1.28"}}}` | Enable AppSec (https://docs.crowdsec.net/docs/next/appsec/intro) |
+| appsec | object | `{"acquisitions":[],"affinity":{},"configs":{},"deployAnnotations":{},"enabled":false,"env":[],"extraInitContainers":[],"extraVolumeMounts":[],"extraVolumes":[],"lapiHost":"","lapiPort":8080,"lapiURL":"","livenessProbe":{"failureThreshold":3,"httpGet":{"path":"/metrics","port":"metrics","scheme":"HTTP"},"periodSeconds":10,"successThreshold":1,"timeoutSeconds":5},"metrics":{"enabled":true,"podMonitor":{"additionalLabels":{},"enabled":false},"serviceMonitor":{"additionalLabels":{},"enabled":false}},"nodeSelector":{},"podAnnotations":{},"podLabels":{},"priorityClassName":"","readinessProbe":{"failureThreshold":3,"httpGet":{"path":"/metrics","port":"metrics","scheme":"HTTP"},"periodSeconds":10,"successThreshold":1,"timeoutSeconds":5},"replicas":1,"resources":{"limits":{"cpu":"500m","memory":"250Mi"},"requests":{"cpu":"500m","memory":"250Mi"}},"rules":{},"service":{"annotations":{},"externalIPs":[],"externalTrafficPolicy":"Cluster","labels":{},"loadBalancerClass":null,"loadBalancerIP":null,"type":"ClusterIP"},"startupProbe":{"failureThreshold":30,"httpGet":{"path":"/metrics","port":"metrics","scheme":"HTTP"},"periodSeconds":10,"successThreshold":1,"timeoutSeconds":5},"strategy":{"type":"Recreate"},"tolerations":[],"wait_for_lapi":{"image":{"pullPolicy":"IfNotPresent","repository":"busybox","tag":"1.28"}}}` | Enable AppSec (https://docs.crowdsec.net/docs/next/appsec/intro) |
 | appsec.enabled | bool | `false` | Enable AppSec (by default disabled) |
 | appsec.lapiURL | string | `""` | lapiURL for agent to connect to (default is the lapi service URL) |
 | appsec.lapiHost | string | `""` | lapiHost for agent to connect to (default is the lapi service) |
@@ -496,8 +498,9 @@ controller:
 | appsec.livenessProbe | object | `{"failureThreshold":3,"httpGet":{"path":"/metrics","port":"metrics","scheme":"HTTP"},"periodSeconds":10,"successThreshold":1,"timeoutSeconds":5}` | livenessProbe for appsec |
 | appsec.readinessProbe | object | `{"failureThreshold":3,"httpGet":{"path":"/metrics","port":"metrics","scheme":"HTTP"},"periodSeconds":10,"successThreshold":1,"timeoutSeconds":5}` | readinessProbe for appsec |
 | appsec.startupProbe | object | `{"failureThreshold":30,"httpGet":{"path":"/metrics","port":"metrics","scheme":"HTTP"},"periodSeconds":10,"successThreshold":1,"timeoutSeconds":5}` | startupProbe for appsec |
-| appsec.metrics | object | `{"enabled":true,"serviceMonitor":{"additionalLabels":{},"enabled":false}}` | Enable service monitoring (exposes "metrics" port "6060" for Prometheus and "7422" for AppSec)  |
+| appsec.metrics | object | `{"enabled":true,"podMonitor":{"additionalLabels":{},"enabled":false},"serviceMonitor":{"additionalLabels":{},"enabled":false}}` | Enable service monitoring (exposes "metrics" port "6060" for Prometheus and "7422" for AppSec)  |
 | appsec.metrics.serviceMonitor | object | `{"additionalLabels":{},"enabled":false}` | See also: https://github.com/prometheus-community/helm-charts/issues/106#issuecomment-700847774 |
+| appsec.metrics.podMonitor | object | `{"additionalLabels":{},"enabled":false}` | See also: https://github.com/prometheus-community/helm-charts/issues/106#issuecomment-700847774 |
 | appsec.wait_for_lapi | object | `{"image":{"pullPolicy":"IfNotPresent","repository":"busybox","tag":"1.28"}}` | wait-for-lapi init container |
 | appsec.wait_for_lapi.image.repository | string | `"busybox"` | docker image repository name |
 | appsec.wait_for_lapi.image.pullPolicy | string | `"IfNotPresent"` | pullPolicy |
