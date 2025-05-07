@@ -378,6 +378,9 @@ controller:
 | tls.lapi.reflector.namespaces | list | `[]` |  |
 | secrets.username | string | `""` | agent username (default is generated randomly) |
 | secrets.password | string | `""` | agent password (default is generated randomly) |
+| secrets.externalSecret.name | string | `""` |  |
+| secrets.externalSecret.csLapiSecretKey | string | `""` |  |
+| secrets.externalSecret.registrationTokenKey | string | `""` |  |
 | lapi.enabled | bool | `true` | enable lapi (by default enabled) |
 | lapi.replicas | int | `1` | replicas for local API |
 | lapi.env | list | `[]` | environment variables from crowdsecurity/crowdsec docker image |
