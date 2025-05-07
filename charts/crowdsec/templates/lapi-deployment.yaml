@@ -113,13 +113,13 @@ spec:
           - name: CS_LAPI_SECRET
             valueFrom:
               secretKeyRef:
-                name: crowdsec-lapi-secrets
-                key: csLapiSecret
+                name: {{ include "lapi.secretName" . }}
+                key: {{ include "lapi.csLapiSecretKey" . }}
           - name: REGISTRATION_TOKEN
             valueFrom:
               secretKeyRef:
-                name: crowdsec-lapi-secrets
-                key: registrationToken
+                name: {{ include "lapi.secretName" . }}
+                key: {{ include "lapi.registrationTokenKey" . }}
           - name: CUSTOM_HOSTNAME
             valueFrom:
               fieldRef:

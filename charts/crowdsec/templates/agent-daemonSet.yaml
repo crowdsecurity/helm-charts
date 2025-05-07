@@ -76,8 +76,8 @@ spec:
           - name: REGISTRATION_TOKEN
             valueFrom:
               secretKeyRef:
-                name: crowdsec-lapi-secrets
-                key: registrationToken
+                name: {{ include "lapi.secretName" . }}
+                key: {{ include "lapi.registrationTokenKey" . }}
           - name: USERNAME
             valueFrom:
               fieldRef:
