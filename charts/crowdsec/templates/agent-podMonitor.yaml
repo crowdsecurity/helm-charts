@@ -1,0 +1,27 @@
+{{- if and (.Values.agent.enabled) (.Values.agent.metrics.enabled) (.Values.agent.metrics.podMonitor.enabled) }}
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: {{ .Release.Name }}-agent
+  namespace: {{ .Release.Namespace }}
+  {{- if .Values.agent.metrics.podMonitor.additionalLabels }}
+  labels:
+{{ toYaml .Values.agent.metrics.podMonitor.additionalLabels | indent 4 }}
+  {{- end }}
+spec:
+  selector:
+    matchLabels:
+      k8s-app: {{ .Release.Name }}
+      type: agent
+  namespaceSelector:
+    matchNames: [{{ .Release.Namespace }}]
+  attachMetadata:
+    node: true
+  podMetricsEndpoints:
+    - port: metrics
+      relabelings:
+        - action: replace
+          sourceLabels:
+            - __meta_kubernetes_pod_node_name
+          targetLabel: machine
+{{ end }}
