@@ -2,6 +2,7 @@
 {{- if and (not .Values.lapi.enabled) (or (not .Values.appsec.lapiURL) (not .Values.appsec.lapiHost) (not .Values.appsec.lapiPort)) }}
   {{- fail "LAPI is not enabled, but appsec.lapiURL, appsec.lapiHost or appsec.lapiPort is not set" }}
 {{- end }}
+ {{- $crowdsecConfig := "/etc/crowdsec" -}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -210,6 +211,11 @@ spec:
           {{- if .Values.appsec.extraVolumeMounts }}
           {{ toYaml .Values.appsec.extraVolumeMounts | nindent 10 }}
           {{- end }}
+          {{- if index .Values.config "appsec_config.yaml.local" }}
+          - name: crowdsec-appsec-config-local-volume
+            mountPath: {{ $crowdsecConfig }}/config.yaml.local
+            subPath: config.yaml.local
+          {{- end }}
 
       terminationGracePeriodSeconds: 30
 
@@ -238,6 +244,11 @@ spec:
           - key: {{ $fileName }}
             path: {{ $fileName }}
       {{- end }}
+      {{- end }}
+      {{ if index .Values.config "appsec_config.yaml.local" }}
+      - name: crowdsec-appsec-config-local-volume
+        configMap:
+          name: crowdsec-appsec-config-local
       {{- end }}
       {{- if .Values.tls.enabled }}
       - name: crowdsec-appsec-client-tls

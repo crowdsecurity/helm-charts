@@ -236,6 +236,12 @@ spec:
           {{- if .Values.agent.extraVolumeMounts }}
           {{ toYaml .Values.agent.extraVolumeMounts | nindent 10 }}
           {{- end }}
+          {{- if index .Values.config "agent_config.yaml.local" }}
+          - name: crowdsec-agent-config-local-volume
+            mountPath: {{ $crowdsecConfig }}/config.yaml.local
+            subPath: config.yaml.local
+          {{- end }}
+
       terminationGracePeriodSeconds: 30
       volumes:
       - name: acquis-config-volume
@@ -311,6 +317,11 @@ spec:
       - name: crowdsec-agent-tls
         secret:
           secretName: {{ .Release.Name }}-agent-tls
+      {{- end }}
+      {{ if index .Values.config "agent_config.yaml.local" }}
+      - name: crowdsec-agent-config-local-volume
+        configMap:
+          name: crowdsec-agent-config-local
       {{- end }}
       {{- if .Values.agent.extraVolumes }}
       {{ toYaml .Values.agent.extraVolumes | nindent 6 }}

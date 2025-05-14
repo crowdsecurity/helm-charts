@@ -33,6 +33,7 @@ podLabels: {}
 # for the lapi those configs will be loaded : profiles.yaml, notifications, console.yaml
 config:
   # -- To better understand stages in parsers, you can take a look at https://docs.crowdsec.net/docs/next/parsers/intro/
+  # Those files are only mounted in the agent pods
   parsers:
     s00-raw: {}
     s01-parse: {}
@@ -42,6 +43,7 @@ config:
       #   ....
     s02-enrich: {}
   # -- to better understand how to write a scenario, you can take a look at https://docs.crowdsec.net/docs/next/scenarios/intro
+  # Those files are only mounted in the agent pods
   scenarios: {}
     # myScenario.yaml: |
     #   type: trigger
@@ -50,6 +52,7 @@ config:
     #    filter: "evt.Meta.log_type == 'auth_bf_log'"
     #    ...
   # -- to better understand how to write a postoverflow, you can take a look at (https://docs.crowdsec.net/docs/next/whitelist/create/#whitelist-in-postoverflows)
+  # Those files are only mounted in the agent pods
   postoverflows:
     s00-enrich: {}
       # rdnsEnricher.yaml: |
@@ -58,16 +61,20 @@ config:
       # myRdnsWhitelist.yaml: |
       #   ...
   # -- Simulation configuration (https://docs.crowdsec.net/docs/next/scenarios/simulation/)
+  # This file is only mounted in the agent pods
   simulation.yaml: ""
     #  |
     # simulation: false
     # exclusions:
     #  - crowdsecurity/ssh-bf
+  # This file is only mounted in the lapi pod
   console.yaml: ""
     #   |
     # share_manual_decisions: true
     # share_tainted: true
     # share_custom: true
+  # This file is only mounted in the lapi pod
+  # Deprecated in favor of centralized allowlists (https://docs.crowdsec.net/docs/next/local_api/centralized_allowlists)
   capi_whitelists.yaml: ""
     #   |
     # ips:
@@ -76,6 +83,7 @@ config:
     # cidrs:
     # - 1.2.3.0/24
   # -- Profiles configuration (https://docs.crowdsec.net/docs/next/profiles/format/#profile-configuration-example)
+  # This file is only mounted in the lapi pod
   profiles.yaml: ""
     #   |
     #  name: default_ip_remediation
@@ -84,6 +92,7 @@ config:
     #    - Alert.Remediation == true && Alert.GetScope() == "Ip"
     #  ...
   # -- General configuration (https://docs.crowdsec.net/docs/configuration/crowdsec_configuration/#configuration-example)
+  # This file is only mounted in the lapi pod
   config.yaml.local: |
     api:
       server:
@@ -104,6 +113,7 @@ config:
     #   port:     5432
     #   sslmode:  require
   # -- notifications configuration (https://docs.crowdsec.net/docs/next/notification_plugins/intro)
+  # Those files are only mounted in the lapi pod
   notifications: {}
     # email.yaml: |
     #   type: email
@@ -114,6 +124,14 @@ config:
     # slack.yaml: ""
     # http.yaml: ""
     # splunk.yaml: ""
+  
+  # General configuration (https://docs.crowdsec.net/docs/configuration/crowdsec_configuration/#configuration-example)
+  # This file is only mounted in the agent pod
+  agent_config.local.yaml: ""
+  
+  # General configuration (https://docs.crowdsec.net/docs/configuration/crowdsec_configuration/#configuration-example)
+  # This file is only mounted in the appsec pod
+  appsec_config.local.yaml: ""
 
 tls:
   enabled: false
