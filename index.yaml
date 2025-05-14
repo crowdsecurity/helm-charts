@@ -3,6 +3,17 @@ entries:
   crowdsec:
   - apiVersion: v2
     appVersion: v1.6.8
+    created: "2025-05-14T15:51:19.160299903Z"
+    description: Crowdsec helm chart is an open-source, lightweight agent to detect
+      and respond to bad behaviours.
+    digest: d86a68c221f2ce88776424382ad563572b264cccdd87b3a7b199db2dcb486f37
+    name: crowdsec
+    type: application
+    urls:
+    - https://github.com/crowdsecurity/helm-charts/releases/download/crowdsec-0.19.3/crowdsec-0.19.3.tgz
+    version: 0.19.3
+  - apiVersion: v2
+    appVersion: v1.6.8
     created: "2025-04-10T10:59:35.137770129Z"
     description: Crowdsec helm chart is an open-source, lightweight agent to detect
       and respond to bad behaviours.
@@ -976,4 +987,4 @@ entries:
     urls:
     - https://github.com/crowdsecurity/helm-charts/releases/download/helloworld-0.1.0/helloworld-0.1.0.tgz
     version: 0.1.0
-generated: "2025-04-10T10:59:35.138278179Z"
+generated: "2025-05-14T15:51:19.160610332Z"
