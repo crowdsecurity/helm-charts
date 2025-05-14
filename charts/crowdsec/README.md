@@ -349,15 +349,17 @@ controller:
 | image.tag | string | `""` | docker image tag |
 | podAnnotations | object | `{}` | Annotations to be added to pods |
 | podLabels | object | `{}` | Labels to be added to pods |
-| config.parsers | object | `{"s00-raw":{},"s01-parse":{},"s02-enrich":{}}` | To better understand stages in parsers, you can take a look at https://docs.crowdsec.net/docs/next/parsers/intro/ |
-| config.scenarios | object | `{}` | to better understand how to write a scenario, you can take a look at https://docs.crowdsec.net/docs/next/scenarios/intro |
-| config.postoverflows | object | `{"s00-enrich":{},"s01-whitelist":{}}` | to better understand how to write a postoverflow, you can take a look at (https://docs.crowdsec.net/docs/next/whitelist/create/#whitelist-in-postoverflows) |
-| config."simulation.yaml" | string | `""` | Simulation configuration (https://docs.crowdsec.net/docs/next/scenarios/simulation/) |
+| config.parsers | object | `{"s00-raw":{},"s01-parse":{},"s02-enrich":{}}` | To better understand stages in parsers, you can take a look at https://docs.crowdsec.net/docs/next/parsers/intro/ Those files are only mounted in the agent pods |
+| config.scenarios | object | `{}` | to better understand how to write a scenario, you can take a look at https://docs.crowdsec.net/docs/next/scenarios/intro Those files are only mounted in the agent pods |
+| config.postoverflows | object | `{"s00-enrich":{},"s01-whitelist":{}}` | to better understand how to write a postoverflow, you can take a look at (https://docs.crowdsec.net/docs/next/whitelist/create/#whitelist-in-postoverflows) Those files are only mounted in the agent pods |
+| config."simulation.yaml" | string | `""` | Simulation configuration (https://docs.crowdsec.net/docs/next/scenarios/simulation/) This file is only mounted in the agent pods |
 | config."console.yaml" | string | `""` |  |
 | config."capi_whitelists.yaml" | string | `""` |  |
-| config."profiles.yaml" | string | `""` | Profiles configuration (https://docs.crowdsec.net/docs/next/profiles/format/#profile-configuration-example) |
-| config."config.yaml.local" | string | `"api:\n  server:\n    auto_registration: # Activate if not using TLS for authentication\n      enabled: true\n      token: \"${REGISTRATION_TOKEN}\" # /!\\ Do not modify this variable (auto-generated and handled by the chart)\n      allowed_ranges: # /!\\ Make sure to adapt to the pod IP ranges used by your cluster\n        - \"127.0.0.1/32\"\n        - \"192.168.0.0/16\"\n        - \"10.0.0.0/8\"\n        - \"172.16.0.0/12\"\n# db_config:\n#   type:     postgresql\n#   user:     crowdsec\n#   password: ${DB_PASSWORD}\n#   db_name:  crowdsec\n#   host:     192.168.0.2\n#   port:     5432\n#   sslmode:  require\n"` | General configuration (https://docs.crowdsec.net/docs/configuration/crowdsec_configuration/#configuration-example) |
-| config.notifications | object | `{}` | notifications configuration (https://docs.crowdsec.net/docs/next/notification_plugins/intro) |
+| config."profiles.yaml" | string | `""` | Profiles configuration (https://docs.crowdsec.net/docs/next/profiles/format/#profile-configuration-example) This file is only mounted in the lapi pod |
+| config."config.yaml.local" | string | `"api:\n  server:\n    auto_registration: # Activate if not using TLS for authentication\n      enabled: true\n      token: \"${REGISTRATION_TOKEN}\" # /!\\ Do not modify this variable (auto-generated and handled by the chart)\n      allowed_ranges: # /!\\ Make sure to adapt to the pod IP ranges used by your cluster\n        - \"127.0.0.1/32\"\n        - \"192.168.0.0/16\"\n        - \"10.0.0.0/8\"\n        - \"172.16.0.0/12\"\n# db_config:\n#   type:     postgresql\n#   user:     crowdsec\n#   password: ${DB_PASSWORD}\n#   db_name:  crowdsec\n#   host:     192.168.0.2\n#   port:     5432\n#   sslmode:  require\n"` | General configuration (https://docs.crowdsec.net/docs/configuration/crowdsec_configuration/#configuration-example) This file is only mounted in the lapi pod |
+| config.notifications | object | `{}` | notifications configuration (https://docs.crowdsec.net/docs/next/notification_plugins/intro) Those files are only mounted in the lapi pod |
+| config."agent_config.local.yaml" | string | `""` |  |
+| config."appsec_config.local.yaml" | string | `""` |  |
 | tls.enabled | bool | `false` |  |
 | tls.caBundle | bool | `true` |  |
 | tls.insecureSkipVerify | bool | `false` |  |
