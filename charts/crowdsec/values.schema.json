@@ -182,6 +182,12 @@
                 },
                 "config.yaml.local": {
                     "type": "string"
+                },
+                "agent_config.yaml.local": {
+                    "type": "string"
+                },
+                "appsec_config.yaml.local": {
+                    "type": "string"
                 }
             },
             "title": "Config"
