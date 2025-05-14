@@ -37,4 +37,15 @@ data:
 {{ end }}
 {{- end }}
 
+---
+{{- if index .Values.config "appsec_config.yaml.local" }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: crowdsec-appsec-config-local
+data:
+  config.yaml.local: |
+{{ printf "%+v" (index .Values.config "appsec_config.yaml.local") | indent 4 }}
+{{- end }}
+
 {{- end }}
