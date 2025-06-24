@@ -1,6 +1,6 @@
 # crowdsec
 
-![Version: 0.19.3](https://img.shields.io/badge/Version-0.19.3-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v1.6.8](https://img.shields.io/badge/AppVersion-v1.6.8-informational?style=flat-square)
+![Version: 0.19.4](https://img.shields.io/badge/Version-0.19.4-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v1.6.9](https://img.shields.io/badge/AppVersion-v1.6.9-informational?style=flat-square)
 
 Crowdsec helm chart is an open-source, lightweight agent to detect and respond to bad behaviours.
 
