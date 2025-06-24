@@ -124,11 +124,11 @@ config:
     # slack.yaml: ""
     # http.yaml: ""
     # splunk.yaml: ""
-  
+
   # General configuration (https://docs.crowdsec.net/docs/configuration/crowdsec_configuration/#configuration-example)
   # This file is only mounted in the agent pod
   agent_config.local.yaml: ""
-  
+
   # General configuration (https://docs.crowdsec.net/docs/configuration/crowdsec_configuration/#configuration-example)
   # This file is only mounted in the appsec pod
   appsec_config.local.yaml: ""
@@ -188,6 +188,9 @@ secrets:
     csLapiSecretKey: ""
     # The key in the secret that holds the registrationToken. Defaults to registrationToken
     registrationTokenKey: ""
+  encryption:
+    name: ""
+    value: ""
 
 # lapi will deploy pod with crowdsec lapi and dashboard as deployment
 lapi:
@@ -741,3 +744,30 @@ appsec:
       pullPolicy: IfNotPresent
       # -- docker image tag
       tag: "1.28"
+
+utils:
+  kubectl:
+    enabled: true
+    image:
+      # -- docker image repository name
+      repository: alpine/k8s
+      # -- pullPolicy
+      pullPolicy: IfNotPresent
+      # -- docker image tag
+      tag: "1.32.4"
+    # Files to copy, separated by space, defaults to /usr/bin/kubectl
+    #
+    # For bitnami image variant, use
+    # files: "/opt/bitnami/kubectl/bin/kubectl"
+    files: ""
+  openssl:
+    enabled: true
+    image:
+      # -- docker image repository name
+      repository: alpine/openssl
+      # -- pullPolicy
+      pullPolicy: IfNotPresent
+      # -- docker image tag
+      tag: "3.3.3"
+    # Files to copy, separated by space. Defaults to /usr/bin/openssl /usr/lib/libcrypto.so.3 /usr/lib/libssl.so.3
+    files: ""
