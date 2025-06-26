@@ -29,13 +29,13 @@ spec:
     spec:
       serviceAccountName: {{ .Release.Name }}-configmap-updater-sa
       restartPolicy: OnFailure
+      {{- if .Values.image.pullSecrets }}
+      imagePullSecrets:
+{{ toYaml .Values.image.pullSecrets | indent 8 }}
+      {{- end }}
       containers:
         - name: capi-register
-          {{- if .Values.image.pullSecrets }}
-          imagePullSecrets:
-{{ toYaml .Values.image.pullSecrets | indent 12 }}
-          {{- end }}
-          image: "crowdsecurity/crowdsec:{{ .Chart.AppVersion }}"
+          image: "{{ .Values.image.repository | default "crowdsecurity/crowdsec" }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command:
             - "/bin/bash"
