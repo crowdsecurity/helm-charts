@@ -42,8 +42,8 @@ service:
 
 ingress:
   enabled: false
+  class: "nginx"
   annotations: {}
-    # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"
   hosts:
     - host: helloworld.local
