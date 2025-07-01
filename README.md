@@ -1,6 +1,6 @@
 # CrowdSec community kubernetes helm charts
 
-:warning: It's still work in progress
+⚠️ It's still work in progress
 
 ## Usage
 
