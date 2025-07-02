@@ -96,6 +96,9 @@
                                 "$ref": "#/definitions/KinesisSource"
                             },
                             {
+                                "$ref": "#/definitions/S3Source"
+                            },
+                            {
                                 "$ref": "#/definitions/SyslogSource"
                             },
                             {
@@ -545,6 +548,118 @@
                 "aws_region": {
                     "type": "string",
                     "description": "Optional, the data source will automatically the standard AWS env vars if present."
+                }
+            },
+            "required": [
+                "source"
+            ]
+        },
+        "S3Source": {
+            "type": "object",
+            "description": "https://docs.crowdsec.net/docs/data_sources/s3",
+            "additionalProperties": false,
+            "allOf": [
+                {
+                    "if": {
+                        "properties": {
+                            "polling_method": {
+                                "const": "sqs"
+                            }
+                        }
+                    },
+                    "then": {
+                        "required": [
+                            "sqs_name"
+                        ]
+                    }
+                },
+                {
+                    "if": {
+                        "properties": {
+                            "polling_method": {
+                                "const": "list"
+                            }
+                        }
+                    },
+                    "then": {
+                        "required": [
+                            "bucket_name"
+                        ]
+                    }
+                },
+                {
+                    "if": {
+                        "properties": {
+                            "polling_method": {
+                                "const": true
+                            }
+                        }
+                    },
+                    "then": {
+                        "required": [
+                            "sqs",
+                            "list"
+                        ]
+                    }
+                },
+                {
+                    "if": {
+                        "properties": {
+                            "sqs_format": {
+                                "const": true
+                            }
+                        }
+                    },
+                    "then": {
+                        "required": [
+                            "eventbridge",
+                            "s3notification"
+                        ]
+                    }
+                }                
+            ],
+            "properties": {
+                "source": {
+                    "const": "s3"
+                },
+                "labels": {
+                    "$ref": "#/definitions/Labels"
+                },
+                "polling_method": {
+                    "type": "string",
+                    "description": "How to detect new files in a bucket."
+                },
+                "polling_interval": {
+                    "type": "string",
+                    "description": "How often in seconds the Security Engine will check for new objects in a bucket when using the `list` polling method."
+                },
+                "sqs_name": {
+                    "type": "string",
+                    "description": "Name of the SQS queue to poll."
+                },
+                "sqs_format": {
+                    "type": "string",
+                    "description": "Format of the body inside the SQS messages."
+                },
+                "bucket_name": {
+                    "type": "string",
+                    "description": "Name of the bucket to poll."
+                },
+                "prefix": {
+                    "type": "string",
+                    "description": "Only read objects matching this prefix when `polling_method` is `list`."
+                },
+                "aws_profile": {
+                    "type": "string",
+                    "description": "The aws profile to use to poll cloudwatch, relies on your ~/.aws/config/."
+                },
+                "aws_region": {
+                    "type": "string",
+                    "description": "Optional, the data source will automatically the standard AWS env vars if present."
+                },
+                "aws_endpoint": {
+                    "type": "string",
+                    "description": "Optional, Endpoint for AWS API."
                 }
             },
             "required": [
