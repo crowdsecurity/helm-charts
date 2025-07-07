@@ -1,26 +1,23 @@
-# CrowdSec community kubernetes helm charts
+# CrowdSec Kubernetes helm charts
 
-:warning: It's still work in progress
+<p align="center">
+    <img width="400px" height=auto src="https://doc.crowdsec.net/img/crowdsec_logo.png" />
+</p>
 
-## Usage
+# Crowdsec Helm Chart
 
-[Helm](https://helm.sh) must be installed to use the charts.
-Please refer to Helm's [documentation](https://helm.sh/docs/) to get started.
+Helm Chart to deploy Crowdsec Security Engine and local API. Please refer to [Helm's documentation](https://helm.sh/docs/) to get started.
 
-Once Helm is set up properly, add the repo as follows:
+Once Helm is set up properly, add the repo as follows: 
 
 ```console
 helm repo add crowdsec https://crowdsecurity.github.io/helm-charts
 ```
 
-You can then run `helm search repo crowdsec` to see the charts.
+You can also refer to:
 
-<!-- Keep full URL links to repo files because this README syncs from main to gh-pages.  -->
-Chart documentation is available in [crowdsecurity directory](https://github.com/crowdsecurity/helm-charts/blob/main/charts/crowdsec/README.md).
-
-## Contributing
-
-TBD
+ - [Crowdsec's Helm Chart Quickstart guide](https://doc.crowdsec.net/u/getting_started/installation/kubernetes) for a step-by-step guide on setting up both [Security Engine](https://doc.crowdsec.net/docs/next/intro) and [Remediation components](https://doc.crowdsec.net/u/bouncers/intro).
+ - [Chart documentation](https://github.com/crowdsecurity/helm-charts/blob/main/charts/crowdsec/README.md) for a list of available options
 
 ## License
 
