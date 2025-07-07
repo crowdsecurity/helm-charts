@@ -127,11 +127,11 @@ config:
   
   # General configuration (https://docs.crowdsec.net/docs/configuration/crowdsec_configuration/#configuration-example)
   # This file is only mounted in the agent pod
-  agent_config.local.yaml: ""
+  agent_config.yaml.local: ""
   
   # General configuration (https://docs.crowdsec.net/docs/configuration/crowdsec_configuration/#configuration-example)
   # This file is only mounted in the appsec pod
-  appsec_config.local.yaml: ""
+  appsec_config.yaml.local: ""
 
 tls:
   enabled: false
