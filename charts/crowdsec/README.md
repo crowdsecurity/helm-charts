@@ -358,8 +358,8 @@ controller:
 | config."profiles.yaml" | string | `""` | Profiles configuration (https://docs.crowdsec.net/docs/next/profiles/format/#profile-configuration-example) This file is only mounted in the lapi pod |
 | config."config.yaml.local" | string | `"api:\n  server:\n    auto_registration: # Activate if not using TLS for authentication\n      enabled: true\n      token: \"${REGISTRATION_TOKEN}\" # /!\\ Do not modify this variable (auto-generated and handled by the chart)\n      allowed_ranges: # /!\\ Make sure to adapt to the pod IP ranges used by your cluster\n        - \"127.0.0.1/32\"\n        - \"192.168.0.0/16\"\n        - \"10.0.0.0/8\"\n        - \"172.16.0.0/12\"\n# db_config:\n#   type:     postgresql\n#   user:     crowdsec\n#   password: ${DB_PASSWORD}\n#   db_name:  crowdsec\n#   host:     192.168.0.2\n#   port:     5432\n#   sslmode:  require\n"` | General configuration (https://docs.crowdsec.net/docs/configuration/crowdsec_configuration/#configuration-example) This file is only mounted in the lapi pod |
 | config.notifications | object | `{}` | notifications configuration (https://docs.crowdsec.net/docs/next/notification_plugins/intro) Those files are only mounted in the lapi pod |
-| config."agent_config.local.yaml" | string | `""` |  |
-| config."appsec_config.local.yaml" | string | `""` |  |
+| config."agent_config.yaml.local" | string | `""` |  |
+| config."appsec_config.yaml.local" | string | `""` |  |
 | tls.enabled | bool | `false` |  |
 | tls.caBundle | bool | `true` |  |
 | tls.insecureSkipVerify | bool | `false` |  |
