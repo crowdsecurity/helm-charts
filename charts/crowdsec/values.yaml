@@ -162,7 +162,7 @@ tls:
       namespaces: []
   appsec:
     tlsClientAuth: true
-    secret: "{{ .Release.Name }}-agent-tls"
+    secret: "{{ .Release.Name }}-appsec-tls"
     reflector:
       namespaces: []
   lapi:
