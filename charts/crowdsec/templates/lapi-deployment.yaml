@@ -183,9 +183,11 @@ spec:
             containerPort: 6060
             protocol: TCP
           {{- end }}
-        {{ if .Values.lapi.persistentVolume.config.enabled }}
+        {{- if .Values.lapi.command }}
+        command: {{ toYaml .Values.lapi.command }}
+        {{- else if .Values.lapi.persistentVolume.config.enabled }}
         command: ['sh', '-c', 'cp -nR /staging/etc/crowdsec/* /etc/crowdsec_data/ && ln -s /etc/crowdsec_data /etc/crowdsec && bash /docker_start.sh']
-        {{ end }}
+        {{- end }}
         {{- if .Values.lapi.lifecycle }}
         lifecycle:
           {{- toYaml .Values.lapi.lifecycle | nindent 10 }}

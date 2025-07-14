@@ -235,6 +235,9 @@ lapi:
   # -- Extra containers to be added to lapi pods (sidecars)
   extraContainers: []
 
+  # -- Custom command to override default container command. If not set, uses default behavior based on persistent volume config
+  command: []
+
   # -- Extra volumes to be added to lapi pods
   extraVolumes: []
 
@@ -305,7 +308,6 @@ lapi:
       storageClassName: ""
       existingClaim: ""
       size: 100Mi
-
   service:
     type: ClusterIP
     labels: {}
