@@ -232,6 +232,9 @@ lapi:
   # -- Extra init containers to be added to lapi pods
   extraInitContainers: []
 
+  # -- Extra containers to be added to lapi pods (sidecars)
+  extraContainers: []
+
   # -- Extra volumes to be added to lapi pods
   extraVolumes: []
 

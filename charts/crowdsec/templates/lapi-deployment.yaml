@@ -316,6 +316,9 @@ spec:
         {{- end }}
 
       {{- end }}
+      {{- if .Values.lapi.extraContainers }}
+      {{- toYaml .Values.lapi.extraContainers | nindent 6 }}
+      {{- end }}
       terminationGracePeriodSeconds: 30
       volumes:
       - name: crowdsec-docker-start-script
