@@ -882,6 +882,12 @@ appsec:
     loadBalancerClass: null
     ## @param appsec.service.externalTrafficPolicy [string] External traffic policy for the AppSec Service
     externalTrafficPolicy: Cluster
+    ports:
+      ## add your custom ports here, for exposing the AppSec component on different ports. See the documentation: https://docs.crowdsec.net/docs/next/appsec/configuration
+      - port: 7422
+        targetPort: 7422
+        protocol: TCP
+        name: appsec
 
   # -- wait-for-lapi init container
   wait_for_lapi:
