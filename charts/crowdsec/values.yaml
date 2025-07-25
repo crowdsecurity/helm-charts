@@ -702,6 +702,11 @@ appsec:
   strategy:
     type: Recreate
 
+  ports:
+  # -- add your custom ports here, by default we expose port 6060 for metrics if metrics is enabled
+    - name: appsec
+      containerPort: 7422
+      protocol: TCP
   # -- Additional acquisitions for AppSec
   ## @param appsec.acquisitions [array] AppSec acquisitions (datasource listeners), e.g. appsec listener on 7422
   acquisitions: []
