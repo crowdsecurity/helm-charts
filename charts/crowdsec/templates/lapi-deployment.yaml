@@ -171,8 +171,7 @@ spec:
             {{- end }}
 
         securityContext:
-          allowPrivilegeEscalation: false
-          privileged: false
+          {{- toYaml .Values.lapi.securityContext | nindent 10 }}
 
         ports:
           - name: lapi
@@ -307,8 +306,7 @@ spec:
           timeoutSeconds: 1
 
         securityContext:
-          allowPrivilegeEscalation: false
-          privileged: false
+          {{- toYaml .Values.lapi.dashboard.securityContext | nindent 10 }}
 
         {{- with .Values.lapi.dashboard.resources }}
         resources:

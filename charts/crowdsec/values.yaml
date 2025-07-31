@@ -238,6 +238,11 @@ lapi:
   # -- Extra volumeMounts to be added to lapi pods
   extraVolumeMounts: []
 
+  # -- Container securityContext
+  securityContext:
+    allowPrivilegeEscalation: false
+    privileged: false
+
   # -- resources for lapi
   resources:
     limits:
@@ -272,6 +277,11 @@ lapi:
       # requests:
       #   cpu: 500m
       #   memory: 1Gi
+
+    # -- Container securityContext
+    securityContext:
+      allowPrivilegeEscalation: false
+      privileged: false
 
     # -- Enable ingress object
     ingress:
@@ -431,6 +441,11 @@ agent:
   # -- Extra volumeMounts to be added to agent pods
   extraVolumeMounts: []
 
+  # -- Container securityContext
+  securityContext:
+    allowPrivilegeEscalation: false
+    privileged: false
+
   resources:
     limits:
       memory: 250Mi
@@ -564,6 +579,10 @@ agent:
       pullPolicy: IfNotPresent
       # -- docker image tag
       tag: "1.28"
+    # -- Container securityContext
+    securityContext:
+      allowPrivilegeEscalation: false
+      privileged: false
 
 # -- Enable AppSec (https://docs.crowdsec.net/docs/next/appsec/intro)
 appsec:
@@ -639,6 +658,10 @@ appsec:
   extraVolumes: []
   # -- Extra volumeMounts to be added to appsec pods
   extraVolumeMounts: []
+  # -- Container securityContext
+  securityContext:
+    allowPrivilegeEscalation: false
+    privileged: false
   # -- resources for appsec pods
   resources:
     limits:
@@ -741,3 +764,7 @@ appsec:
       pullPolicy: IfNotPresent
       # -- docker image tag
       tag: "1.28"
+    # -- Container securityContext
+    securityContext:
+      allowPrivilegeEscalation: false
+      privileged: false

@@ -69,8 +69,7 @@ spec:
             cpu: 1m
             memory: 10Mi
         securityContext:
-          allowPrivilegeEscalation: false
-          privileged: false
+          {{- toYaml .Values.appsec.wai_for_lapi.securityContext | nindent 10 }}
         {{- if or (not .Values.tls.enabled) (not .Values.tls.appsec.tlsClientAuth) }}
         volumeMounts:
           - name: crowdsec-config
@@ -179,8 +178,7 @@ spec:
         {{ end }}
 
         securityContext:
-          allowPrivilegeEscalation: false
-          privileged: false
+          {{- toYaml .Values.appsec.securityContext | nindent 10 }}
 
         volumeMounts:
           - name: crowdsec-config
