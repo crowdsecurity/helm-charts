@@ -370,6 +370,8 @@ agent:
   enabled: true
   # -- Switch to Deployment instead of DaemonSet (In some cases, you may want to deploy the agent as a Deployment)
   isDeployment: false
+  # [optionnal] serviceAccountName for the deployment 
+  # serviceAccountName: crowdsec-sa
   # -- lapiURL for agent to connect to (default is the lapi service URL)
   lapiURL: ""
   # -- lapiHost for agent to connect to (default is the lapi service)

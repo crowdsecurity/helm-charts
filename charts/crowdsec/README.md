@@ -430,6 +430,7 @@ controller:
 | lapi.storeCAPICredentialsInSecret | bool | `false` | If set to true, the Central API credentials will be stored in a secret (to use when lapi replicas > 1) |
 | agent.enabled | bool | `true` | enable agent (by default enabled) |
 | agent.isDeployment | bool | `false` | Switch to Deployment instead of DaemonSet (In some cases, you may want to deploy the agent as a Deployment) |
+| agent.serviceAccountName | string | `""` | Optionnal : serviceAccountName (not created by the Chart) to be used by the deployment |
 | agent.lapiURL | string | `""` | lapiURL for agent to connect to (default is the lapi service URL) |
 | agent.lapiHost | string | `""` | lapiHost for agent to connect to (default is the lapi service) |
 | agent.lapiPort | int | `8080` | lapiPort for agent to connect to (default is the lapi service port) |
