@@ -50,16 +50,6 @@ spec:
       {{- end }}
       {{- if or (.Values.lapi.dashboard.enabled) (.Values.lapi.extraInitContainers) }}
       initContainers:
-      {{- if .Values.lapi.dashboard.enabled }}
-      - name: fetch-metabase-config
-        image: busybox:1.28
-        imagePullPolicy: IfNotPresent
-        command: ['sh', '-c', 'if [ -f /metabase-data/metabase.db/metabase.db.mv.db ]; then echo "Metabase database file already exists, skipping download and unzip"; else wget {{ .Values.lapi.dashboard.assetURL }} && unzip metabase_sqlite.zip -nd /metabase-data/; fi']
-        volumeMounts:
-        - name: crowdsec-db
-          mountPath: /metabase-data
-          subPath: dashboard
-      {{- end }}
       {{- if .Values.lapi.extraInitContainers }}
       {{- toYaml .Values.lapi.extraInitContainers | nindent 8 }}
       {{- end }}
@@ -252,70 +242,6 @@ spec:
           {{ toYaml .Values.lapi.extraVolumeMounts | nindent 10 }}
           {{- end }}
           {{- end }}
-      {{- if .Values.lapi.dashboard.enabled }}
-      - name: dashboard
-        image: "{{ .Values.lapi.dashboard.image.repository | default "metabase/metabase" }}:{{ .Values.lapi.dashboard.image.tag | default "latest" }}"
-        imagePullPolicy: {{ .Values.lapi.dashboard.image.pullPolicy }}
-        command: ['sh', '-c', 'ln -fs /var/lib/crowdsec/data/crowdsec.db /metabase-data/crowdsec.db && /app/run_metabase.sh']
-        volumeMounts:
-        - name: crowdsec-db
-          mountPath: /metabase-data
-          subPath: dashboard
-        - name: crowdsec-db
-          mountPath: /var/lib/crowdsec/data
-          subPath: crowdsec
-        env:
-          - name: MB_DB_FILE
-            value: /metabase-data/metabase.db
-          - name: MGID
-            value: "1000"
-        {{- with .Values.lapi.dashboard.env }}
-        {{- toYaml . | nindent 10 }}
-        {{- end }}
-
-        ports:
-        - containerPort: 3000
-          name: http
-          protocol: TCP
-
-        livenessProbe:
-          failureThreshold: 3
-          httpGet:
-            path: /
-            port: http
-            scheme: HTTP
-          periodSeconds: 10
-          successThreshold: 1
-          timeoutSeconds: 1
-        readinessProbe:
-          failureThreshold: 3
-          httpGet:
-            path: /
-            port: http
-            scheme: HTTP
-          periodSeconds: 10
-          successThreshold: 1
-          timeoutSeconds: 1
-        startupProbe:
-          failureThreshold: 30
-          httpGet:
-            path: /
-            port: http
-            scheme: HTTP
-          periodSeconds: 10
-          successThreshold: 1
-          timeoutSeconds: 1
-
-        securityContext:
-          allowPrivilegeEscalation: false
-          privileged: false
-
-        {{- with .Values.lapi.dashboard.resources }}
-        resources:
-          {{- toYaml . | nindent 10 }}
-        {{- end }}
-
-      {{- end }}
       terminationGracePeriodSeconds: 30
       volumes:
       - name: crowdsec-docker-start-script
