@@ -251,17 +251,6 @@ lapi:
       cpu: 500m
       memory: 500Mi
 
-    # -- Enable ingress object
-    ingress:
-      enabled: false
-      annotations:
-        # metabase only supports http so we need this annotation
-        nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
-      # labels: {}
-      ingressClassName: "" # nginx
-      host: "" # metabase.example.com
-      # tls: {}
-
   # -- Enable persistent volumes
   persistentVolume:
     # -- Persistent volume for data folder. Stores e.g. registered bouncer api keys
