@@ -38,12 +38,6 @@ spec:
       targetPort: 8080
       protocol: TCP
       name: lapi
-    {{- if .Values.lapi.dashboard.enabled }}
-    - port: 3000
-      targetPort: 3000
-      protocol: TCP
-      name: dashboard
-    {{- end }}
   selector:
     k8s-app: {{ .Release.Name }}
     type: lapi

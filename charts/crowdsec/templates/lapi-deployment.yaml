@@ -48,7 +48,7 @@ spec:
       imagePullSecrets:
 {{ toYaml .Values.image.pullSecrets | indent 8 }}
       {{- end }}
-      {{- if or (.Values.lapi.dashboard.enabled) (.Values.lapi.extraInitContainers) }}
+      {{- if (.Values.lapi.extraInitContainers) }}
       initContainers:
       {{- if .Values.lapi.extraInitContainers }}
       {{- toYaml .Values.lapi.extraInitContainers | nindent 8 }}
@@ -72,10 +72,6 @@ spec:
           {{- end }}
           - name: DISABLE_AGENT
             value: "true"
-          {{- if .Values.lapi.dashboard.enabled }}
-          - name: GID
-            value: "1000"
-          {{- end }}
           {{- if .Values.tls.enabled }}
           - name: USE_TLS
             value: "true"
@@ -191,14 +187,14 @@ spec:
             subPath: online_api_credentials.yaml
           {{- end }}
           {{- end }}
-        {{- if or (.Values.tls.enabled) (.Values.lapi.persistentVolume.data.enabled) (.Values.lapi.persistentVolume.config.enabled) (.Values.lapi.dashboard.enabled) (include "lapiCustomConfigIsNotEmpty" .) (.Values.lapi.extraVolumeMounts) }}
+        {{- if or (.Values.tls.enabled) (.Values.lapi.persistentVolume.data.enabled) (.Values.lapi.persistentVolume.config.enabled) (include "lapiCustomConfigIsNotEmpty" .) (.Values.lapi.extraVolumeMounts) }}
           {{- if .Values.tls.enabled }}
           - name: crowdsec-lapi-tls
             mountPath: /etc/ssl/crowdsec-lapi
           - name: crowdsec-agent-tls
             mountPath: /etc/ssl/crowdsec-agent
           {{- end }}
-          {{ if or (.Values.lapi.persistentVolume.data.enabled) (.Values.lapi.dashboard.enabled) }}
+          {{ if (.Values.lapi.persistentVolume.data.enabled) }}
           - name: crowdsec-db
             mountPath: /var/lib/crowdsec/data
             subPath: crowdsec
@@ -254,7 +250,7 @@ spec:
           secretName: {{ .Release.Name }}-capi-credentials
       {{- end }}
       {{- end }}
-      {{- if or (.Values.tls.enabled) (.Values.lapi.persistentVolume.data.enabled) (.Values.lapi.persistentVolume.config.enabled) (.Values.lapi.dashboard.enabled) (include "lapiCustomConfigIsNotEmpty" .) (.Values.lapi.extraVolumes) }}
+      {{- if or (.Values.tls.enabled) (.Values.lapi.persistentVolume.data.enabled) (.Values.lapi.persistentVolume.config.enabled) (include "lapiCustomConfigIsNotEmpty" .) (.Values.lapi.extraVolumes) }}
       {{- if .Values.lapi.persistentVolume.data.enabled }}
       - name: crowdsec-db
         persistentVolumeClaim:
@@ -263,9 +259,6 @@ spec:
           {{ else }}
           claimName: {{ .Release.Name }}-db-pvc
           {{ end }}
-      {{- else if .Values.lapi.dashboard.enabled }}
-      - name: crowdsec-db
-        emptyDir: {}
       {{- end }}
       {{- if .Values.lapi.persistentVolume.config.enabled }}
       - name: crowdsec-config
