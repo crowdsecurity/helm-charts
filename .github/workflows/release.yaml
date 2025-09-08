@@ -32,12 +32,13 @@ jobs:
 
       - name: Generate README.md & values.schema.json
         run: |
-          for CHART_DIR in crowdsec crowdsec-traefik-bouncer helloworld do \
+          for CHART_DIR in crowdsec crowdsec-traefik-bouncer helloworld; do \
           readme-generator \
             --values charts/$CHART_DIR/"values.yaml" \
             --readme charts/$CHART_DIR/"README.md" \
             --schema charts/$CHART_DIR/"values.schema.json"
           done
+
       - name: Commit bump
         uses: EndBug/add-and-commit@v9
         with:
