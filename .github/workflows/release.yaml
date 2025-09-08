@@ -20,8 +20,10 @@ jobs:
         chart: [crowdsec, crowdsec-traefik-bouncer, helloworld]
     steps:
       - uses: actions/checkout@v4
-        ref: ${{ github.ref }}
-        persist-credentials: true
+        with:
+          fetch-depth: 0
+          ref: ${{ github.ref }}
+          persist-credentials: true
 
       - name: Set up Node.js (readme-generator requires Node 22.x)
         uses: actions/setup-node@v4
