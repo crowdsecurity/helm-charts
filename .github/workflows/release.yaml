@@ -4,50 +4,67 @@ on:
   push:
     branches:
       - main
+      - values/revamp
     paths:
-      - 'charts/*/templates/**'
-      - 'charts/*/README.md.gotmpl'
-      - 'charts/*/*.yaml'
+      - "charts/**/values.yaml"
+      - "charts/**/README.md" # ensure section exists; regen when touched
+      - ".github/workflows/helm-docs.yml"
+  # Adjust if your chart lives elsewhere
+env:
+  CHART_DIR: charts/crowdsec
 
 jobs:
   update-readme:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        chart: [crowdsec, crowdsec-traefik-bouncer, helloworld]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - name: Run helm-docs
+      - name: Set up Node.js (readme-generator requires Node 22.x)
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install readme-generator-for-helm
+        run: npm i -g @bitnami/readme-generator-for-helm@2.7.2
+
+      - name: Generate README.md & values.schema.json
+        working-directory: charts/${{ matrix.chart }}
         run: |
-          GOBIN=$PWD go install github.com/norwoodj/helm-docs/cmd/helm-docs@v1.14.2
-          ./helm-docs --sort-values-order file
-          rm helm-docs
+          readme-generator \
+            --values "$CHART_DIR/values.yaml" \
+            --readme "$CHART_DIR/README.md" \
+            --schema "$CHART_DIR/values.schema.json"
 
       - name: Commit bump
         uses: EndBug/add-and-commit@v9
         with:
-          branch: main
-          message: 'Regenerate chart README.md'
+          branch: values/revamp
+          message: "Regenerate chart README.md"
 
-  release:
-    needs: update-readme
-    permissions:
-      contents: write
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
+  # release:
+  #   needs: update-readme
+  #   permissions:
+  #     contents: write
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v3
+  #       with:
+  #         fetch-depth: 0
 
-      - name: Configure Git
-        run: |
-          git config user.name "$GITHUB_ACTOR"
-          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+  #     - name: Configure Git
+  #       run: |
+  #         git config user.name "$GITHUB_ACTOR"
+  #         git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
 
-      - name: Run chart-releaser
-        uses: helm/chart-releaser-action@v1.7.0
-        with:
-          charts_dir: charts
-          config: cr.yaml
-        env:
-          CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-          CR_SKIP_EXISTING: true
+  #     - name: Run chart-releaser
+  #       uses: helm/chart-releaser-action@v1.7.0
+  #       with:
+  #         charts_dir: charts
+  #         config: cr.yaml
+  #       env:
+  #         CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+  #         CR_SKIP_EXISTING: true
