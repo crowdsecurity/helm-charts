@@ -3,7 +3,6 @@ name: Release Charts
 on:
   push:
     branches:
-      - main
       - values/revamp
     paths:
       - "charts/**/values.yaml"
