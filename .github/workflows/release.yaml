@@ -34,9 +34,9 @@ jobs:
         working-directory: charts/${{ matrix.chart }}
         run: |
           readme-generator \
-            --values "$CHART_DIR/values.yaml" \
-            --readme "$CHART_DIR/README.md" \
-            --schema "$CHART_DIR/values.schema.json"
+            --values "values.yaml" \
+            --readme "README.md" \
+            --schema "values.schema.json"
 
       - name: Commit bump
         uses: EndBug/add-and-commit@v9
