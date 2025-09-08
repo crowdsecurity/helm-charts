@@ -89,7 +89,7 @@ resources: #{}
 
 # @section Autoscaling
 autoscaling:
-  ## @param autoscaling.enabled [boolean] Enable HorizontalPodAutoscaler
+  ## @param autoscaling.enabled  Enable HorizontalPodAutoscaler
   enabled: false
   ## @param autoscaling.minReplicas  Minimum number of replicas
   minReplicas: 1
