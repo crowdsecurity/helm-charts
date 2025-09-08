@@ -54,7 +54,7 @@ service:
   name: helloworld
   ## @param service.type [string] Kubernetes Service type
   type: ClusterIP
-  ## @param service.port [int] Service port
+  ## @param service.port Service port
   port: 5678
 
 # @section Ingress
@@ -91,13 +91,13 @@ resources: #{}
 autoscaling:
   ## @param autoscaling.enabled [boolean] Enable HorizontalPodAutoscaler
   enabled: false
-  ## @param autoscaling.minReplicas [int] Minimum number of replicas
+  ## @param autoscaling.minReplicas  Minimum number of replicas
   minReplicas: 1
-  ## @param autoscaling.maxReplicas [int] Maximum number of replicas
+  ## @param autoscaling.maxReplicas  Maximum number of replicas
   maxReplicas: 5
-  ## @param autoscaling.targetCPUUtilizationPercentage [int] Target CPU utilization percentage
+  ## @param autoscaling.targetCPUUtilizationPercentage  Target CPU utilization percentage
   targetCPUUtilizationPercentage: 80
-  # ## @param autoscaling.targetMemoryUtilizationPercentage [int] Target memory utilization percentage
+  # ## @param autoscaling.targetMemoryUtilizationPercentage  Target memory utilization percentage
   # targetMemoryUtilizationPercentage: 80
 
 ## @param nodeSelector [object] Node selector rules for pod assignment
