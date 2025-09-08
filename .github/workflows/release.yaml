@@ -58,7 +58,6 @@ jobs:
             message: "chore(charts): regenerate README.md and values.schema.json for ${{ matrix.chart }}"
             default_author: github_actions
             fetch: true
-            pull: "--rebase --autostash"
             push: true
 
   # release:
