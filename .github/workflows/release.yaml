@@ -7,7 +7,7 @@ on:
     paths:
       - "charts/**/values.yaml"
       - "charts/**/README.md" # ensure section exists; regen when touched
-      - ".github/workflows/release.yml"
+      - ".github/workflows/release.yaml"
   # Adjust if your chart lives elsewhere
 env:
   CHART_DIR: charts/crowdsec
