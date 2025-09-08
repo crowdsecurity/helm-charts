@@ -15,23 +15,12 @@ env:
 jobs:
   update-readme:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        chart: [crowdsec, crowdsec-traefik-bouncer, helloworld]
-
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
           ref: ${{ github.ref }}
           persist-credentials: true
-
-      - name: Sync with remote (rebase)
-        run: |
-          git config user.name  "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git fetch --all
-          git pull --rebase --autostash origin "${{ github.ref_name }}"
 
       - name: Set up Node.js (readme-generator requires Node 22.x)
         uses: actions/setup-node@v4
@@ -42,23 +31,18 @@ jobs:
         run: npm i -g @bitnami/readme-generator-for-helm@2.7.2
 
       - name: Generate README.md & values.schema.json
-        working-directory: charts/${{ matrix.chart }}
         run: |
+          for CHART_DIR in crowdsec crowdsec-traefik-bouncer helloworld do \
           readme-generator \
-            --values "values.yaml" \
-            --readme "README.md" \
-            --schema "values.schema.json"
-
+            --values charts/$CHART_DIR/"values.yaml" \
+            --readme charts/$CHART_DIR/"README.md" \
+            --schema charts/$CHART_DIR/"values.schema.json"
+          done
       - name: Commit bump
         uses: EndBug/add-and-commit@v9
         with:
-          add: |
-            charts/${{ matrix.chart }}/README.md
-            charts/${{ matrix.chart }}/values.schema.json
-            message: "chore(charts): regenerate README.md and values.schema.json for ${{ matrix.chart }}"
-            default_author: github_actions
-            fetch: true
-            push: true
+          message: "chore(charts): regenerate README.md and values.schema.json"
+          branch: values/revamp
 
   # release:
   #   needs: update-readme
