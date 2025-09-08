@@ -5,7 +5,7 @@
 ## @param replicaCount Number of replicas for the Deployment
 replicaCount: 1
 
-# @section Image
+## @section Image
 image:
   ## @param image.repository [string] Container image repository
   repository: hashicorp/http-echo
@@ -23,7 +23,7 @@ nameOverride: ""
 ## @param fullnameOverride [string] String to fully override fullname template with a name
 fullnameOverride: ""
 
-# @section ServiceAccount
+## @section ServiceAccount
 serviceAccount:
   ## @param serviceAccount.create  Specifies whether a service account should be created
   create: true
@@ -48,7 +48,7 @@ securityContext: {}
   # runAsNonRoot: true
   # runAsUser: 1000
 
-# @section Service
+## @section Service
 service:
   ## @param service.name [string] Name of the service
   name: helloworld
@@ -57,7 +57,7 @@ service:
   ## @param service.port Service port
   port: 5678
 
-# @section Ingress
+## @section Ingress
 ingress:
   ## @param ingress.enabled Enable ingress resource
   enabled: false
@@ -77,7 +77,7 @@ ingress:
   #    hosts:
   #      - chart-example.local
 
-# @section Resources
+## @section Resources
 ## @param resources [object] Resource requests and limits for pods
 resources: #{}
   limits:
@@ -87,7 +87,7 @@ resources: #{}
     cpu: 100m
     memory: 128Mi
 
-# @section Autoscaling
+## @section Autoscaling
 autoscaling:
   ## @param autoscaling.enabled  Enable HorizontalPodAutoscaler
   enabled: false

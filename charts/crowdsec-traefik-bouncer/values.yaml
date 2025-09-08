@@ -2,7 +2,7 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-# @section Bouncer
+## @section Bouncer
 bouncer:
   ## @param bouncer.crowdsec_bouncer_api_key [string] Bouncer API key (must be generated from CrowdSec agent)
   crowdsec_bouncer_api_key: ""
@@ -16,7 +16,7 @@ bouncer:
 ## @param replicaCount Number of replicas for the bouncer Deployment
 replicaCount: 1
 
-# @section Image
+## @section Image
 image:
   ## @param image.repository [string] Container image repository
   repository: fbonalair/traefik-crowdsec-bouncer
@@ -44,14 +44,14 @@ securityContext: {}
   # runAsNonRoot: true
   # runAsUser: 1000
 
-# @section Service
+## @section Service
 service:
   ## @param service.type [string] Kubernetes Service type
   type: ClusterIP
   ## @param service.port Service port for the bouncer
   port: 80
 
-# @section Resources
+## @section Resources
 ## @param resources [object] Resource requests and limits for bouncer pods
 resources: {}
   # limits:
