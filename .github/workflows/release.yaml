@@ -18,6 +18,7 @@ jobs:
     strategy:
       matrix:
         chart: [crowdsec, crowdsec-traefik-bouncer, helloworld]
+
     steps:
       - uses: actions/checkout@v4
         with:
