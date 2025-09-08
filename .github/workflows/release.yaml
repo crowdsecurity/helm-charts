@@ -26,6 +26,13 @@ jobs:
           ref: ${{ github.ref }}
           persist-credentials: true
 
+      - name: Sync with remote (rebase)
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch --all
+          git pull --rebase --autostash origin "${{ github.ref_name }}"
+
       - name: Set up Node.js (readme-generator requires Node 22.x)
         uses: actions/setup-node@v4
         with:
