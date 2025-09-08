@@ -20,6 +20,8 @@ jobs:
         chart: [crowdsec, crowdsec-traefik-bouncer, helloworld]
     steps:
       - uses: actions/checkout@v4
+        ref: ${{ github.ref }}
+        persist-credentials: true
 
       - name: Set up Node.js (readme-generator requires Node 22.x)
         uses: actions/setup-node@v4
@@ -40,8 +42,14 @@ jobs:
       - name: Commit bump
         uses: EndBug/add-and-commit@v9
         with:
-          branch: values/revamp
-          message: "Regenerate chart README.md"
+          add: |
+            charts/${{ matrix.chart }}/README.md
+            charts/${{ matrix.chart }}/values.schema.json
+            message: "chore(charts): regenerate README.md and values.schema.json for ${{ matrix.chart }}"
+            default_author: github_actions
+            fetch: true
+            pull: "--rebase --autostash"
+            push: true
 
   # release:
   #   needs: update-readme
