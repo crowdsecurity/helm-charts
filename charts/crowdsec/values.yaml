@@ -113,7 +113,7 @@ config:
     #  ...
   # -- General configuration (https://docs.crowdsec.net/docs/configuration/crowdsec_configuration/#configuration-example)
   # This file is mounted in the lapi pod
-  ## @param config.config.yaml.local main configuration file local overriden values. This is merged with main configuration file.
+  ## @param config.config.yaml.local [string] main configuration file local overriden values. This is merged with main configuration file.
   config.yaml.local: |
     api:
       server:
