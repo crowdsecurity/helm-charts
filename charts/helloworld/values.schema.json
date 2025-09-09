@@ -1,0 +1,148 @@
+{
+    "title": "Chart Values",
+    "type": "object",
+    "properties": {
+        "replicaCount": {
+            "type": "number",
+            "description": "Number of replicas for the Deployment",
+            "default": 1
+        },
+        "image": {
+            "type": "object",
+            "properties": {
+                "repository": {
+                    "type": "string",
+                    "description": "Container image repository",
+                    "default": "\"\""
+                },
+                "pullPolicy": {
+                    "type": "string",
+                    "description": "Image pull policy (Always, IfNotPresent, Never)",
+                    "default": "\"\""
+                },
+                "tag": {
+                    "type": "string",
+                    "description": "Image tag",
+                    "default": "\"\""
+                }
+            }
+        },
+        "imagePullSecrets": {
+            "type": "array",
+            "description": "Secrets to use for pulling images",
+            "default": "[]",
+            "items": {
+                "type": "string"
+            }
+        },
+        "nameOverride": {
+            "type": "string",
+            "description": "String to partially override fullname template with a name",
+            "default": "\"\""
+        },
+        "fullnameOverride": {
+            "type": "string",
+            "description": "String to fully override fullname template with a name",
+            "default": "\"\""
+        },
+        "serviceAccount": {
+            "type": "object",
+            "properties": {
+                "create": {
+                    "type": "boolean",
+                    "description": "Specifies whether a service account should be created",
+                    "default": true
+                },
+                "name": {
+                    "type": "string",
+                    "description": "The name of the service account to use (if not set and create is true, a name is generated)",
+                    "default": "\"\""
+                }
+            }
+        },
+        "service": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "description": "Name of the service",
+                    "default": "\"\""
+                },
+                "type": {
+                    "type": "string",
+                    "description": "Kubernetes Service type",
+                    "default": "\"\""
+                },
+                "port": {
+                    "type": "number",
+                    "description": "Service port",
+                    "default": 5678
+                }
+            }
+        },
+        "ingress": {
+            "type": "object",
+            "properties": {
+                "enabled": {
+                    "type": "boolean",
+                    "description": "Enable ingress resource",
+                    "default": false
+                },
+                "class": {
+                    "type": "string",
+                    "description": "Ingress class name",
+                    "default": "\"\""
+                },
+                "hosts": {
+                    "type": "array",
+                    "description": "List of ingress hosts",
+                    "default": "[]",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "tls": {
+                    "type": "array",
+                    "description": "TLS configuration for ingress",
+                    "default": "[]",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "autoscaling": {
+            "type": "object",
+            "properties": {
+                "enabled": {
+                    "type": "boolean",
+                    "description": "Enable HorizontalPodAutoscaler",
+                    "default": false
+                },
+                "minReplicas": {
+                    "type": "number",
+                    "description": "Minimum number of replicas",
+                    "default": 1
+                },
+                "maxReplicas": {
+                    "type": "number",
+                    "description": "Maximum number of replicas",
+                    "default": 5
+                },
+                "targetCPUUtilizationPercentage": {
+                    "type": "number",
+                    "description": "Target CPU utilization percentage",
+                    "default": 80
+                }
+            }
+        },
+        "tolerations": {
+            "type": "array",
+            "description": "Tolerations for pod assignment",
+            "default": "[]",
+            "items": {
+                "type": "string"
+            }
+        }
+    }
+}
