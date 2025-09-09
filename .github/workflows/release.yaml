@@ -3,7 +3,7 @@ name: Release Charts
 on:
   push:
     branches:
-      - values/revamp
+      - main
     paths:
       - "charts/**/values.yaml"
       - "charts/**/README.md" # ensure section exists; regen when touched
@@ -43,7 +43,7 @@ jobs:
         uses: EndBug/add-and-commit@v9
         with:
           message: "chore(charts): regenerate README.md and values.schema.json"
-          branch: values/revamp
+          branch: main
 
   # release:
   #   needs: update-readme
