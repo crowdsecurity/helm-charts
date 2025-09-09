@@ -125,14 +125,14 @@ config:
             - "192.168.0.0/16"
             - "10.0.0.0/8"
             - "172.16.0.0/12"
-    # db_config:
-    #   type:     postgresql
-    #   user:     crowdsec
-    #   password: ${DB_PASSWORD}
-    #   db_name:  crowdsec
-    #   host:     192.168.0.2
-    #   port:     5432
-    #   sslmode:  require
+  # db_config:
+  #   type:     postgresql
+  #   user:     crowdsec
+  #   password: ${DB_PASSWORD}
+  #   db_name:  crowdsec
+  #   host:     192.168.0.2
+  #   port:     5432
+  #   sslmode:  require
   # -- notifications configuration (https://docs.crowdsec.net/docs/next/notification_plugins/intro)
   # Those files are only mounted in the lapi pod
   ## @param config.notifications notification on alert configuration
