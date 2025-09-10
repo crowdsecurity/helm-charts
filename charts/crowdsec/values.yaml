@@ -63,34 +63,34 @@ config:
   # -- Simulation configuration (https://docs.crowdsec.net/docs/next/scenarios/simulation/)
   # This file is only mounted in the agent pods
   simulation.yaml: ""
-    #  |
-    # simulation: false
-    # exclusions:
-    #  - crowdsecurity/ssh-bf
+  #  |
+  # simulation: false
+  # exclusions:
+  #  - crowdsecurity/ssh-bf
   # This file is only mounted in the lapi pod
   console.yaml: ""
-    #   |
-    # share_manual_decisions: true
-    # share_tainted: true
-    # share_custom: true
+  #   |
+  # share_manual_decisions: true
+  # share_tainted: true
+  # share_custom: true
   # This file is only mounted in the lapi pod
   # Deprecated in favor of centralized allowlists (https://docs.crowdsec.net/docs/next/local_api/centralized_allowlists)
   capi_whitelists.yaml: ""
-    #   |
-    # ips:
-    # - 1.2.3.4
-    # - 2.3.4.5
-    # cidrs:
-    # - 1.2.3.0/24
+  #   |
+  # ips:
+  # - 1.2.3.4
+  # - 2.3.4.5
+  # cidrs:
+  # - 1.2.3.0/24
   # -- Profiles configuration (https://docs.crowdsec.net/docs/next/profiles/format/#profile-configuration-example)
   # This file is only mounted in the lapi pod
   profiles.yaml: ""
-    #   |
-    #  name: default_ip_remediation
-    #  debug: true
-    #  filters:
-    #    - Alert.Remediation == true && Alert.GetScope() == "Ip"
-    #  ...
+  #   |
+  #  name: default_ip_remediation
+  #  debug: true
+  #  filters:
+  #    - Alert.Remediation == true && Alert.GetScope() == "Ip"
+  #  ...
   # -- General configuration (https://docs.crowdsec.net/docs/configuration/crowdsec_configuration/#configuration-example)
   # This file is only mounted in the lapi pod
   config.yaml.local: |
@@ -124,11 +124,11 @@ config:
     # slack.yaml: ""
     # http.yaml: ""
     # splunk.yaml: ""
-  
+
   # General configuration (https://docs.crowdsec.net/docs/configuration/crowdsec_configuration/#configuration-example)
   # This file is only mounted in the agent pod
   agent_config.yaml.local: ""
-  
+
   # General configuration (https://docs.crowdsec.net/docs/configuration/crowdsec_configuration/#configuration-example)
   # This file is only mounted in the appsec pod
   appsec_config.yaml.local: ""
@@ -247,43 +247,6 @@ lapi:
       cpu: 500m
       memory: 500Mi
 
-  dashboard:
-    # -- Enable Metabase Dashboard (by default disabled)
-    enabled: false
-    # -- environment variables from metabase/metabase docker image
-    # -- see https://www.metabase.com/docs/latest/configuring-metabase/environment-variables
-    env: []
-    image:
-      # -- docker image repository name
-      repository: metabase/metabase
-      # -- pullPolicy
-      pullPolicy: IfNotPresent
-      # -- docker image tag
-      tag: "v0.46.6.1"
-    # -- Metabase SQLite static DB containing Dashboards
-    assetURL: https://crowdsec-statics-assets.s3-eu-west-1.amazonaws.com/metabase_sqlite.zip
-
-    ## Ref: http://kubernetes.io/docs/user-guide/compute-resources/
-    # -- resources for metabase dashboard
-    resources: {}
-      # limits:
-      #   memory: 1Gi
-      #   cpu: 500m
-      # requests:
-      #   cpu: 500m
-      #   memory: 1Gi
-
-    # -- Enable ingress object
-    ingress:
-      enabled: false
-      annotations:
-        # metabase only supports http so we need this annotation
-        nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
-      # labels: {}
-      ingressClassName: "" # nginx
-      host: "" # metabase.example.com
-      # tls: {}
-
   # -- Enable persistent volumes
   persistentVolume:
     # -- Persistent volume for data folder. Stores e.g. registered bouncer api keys
@@ -359,7 +322,7 @@ lapi:
     # postStart:
     #   exec:
     #     command: ["/bin/sh", "-c", "echo Hello from the postStart handler > /usr/share/message"]
-  
+
   # -- storeCAPICredentialsInSecret
   # -- If set to true, the Central API credentials will be stored in a secret (to use when lapi replicas > 1)
   storeCAPICredentialsInSecret: false
@@ -381,7 +344,7 @@ agent:
   # -- strategy for agent if isDeployment is set to true
   strategy:
     type: Recreate
-  
+
   # -- add your custom ports here, by default we expose port 6060 for metrics if metrics is enabled
   ports: []
     # - name: http-datasource
@@ -401,11 +364,11 @@ agent:
   # -- Specify each pod you want to process it logs (namespace, podName and program)
   acquisition: []
     #- namespace: "" #ingress-nginx
-      # -- to select pod logs to process
+    # -- to select pod logs to process
     #  podName: "" #ingress-nginx-controller-*
-      # -- program name related to specific parser you will use (see https://hub.crowdsec.net/author/crowdsecurity/configurations/docker-logs)
+    # -- program name related to specific parser you will use (see https://hub.crowdsec.net/author/crowdsecurity/configurations/docker-logs)
     #  program: "" #nginx
-      # -- If set to true, will poll the files using os.Stat instead of using inotify
+    # -- If set to true, will poll the files using os.Stat instead of using inotify
     #  poll_without_inotify: false
 
   # -- pod priority class name
@@ -598,7 +561,7 @@ appsec:
     #  outofband_rules:
     #    - crowdsecurity/crs
     #  inband_rules:
-    #    - crowdsecurity/base-config 
+    #    - crowdsecurity/base-config
     #    - crowdsecurity/vpatch-*
   # -- appsec_configs to disable
   # -- appsec_rules (https://docs.crowdsec.net/docs/next/appsec/rules_syntax)
@@ -623,7 +586,7 @@ appsec:
     #    label: "A good description of the rule"
     #    classification:
     #      - cve.CVE-xxxx-xxxxx
-    #      - attack.Txxxx 
+    #      - attack.Txxxx
 
   # -- priorityClassName for appsec pods
   priorityClassName: ""
@@ -673,7 +636,7 @@ appsec:
   tolerations: []
   # -- affinity for appsec
   affinity: {}
-  
+
   # -- livenessProbe for appsec
   livenessProbe:
     httpGet:
@@ -705,7 +668,7 @@ appsec:
     timeoutSeconds: 5
     failureThreshold: 30
 
-  # -- Enable service monitoring (exposes "metrics" port "6060" for Prometheus and "7422" for AppSec) 
+  # -- Enable service monitoring (exposes "metrics" port "6060" for Prometheus and "7422" for AppSec)
   metrics:
     enabled: true
     # -- Creates a ServiceMonitor so Prometheus will monitor this service
