@@ -62,39 +62,35 @@ config:
       #   ...
   # -- Simulation configuration (https://docs.crowdsec.net/docs/next/scenarios/simulation/)
   # This file is only mounted in the agent pods
-  simulation.yaml:
-    ""
-    #  |
-    # simulation: false
-    # exclusions:
-    #  - crowdsecurity/ssh-bf
+  simulation.yaml: ""
+  #  |
+  # simulation: false
+  # exclusions:
+  #  - crowdsecurity/ssh-bf
   # This file is only mounted in the lapi pod
-  console.yaml:
-    ""
-    #   |
-    # share_manual_decisions: true
-    # share_tainted: true
-    # share_custom: true
+  console.yaml: ""
+  #   |
+  # share_manual_decisions: true
+  # share_tainted: true
+  # share_custom: true
   # This file is only mounted in the lapi pod
   # Deprecated in favor of centralized allowlists (https://docs.crowdsec.net/docs/next/local_api/centralized_allowlists)
-  capi_whitelists.yaml:
-    ""
-    #   |
-    # ips:
-    # - 1.2.3.4
-    # - 2.3.4.5
-    # cidrs:
-    # - 1.2.3.0/24
+  capi_whitelists.yaml: ""
+  #   |
+  # ips:
+  # - 1.2.3.4
+  # - 2.3.4.5
+  # cidrs:
+  # - 1.2.3.0/24
   # -- Profiles configuration (https://docs.crowdsec.net/docs/next/profiles/format/#profile-configuration-example)
   # This file is only mounted in the lapi pod
-  profiles.yaml:
-    ""
-    #   |
-    #  name: default_ip_remediation
-    #  debug: true
-    #  filters:
-    #    - Alert.Remediation == true && Alert.GetScope() == "Ip"
-    #  ...
+  profiles.yaml: ""
+  #   |
+  #  name: default_ip_remediation
+  #  debug: true
+  #  filters:
+  #    - Alert.Remediation == true && Alert.GetScope() == "Ip"
+  #  ...
   # -- General configuration (https://docs.crowdsec.net/docs/configuration/crowdsec_configuration/#configuration-example)
   # This file is only mounted in the lapi pod
   config.yaml.local: |
