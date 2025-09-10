@@ -16,7 +16,7 @@ image:
   ## @param image.pullPolicy [default: IfNotPresent] [string] Image pull policy (Always, IfNotPresent, Never)
   pullPolicy: IfNotPresent
 
-  ## @param image.pullSecrets [array] Image pull secrets (array of objects with a 'name' field)
+  ## @param image.pullSecrets Image pull secrets (array of objects with a 'name' field)
   pullSecrets: []
     # - name: ""
 
@@ -163,7 +163,7 @@ tls:
   insecureSkipVerify: false
   ## @param tls.certManager [object] Use of a cluster certManager configuration
   certManager:
-    ## @param tls.certManager.enabled [default: true] [object] Use of a cluster cert manager
+    ## @param tls.certManager.enabled [default: true] Use of a cluster cert manager
     enabled: true
     # -- Use existing issuer to sign certificates. Leave empty to generate a self-signed issuer
     issuerRef: {}
@@ -172,9 +172,9 @@ tls:
     # -- Add annotations and/or labels to generated secret
     ## @param tls.certManager.secretTemplate [object] secret configuration
     secretTemplate:
-      ## @param tls.certManager.secretTemplate.annotations [object] add annotation to generated secret
+      ## @param tls.certManager.secretTemplate.annotations add annotation to generated secret
       annotations: {}
-      ## @param tls.certManager.secretTemplate.labels [object] add annotation to generated labels
+      ## @param tls.certManager.secretTemplate.labels add annotation to generated labels
       labels: {}
     # -- duration for Certificate resources
     ## @param tls.certManager.duration [string] validity duration of certificate (golang duration string)
@@ -189,7 +189,7 @@ tls:
       ## @param tls.bouncer.reflector.namespaces [array] List of namespaces from which the bouncer will watch and sync Secrets/ConfigMaps.
       namespaces: []
   agent:
-    ## @param tls.agent.tlsClientAuth [default: true] [object] Enables mutual TLS authentication for the agent when connecting to LAPI.
+    ## @param tls.agent.tlsClientAuth [default: true] Enables mutual TLS authentication for the agent when connecting to LAPI.
     tlsClientAuth: true
     ## @param tls.agent.secret [string] Name of the Secret holding the agent’s TLS certificate and key.
     secret: "{{ .Release.Name }}-agent-tls"
@@ -197,7 +197,7 @@ tls:
       ## @param tls.agent.reflector.namespaces [array] Namespaces where the agent’s TLS Secret can be reflected/synced.
       namespaces: []
   appsec:
-    ## @param tls.appsec.tlsClientAuth [default: true] [object] Enables mutual TLS authentication for the agent when connecting to LAPI.
+    ## @param tls.appsec.tlsClientAuth [default: true] Enables mutual TLS authentication for the agent when connecting to LAPI.
     tlsClientAuth: true
     ## @param tls.appsec.secret [string] Name of the Secret holding the agent’s TLS certificate and key.
     secret: "{{ .Release.Name }}-agent-tls"
@@ -224,16 +224,15 @@ secrets:
   #
   # When externalSecret.name is specified, lapi.secrets.csLapiSecret and
   # lapi.secrets.registrationToken values are ignored
-  ## @param secrets.externalSecret.name string Name of the external secret to use (overrides lapi.secrets.csLapiSecret and lapi.secrets.registrationToken)
   externalSecret:
     # Name of the secret to use
     ## @param secrets.externalSecret.name [string] Name of the external secret to use (overrides lapi.secrets.csLapiSecret and lapi.secrets.registrationToken)
     name: ""
     # The key in the secret that holds the csLapiSecret. Defaults to csLapiSecret
-    ## @param secrets.externalSecret.csLapiSecretKey [string] [default: csLapiSecret] The key in the external secret that holds the csLapiSecret
+    ## @param secrets.externalSecret.csLapiSecretKey [string] The key in the external secret that holds the csLapiSecret
     csLapiSecretKey: ""
     # The key in the secret that holds the registrationToken. Defaults to registrationToken
-    ## @param secrets.externalSecret.registrationTokenKey [string] [default:registrationToken] The key in the external secret that holds the registrationToken
+    ## @param secrets.externalSecret.registrationTokenKey [string] The key in the external secret that holds the registrationToken
     registrationTokenKey: ""
 
 # lapi will deploy pod with crowdsec lapi and dashboard as deployment
@@ -246,13 +245,13 @@ lapi:
   ## @param lapi.replicas  Number of replicas for the Local API
   replicas: 1
   # -- environment variables from crowdsecurity/crowdsec docker image
-  ## @param lapi.env [array] Extra environment variables passed to the crowdsecurity/crowdsec container
+  ## @param lapi.env Extra environment variables passed to the crowdsecurity/crowdsec container
   env: []
     # by default disable the agent because it only needs the local API.
     #- name: DISABLE_AGENT
     #  value: "true"
   # Allows you to load environment variables from kubernetes secret or config map
-  ## @param lapi.envFrom [array] Environment variables loaded from Kubernetes Secrets or ConfigMaps
+  ## @param lapi.envFrom Environment variables loaded from Kubernetes Secrets or ConfigMaps
   envFrom: []
     # - secretRef:
     #     name: env-secret
@@ -260,9 +259,9 @@ lapi:
     #     name: config-map
   # -- Enable ingress lapi object
   ingress:
-    ## @param lapi.ingress.enabled [object] [default: false] Enable ingress for the LAPI service
+    ## @param lapi.ingress.enabled [default: false] Enable ingress for the LAPI service
     enabled: false
-    ## @param lapi.ingress.annotations [object] Annotations to apply to the LAPI ingress object
+    ## @param lapi.ingress.annotations Annotations to apply to the LAPI ingress object
     annotations:
       # we only want http to the backend so we need this annotation
       nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
@@ -277,29 +276,29 @@ lapi:
   priorityClassName: ""
 
   # -- Annotations to be added to lapi deployment
-  ## @param lapi.deployAnnotations [object] Annotations applied to the LAPI Deployment
+  ## @param lapi.deployAnnotations Annotations applied to the LAPI Deployment
   deployAnnotations: {}
 
   # -- Annotations to be added to lapi pods, if global podAnnotations are not set
-  ## @param lapi.podAnnotations [object] Annotations applied to LAPI pods
+  ## @param lapi.podAnnotations Annotations applied to LAPI pods
   podAnnotations: {}
   # -- Labels to be added to lapi pods, if global podLabels are not set
-  ## @param lapi.podLabels [object] Labels applied to LAPI pods
+  ## @param lapi.podLabels Labels applied to LAPI pods
   podLabels: {}
 
   # -- Extra init containers to be added to lapi pods
-  ## @param lapi.extraInitContainers [array] Additional init containers for LAPI pods
+  ## @param lapi.extraInitContainers Additional init containers for LAPI pods
   extraInitContainers: []
 
   # -- Extra volumes to be added to lapi pods
-  ## @param lapi.extraVolumes [array] Additional volumes for LAPI pods
+  ## @param lapi.extraVolumes Additional volumes for LAPI pods
   extraVolumes: []
 
   # -- Extra volumeMounts to be added to lapi pods
-  ## @param lapi.extraVolumeMounts [array] Additional volumeMounts for LAPI pods
+  ## @param lapi.extraVolumeMounts Additional volumeMounts for LAPI pods
   extraVolumeMounts: []
   # -- resources for lapi
-  ## @param lapi.resources [object] Resource requests and limits for the LAPI pods
+  ## @param lapi.resources Resource requests and limits for the LAPI pods
   resources:
     limits:
       memory: 500Mi
@@ -314,7 +313,7 @@ lapi:
     data:
       ## @param lapi.persistentVolume.data.enabled Enable persistent volume for the data folder (stores bouncer API keys)
       enabled: true
-      ## @param lapi.persistentVolume.data.accessModes [array] Access modes for the data PVC
+      ## @param lapi.persistentVolume.data.accessModes Access modes for the data PVC
       accessModes:
         - ReadWriteOnce
       ## @param lapi.persistentVolume.data.storageClassName [string] StorageClass name for the data PVC
@@ -326,7 +325,7 @@ lapi:
     config:
       ## @param lapi.persistentVolume.config.enabled Enable persistent volume for the config folder (stores API credentials)
       enabled: true
-      ## @param lapi.persistentVolume.config.accessModes [array] Access modes for the config PVC
+      ## @param lapi.persistentVolume.config.accessModes Access modes for the config PVC
       accessModes:
         - ReadWriteOnce
       ## @param lapi.persistentVolume.config.storageClassName [string] StorageClass name for the config PVC
@@ -339,32 +338,32 @@ lapi:
   service:
     ## @param lapi.service.type [string] Kubernetes service type for LAPI
     type: ClusterIP
-    ## @param lapi.service.labels [object] Extra labels to add to the LAPI service
+    ## @param lapi.service.labels Extra labels to add to the LAPI service
     labels: {}
-    ## @param lapi.service.annotations [object] Extra annotations to add to the LAPI service
+    ## @param lapi.service.annotations Extra annotations to add to the LAPI service
     annotations: {}
-    ## @param lapi.service.externalIPs [array] List of external IPs for the LAPI service
+    ## @param lapi.service.externalIPs List of external IPs for the LAPI service
     externalIPs: []
-    ## @param lapi.service.loadBalancerIP [string] Specific loadBalancer IP for the LAPI service
+    ## @param lapi.service.loadBalancerIP Specific loadBalancer IP for the LAPI service
     loadBalancerIP: null
-    ## @param lapi.service.loadBalancerClass [string] LoadBalancer class for the LAPI service
+    ## @param lapi.service.loadBalancerClass LoadBalancer class for the LAPI service
     loadBalancerClass: null
     ## @param lapi.service.externalTrafficPolicy [string] External traffic policy for the LAPI service
     externalTrafficPolicy: Cluster
   # -- nodeSelector for lapi
-  ## @param lapi.nodeSelector [object] Node selector for scheduling LAPI pods
+  ## @param lapi.nodeSelector Node selector for scheduling LAPI pods
   nodeSelector: {}
   # -- tolerations for lapi
-  ## @param lapi.tolerations [array] Tolerations for scheduling LAPI pods
+  ## @param lapi.tolerations Tolerations for scheduling LAPI pods
   tolerations: []
   # -- dnsConfig for lapi
-  ## @param lapi.dnsConfig [object] DNS configuration for LAPI pods
+  ## @param lapi.dnsConfig DNS configuration for LAPI pods
   dnsConfig: {}
   # -- affinity for lapi
-  ## @param lapi.affinity [object] Affinity rules for LAPI pods
+  ## @param lapi.affinity Affinity rules for LAPI pods
   affinity: {}
   # -- topologySpreadConstraints for lapi
-  ## @param lapi.topologySpreadConstraints [array] Topology spread constraints for LAPI pods
+  ## @param lapi.topologySpreadConstraints Topology spread constraints for LAPI pods
   topologySpreadConstraints: []
 
   # -- Enable service monitoring (exposes "metrics" port "6060" for Prometheus)
@@ -530,7 +529,7 @@ agent:
   ## @param agent.hostVarLog [default: true] [object] Mount hostPath `/var/log` into the agent pod
   hostVarLog: true
   # -- environment variables from crowdsecurity/crowdsec docker image
-  ## @param agent.env [array] Environment variables passed to the crowdsecurity/crowdsec container
+  ## @param agent.env Environment variables passed to the crowdsecurity/crowdsec container
   env: []
     # by default we configure the docker-logs parser to be able to parse docker logs in k8s
     # by default we disable local API on the agent pod
@@ -640,9 +639,9 @@ agent:
     annotations: {}
     ## @param agent.service.externalIPs [array] External IPs assigned to the agent Service
     externalIPs: []
-    ## @param agent.service.loadBalancerIP [string] Fixed LoadBalancer IP for the agent Service
+    ## @param agent.service.loadBalancerIP [string, nullable] Fixed LoadBalancer IP for the agent Service
     loadBalancerIP: null
-    ## @param agent.service.loadBalancerClass [string] LoadBalancer class for the agent Service
+    ## @param agent.service.loadBalancerClass [string, nullable] LoadBalancer class for the agent Service
     loadBalancerClass: null
     ## @param agent.service.externalTrafficPolicy [string] External traffic policy for the agent Service
     externalTrafficPolicy: Cluster
@@ -864,9 +863,9 @@ appsec:
     annotations: {}
     ## @param appsec.service.externalIPs [array] External IPs for the AppSec Service
     externalIPs: []
-    ## @param appsec.service.loadBalancerIP [string] Fixed LoadBalancer IP for the AppSec Service
+    ## @param appsec.service.loadBalancerIP [string,nullable] Fixed LoadBalancer IP for the AppSec Service
     loadBalancerIP: null
-    ## @param appsec.service.loadBalancerClass [string] LoadBalancer class for the AppSec Service
+    ## @param appsec.service.loadBalancerClass [string,nullable] LoadBalancer class for the AppSec Service
     loadBalancerClass: null
     ## @param appsec.service.externalTrafficPolicy [string] External traffic policy for the AppSec Service
     externalTrafficPolicy: Cluster
