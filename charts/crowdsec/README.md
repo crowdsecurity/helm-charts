@@ -1,6 +1,6 @@
 # crowdsec
 
-![Version: 0.19.5](https://img.shields.io/badge/Version-0.19.5-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v1.6.10](https://img.shields.io/badge/AppVersion-v1.6.10-informational?style=flat-square)
+![Version: 0.20.0](https://img.shields.io/badge/Version-0.20.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v1.7.0](https://img.shields.io/badge/AppVersion-v1.7.0-informational?style=flat-square)
 
 Crowdsec helm chart is an open-source, lightweight agent to detect and respond to bad behaviours.
 
@@ -395,7 +395,6 @@ controller:
 | `tls.appsec.reflector.namespaces`            | Namespaces where the agent’s TLS Secret can be reflected/synced.                                                                    | `[]`    |
 | `tls.lapi.secret`                            | Name of the Secret holding the lapidary's’s TLS certificate and key.                                                                | `""`    |
 | `tls.lapi.reflector.namespaces`              | Namespaces where the LAPI TLS Secret can be reflected/synced.                                                                       | `[]`    |
->>>>>>> 405b7853b2029850b3978dfbb832960417643e41
 
 ### secrets
 

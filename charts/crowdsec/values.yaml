@@ -75,42 +75,38 @@ config:
   # -- Simulation configuration (https://docs.crowdsec.net/docs/next/scenarios/simulation/)
   # This file is only mounted in the agent pods
   ## @param config.simulation.yaml This file is usually handled by the agent.
-  simulation.yaml:
-    ""
-    #  |
-    # simulation: false
-    # exclusions:
-    #  - crowdsecurity/ssh-bf
+  simulation.yaml: ""
+  #  |
+  # simulation: false
+  # exclusions:
+  #  - crowdsecurity/ssh-bf
   # This file is only mounted in the lapi pod
   ## @param config.console.yaml This file is usually handled by the agent.
-  console.yaml:
-    ""
-    #   |
-    # share_manual_decisions: true
-    # share_tainted: true
-    # share_custom: true
-    # share_context: false
+  console.yaml: ""
+  #   |
+  # share_manual_decisions: true
+  # share_tainted: true
+  # share_custom: true
   # This file is only mounted in the lapi pod
   # Deprecated in favor of centralized allowlists (https://docs.crowdsec.net/docs/next/local_api/centralized_allowlists)
   ## @param config.capi_whitelists.yaml This file is deprecated in favor of centralized allowlists see https://docs.crowdsec.net/docs/next/local_api/centralized_allowlists
-  capi_whitelists.yaml:
-    ""
-    #   |
-    # ips:
-    # - 1.2.3.4
-    # - 2.3.4.5
-    # cidrs:
-    # - 1.2.3.0/24
+  capi_whitelists.yaml: ""
+  #   |
+  # ips:
+  # - 1.2.3.4
+  # - 2.3.4.5
+  # cidrs:
+  # - 1.2.3.0/24
   # -- Profiles configuration (https://docs.crowdsec.net/docs/next/profiles/format/#profile-configuration-example)
-  ## @param config.profiles.yaml For custo mcThis file is mounted in the lapi pod
-  profiles.yaml:
-    ""
-    #   |
-    #  name: default_ip_remediation
-    #  debug: true
-    #  filters:
-    #    - Alert.Remediation == true && Alert.GetScope() == "Ip"
-    #  ...
+  # This file is only mounted in the lapi pod
+  ## @param config.profiles.yaml Use for defining custom profiles
+  profiles.yaml: ""
+  #   |
+  #  name: default_ip_remediation
+  #  debug: true
+  #  filters:
+  #    - Alert.Remediation == true && Alert.GetScope() == "Ip"
+  #  ...
   # -- General configuration (https://docs.crowdsec.net/docs/configuration/crowdsec_configuration/#configuration-example)
   # This file is mounted in the lapi pod
   ## @param config.config.yaml.local [string] main configuration file local overriden values. This is merged with main configuration file.
@@ -311,6 +307,7 @@ lapi:
     requests:
       cpu: 500m
       memory: 500Mi
+
   # -- Enable persistent volumes
   persistentVolume:
     # -- Persistent volume for data folder. Stores e.g. registered bouncer api keys
