@@ -344,26 +344,26 @@ lapi:
     annotations: {}
     ## @param lapi.service.externalIPs List of external IPs for the LAPI service
     externalIPs: []
-    ## @param lapi.service.loadBalancerIP Specific loadBalancer IP for the LAPI service
+    ## @param lapi.service.loadBalancerIP [string,nullable] Specific loadBalancer IP for the LAPI service
     loadBalancerIP: null
-    ## @param lapi.service.loadBalancerClass LoadBalancer class for the LAPI service
+    ## @param lapi.service.loadBalancerClass [string,nullable] LoadBalancer class for the LAPI service
     loadBalancerClass: null
     ## @param lapi.service.externalTrafficPolicy [string] External traffic policy for the LAPI service
     externalTrafficPolicy: Cluster
   # -- nodeSelector for lapi
-  ## @param lapi.nodeSelector Node selector for scheduling LAPI pods
+  ## @param lapi.nodeSelector [object] Node selector for scheduling LAPI pods
   nodeSelector: {}
   # -- tolerations for lapi
-  ## @param lapi.tolerations Tolerations for scheduling LAPI pods
+  ## @param lapi.tolerations [array] Tolerations for scheduling LAPI pods
   tolerations: []
   # -- dnsConfig for lapi
-  ## @param lapi.dnsConfig DNS configuration for LAPI pods
+  ## @param lapi.dnsConfig [object] DNS configuration for LAPI pods
   dnsConfig: {}
   # -- affinity for lapi
-  ## @param lapi.affinity Affinity rules for LAPI pods
+  ## @param lapi.affinity [object] Affinity rules for LAPI pods
   affinity: {}
   # -- topologySpreadConstraints for lapi
-  ## @param lapi.topologySpreadConstraints Topology spread constraints for LAPI pods
+  ## @param lapi.topologySpreadConstraints [array] Topology spread constraints for LAPI pods
   topologySpreadConstraints: []
 
   # -- Enable service monitoring (exposes "metrics" port "6060" for Prometheus)
