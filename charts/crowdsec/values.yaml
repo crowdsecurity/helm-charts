@@ -245,7 +245,7 @@ lapi:
   ## @param lapi.replicas  Number of replicas for the Local API
   replicas: 1
   # -- environment variables from crowdsecurity/crowdsec docker image
-  ## @param lapi.env Extra environment variables passed to the crowdsecurity/crowdsec container
+  ## @param lapi.env [array] Extra environment variables passed to the crowdsecurity/crowdsec container
   env: []
     # by default disable the agent because it only needs the local API.
     #- name: DISABLE_AGENT
