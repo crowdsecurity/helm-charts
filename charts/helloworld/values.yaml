@@ -2,44 +2,31 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-## @param replicaCount Number of replicas for the Deployment
 replicaCount: 1
 
-## @section Image
 image:
-  ## @param image.repository [string] Container image repository
   repository: hashicorp/http-echo
-  ## @param image.pullPolicy [string] Image pull policy (Always, IfNotPresent, Never)
   pullPolicy: IfNotPresent
-  ## @param image.tag [string] Image tag
   tag: "0.2.3"
 
-## @param imagePullSecrets [array] Secrets to use for pulling images
 imagePullSecrets: []
-
-## @param nameOverride [string] String to partially override fullname template with a name
 nameOverride: ""
-
-## @param fullnameOverride [string] String to fully override fullname template with a name
 fullnameOverride: ""
 
-## @section ServiceAccount
 serviceAccount:
-  ## @param serviceAccount.create  Specifies whether a service account should be created
+  # Specifies whether a service account should be created
   create: true
-  ## @param serviceAccount.annotations [object] Annotations to add to the service account
+  # Annotations to add to the service account
   annotations: {}
-  ## @param serviceAccount.name [string] The name of the service account to use (if not set and create is true, a name is generated)
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
   name: "helloworld"
 
-## @param podAnnotations [object] Annotations to be added to pods
 podAnnotations: {}
 
-## @param podSecurityContext [object] Pod-level security context
 podSecurityContext: {}
   # fsGroup: 2000
 
-## @param securityContext [object] Container-level security context
 securityContext: {}
   # capabilities:
   #   drop:
@@ -48,38 +35,30 @@ securityContext: {}
   # runAsNonRoot: true
   # runAsUser: 1000
 
-## @section Service
 service:
-  ## @param service.name [string] Name of the service
   name: helloworld
-  ## @param service.type [string] Kubernetes Service type
   type: ClusterIP
-  ## @param service.port Service port
   port: 5678
 
-## @section Ingress
 ingress:
-  ## @param ingress.enabled Enable ingress resource
   enabled: false
-  ## @param ingress.class [string] Ingress class name
   class: "nginx"
-  ## @param ingress.annotations [object] Annotations for the ingress resource
   annotations: {}
     # kubernetes.io/tls-acme: "true"
-  ## @param ingress.hosts [array] List of ingress hosts
   hosts:
     - host: helloworld.local
       paths:
         - path: /
-  ## @param ingress.tls [array] TLS configuration for ingress
   tls: []
   #  - secretName: chart-example-tls
   #    hosts:
   #      - chart-example.local
 
-## @section Resources
-## @param resources [object] Resource requests and limits for pods
 resources: #{}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
   limits:
     cpu: 100m
     memory: 128Mi
@@ -87,24 +66,15 @@ resources: #{}
     cpu: 100m
     memory: 128Mi
 
-## @section Autoscaling
 autoscaling:
-  ## @param autoscaling.enabled  Enable HorizontalPodAutoscaler
   enabled: false
-  ## @param autoscaling.minReplicas  Minimum number of replicas
   minReplicas: 1
-  ## @param autoscaling.maxReplicas  Maximum number of replicas
   maxReplicas: 5
-  ## @param autoscaling.targetCPUUtilizationPercentage  Target CPU utilization percentage
   targetCPUUtilizationPercentage: 80
-  # ## @param autoscaling.targetMemoryUtilizationPercentage  Target memory utilization percentage
   # targetMemoryUtilizationPercentage: 80
 
-## @param nodeSelector [object] Node selector rules for pod assignment
 nodeSelector: {}
 
-## @param tolerations [array] Tolerations for pod assignment
 tolerations: []
 
-## @param affinity [object] Affinity rules for pod assignment
 affinity: {}

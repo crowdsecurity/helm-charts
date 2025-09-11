@@ -36,13 +36,13 @@ jobs:
           readme-generator \
             --values charts/$CHART_DIR/"values.yaml" \
             --readme charts/$CHART_DIR/"README.md" \
-            --schema charts/$CHART_DIR/"values.schema.json"
+            --schema "/tmp/schema.json""
           done
 
       - name: Commit bump
         uses: EndBug/add-and-commit@v9
         with:
-          message: "chore(charts): regenerate README.md and values.schema.json"
+          message: "chore(charts): regenerate README.md"
           branch: main
 
   # release:

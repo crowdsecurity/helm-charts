@@ -1,940 +1,1103 @@
 {
-    "title": "Chart Values",
-    "type": "object",
-    "properties": {
-        "container_runtime": {
+    "$schema": "http://json-schema.org/draft-06/schema#",
+    "$ref": "#/definitions/values",
+    "definitions": {
+        "values": {
+            "type": "object",
+            "properties": {
+                "agent": {
+                    "$ref": "#/definitions/Agent"
+                },
+                "config": {
+                    "$ref": "#/definitions/Config"
+                },
+                "lapi": {
+                    "$ref": "#/definitions/Lapi"
+                },
+                "container_runtime": {
+                    "$ref": "#/definitions/containerRuntime"
+                },
+                "image": {
+                    "$ref": "#/definitions/image"
+                }
+            },
+            "required": [
+                "agent",
+                "config",
+                "lapi",
+                "container_runtime",
+                "image"
+            ],
+            "title": "values"
+        },
+        "nonEmptyString": {
             "type": "string",
-            "description": "[string] for raw logs format: json or cri (docker|containerd)",
-            "default": "docker"
+            "minLength": 1
         },
         "image": {
             "type": "object",
             "properties": {
                 "repository": {
-                    "type": "string",
-                    "description": "[string] docker image repository name",
-                    "default": "crowdsecurity/crowdsec"
-                },
-                "pullPolicy": {
-                    "type": "string",
-                    "description": "[string] Image pull policy (Always, IfNotPresent, Never)",
-                    "default": "IfNotPresent"
-                },
-                "pullSecrets": {
-                    "type": "array",
-                    "description": "Image pull secrets (array of objects with a 'name' field)",
-                    "default": "[]",
-                    "items": {
-                        "type": "string"
-                    }
+                    "type": "string"
                 },
                 "tag": {
-                    "type": "string",
-                    "description": "docker image tag (empty defaults to chart AppVersion)",
-                    "default": "\"\""
+                    "type": "string"
+                },
+                "pullPolicy": {
+                    "type": "string"
                 }
-            }
+            },
+            "required": [
+                "repository",
+                "pullPolicy"
+            ]
         },
-        "config": {
-            "type": "object",
-            "properties": {
-                "parsers": {
-                    "type": "object",
-                    "properties": {
-                        "s00-raw": {
-                            "type": "object",
-                            "description": "First step custom parsers definitions, usually used to label logs",
-                            "default": {}
-                        },
-                        "s01-parse": {
-                            "type": "object",
-                            "description": "Second step custom parsers definitions, usually to normalize logs into events",
-                            "default": {}
-                        },
-                        "s02-enrich": {
-                            "type": "object",
-                            "description": "Third step custom parsers definitions, usually to enrich events",
-                            "default": {}
-                        }
-                    }
-                },
-                "scenarios": {
-                    "type": "object",
-                    "description": "Custom raw scenarios definition see https://docs.crowdsec.net/docs/next/log_processor/scenarios/intro",
-                    "default": {}
-                },
-                "postoverflows": {
-                    "type": "object",
-                    "properties": {
-                        "s00-enrich": {
-                            "type": "object",
-                            "description": "First step custom postoverflows definitions, usually used to enrich overflow events",
-                            "default": {}
-                        },
-                        "s01-whitelist": {
-                            "type": "object",
-                            "description": "Second step custom postoverflows definitions, usually used to whitelist events",
-                            "default": {}
-                        }
-                    }
-                },
-                "notifications": {
-                    "type": "object",
-                    "description": "notification on alert configuration",
-                    "default": {}
-                }
-            }
+        "containerRuntime": {
+            "type": "string",
+            "enum": [
+                "docker",
+                "containerd"
+            ]
         },
-        "tls": {
+        "Lapi": {
             "type": "object",
             "properties": {
                 "enabled": {
-                    "type": "boolean",
-                    "description": "Is tls enabled ?",
-                    "default": false
-                },
-                "caBundle": {
-                    "type": "boolean",
-                    "description": "pem format CA collection",
-                    "default": true
-                },
-                "insecureSkipVerify": {
-                    "type": "boolean",
-                    "description": "",
-                    "default": false
-                },
-                "certManager": {
-                    "type": "object",
-                    "properties": {
-                        "enabled": {
-                            "type": "boolean",
-                            "description": "[object] Use of a cluster cert manager",
-                            "default": "true"
-                        },
-                        "duration": {
-                            "type": "string",
-                            "description": "validity duration of certificate (golang duration string)",
-                            "default": "\"\""
-                        },
-                        "renewBefore": {
-                            "type": "string",
-                            "description": "duration before a certificate’s expiry when cert-manager should start renewing it.",
-                            "default": "\"\""
-                        }
-                    }
-                },
-                "bouncer": {
-                    "type": "object",
-                    "properties": {
-                        "secret": {
-                            "type": "string",
-                            "description": "Name of the Kubernetes Secret containing TLS materials for the bouncer",
-                            "default": "\"\""
-                        },
-                        "reflector": {
-                            "type": "object",
-                            "properties": {
-                                "namespaces": {
-                                    "type": "array",
-                                    "description": "List of namespaces from which the bouncer will watch and sync Secrets/ConfigMaps.",
-                                    "default": "[]",
-                                    "items": {
-                                        "type": "string"
-                                    }
-                                }
-                            }
-                        }
-                    }
-                },
-                "agent": {
-                    "type": "object",
-                    "properties": {
-                        "tlsClientAuth": {
-                            "type": "boolean",
-                            "description": "[object] Enables mutual TLS authentication for the agent when connecting to LAPI.",
-                            "default": "true"
-                        },
-                        "secret": {
-                            "type": "string",
-                            "description": "Name of the Secret holding the agent’s TLS certificate and key.",
-                            "default": "\"\""
-                        },
-                        "reflector": {
-                            "type": "object",
-                            "properties": {
-                                "namespaces": {
-                                    "type": "array",
-                                    "description": "Namespaces where the agent’s TLS Secret can be reflected/synced.",
-                                    "default": "[]",
-                                    "items": {
-                                        "type": "string"
-                                    }
-                                }
-                            }
-                        }
-                    }
-                },
-                "appsec": {
-                    "type": "object",
-                    "properties": {
-                        "tlsClientAuth": {
-                            "type": "boolean",
-                            "description": "[object] Enables mutual TLS authentication for the agent when connecting to LAPI.",
-                            "default": "true"
-                        },
-                        "secret": {
-                            "type": "string",
-                            "description": "Name of the Secret holding the agent’s TLS certificate and key.",
-                            "default": "\"\""
-                        },
-                        "reflector": {
-                            "type": "object",
-                            "properties": {
-                                "namespaces": {
-                                    "type": "array",
-                                    "description": "Namespaces where the agent’s TLS Secret can be reflected/synced.",
-                                    "default": "[]",
-                                    "items": {
-                                        "type": "string"
-                                    }
-                                }
-                            }
-                        }
-                    }
-                },
-                "lapi": {
-                    "type": "object",
-                    "properties": {
-                        "secret": {
-                            "type": "string",
-                            "description": "Name of the Secret holding the lapidary's’s TLS certificate and key.",
-                            "default": "\"\""
-                        },
-                        "reflector": {
-                            "type": "object",
-                            "properties": {
-                                "namespaces": {
-                                    "type": "array",
-                                    "description": "Namespaces where the LAPI TLS Secret can be reflected/synced.",
-                                    "default": "[]",
-                                    "items": {
-                                        "type": "string"
-                                    }
-                                }
-                            }
-                        }
-                    }
+                    "type": "boolean"
                 }
             }
         },
-        "secrets": {
-            "type": "object",
-            "properties": {
-                "username": {
-                    "type": "string",
-                    "description": "Agent username (default is generated randomly)",
-                    "default": "\"\""
-                },
-                "password": {
-                    "type": "string",
-                    "description": "Agent password (default is generated randomly)",
-                    "default": "\"\""
-                },
-                "externalSecret": {
-                    "type": "object",
-                    "properties": {
-                        "name": {
-                            "type": "string",
-                            "description": "Name of the external secret to use (overrides lapi.secrets.csLapiSecret and lapi.secrets.registrationToken)",
-                            "default": "\"\""
-                        },
-                        "csLapiSecretKey": {
-                            "type": "string",
-                            "description": "[default: csLapiSecret] The key in the external secret that holds the csLapiSecret",
-                            "default": "\"\""
-                        },
-                        "registrationTokenKey": {
-                            "type": "string",
-                            "description": "[default:registrationToken] The key in the external secret that holds the registrationToken",
-                            "default": "\"\""
-                        }
-                    }
-                }
-            }
-        },
-        "lapi": {
+        "Agent": {
             "type": "object",
             "properties": {
                 "enabled": {
-                    "type": "boolean",
-                    "description": "Enable LAPI deployment (enabled by default)",
-                    "default": true
+                    "type": "boolean"
                 },
-                "replicas": {
-                    "type": "number",
-                    "description": "Number of replicas for the Local API",
-                    "default": 1
-                },
-                "env": {
+                "acquisition": {
                     "type": "array",
-                    "description": "Extra environment variables passed to the crowdsecurity/crowdsec container",
-                    "default": "[]",
                     "items": {
-                        "type": "string"
-                    }
-                },
-                "envFrom": {
-                    "type": "array",
-                    "description": "Environment variables loaded from Kubernetes Secrets or ConfigMaps",
-                    "default": "[]",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "ingress": {
-                    "type": "object",
-                    "properties": {
-                        "ingressClassName": {
-                            "type": "string",
-                            "description": "IngressClass name for the LAPI ingress",
-                            "default": "\"\""
-                        },
-                        "host": {
-                            "type": "string",
-                            "description": "Hostname for the LAPI ingress",
-                            "default": "\"\""
-                        }
-                    }
-                },
-                "priorityClassName": {
-                    "type": "string",
-                    "description": "Pod priority class name",
-                    "default": "\"\""
-                },
-                "extraInitContainers": {
-                    "type": "array",
-                    "description": "Additional init containers for LAPI pods",
-                    "default": "[]",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "extraVolumes": {
-                    "type": "array",
-                    "description": "Additional volumes for LAPI pods",
-                    "default": "[]",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "extraVolumeMounts": {
-                    "type": "array",
-                    "description": "Additional volumeMounts for LAPI pods",
-                    "default": "[]",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "persistentVolume": {
-                    "type": "object",
-                    "properties": {
-                        "data": {
-                            "type": "object",
-                            "properties": {
-                                "enabled": {
-                                    "type": "boolean",
-                                    "description": "Enable persistent volume for the data folder (stores bouncer API keys)",
-                                    "default": true
-                                },
-                                "accessModes": {
-                                    "type": "array",
-                                    "description": "Access modes for the data PVC",
-                                    "default": "[]",
-                                    "items": {
-                                        "type": "string"
-                                    }
-                                },
-                                "storageClassName": {
-                                    "type": "string",
-                                    "description": "StorageClass name for the data PVC",
-                                    "default": "\"\""
-                                },
-                                "existingClaim": {
-                                    "type": "string",
-                                    "description": "Existing PersistentVolumeClaim to use for the data PVC",
-                                    "default": "\"\""
-                                },
-                                "size": {
-                                    "type": "string",
-                                    "description": "Requested size for the data PVC",
-                                    "default": "\"\""
-                                }
-                            }
-                        },
-                        "config": {
-                            "type": "object",
-                            "properties": {
-                                "enabled": {
-                                    "type": "boolean",
-                                    "description": "Enable persistent volume for the config folder (stores API credentials)",
-                                    "default": true
-                                },
-                                "accessModes": {
-                                    "type": "array",
-                                    "description": "Access modes for the config PVC",
-                                    "default": "[]",
-                                    "items": {
-                                        "type": "string"
-                                    }
-                                },
-                                "storageClassName": {
-                                    "type": "string",
-                                    "description": "StorageClass name for the config PVC",
-                                    "default": "\"\""
-                                },
-                                "existingClaim": {
-                                    "type": "string",
-                                    "description": "Existing PersistentVolumeClaim to use for the config PVC",
-                                    "default": "\"\""
-                                },
-                                "size": {
-                                    "type": "string",
-                                    "description": "Requested size for the config PVC",
-                                    "default": "\"\""
-                                }
-                            }
-                        }
-                    }
-                },
-                "service": {
-                    "type": "object",
-                    "properties": {
-                        "type": {
-                            "type": "string",
-                            "description": "Kubernetes service type for LAPI",
-                            "default": "\"\""
-                        },
-                        "externalIPs": {
-                            "type": "array",
-                            "description": "List of external IPs for the LAPI service",
-                            "default": "[]",
-                            "items": {
-                                "type": "string"
-                            }
-                        },
-                        "loadBalancerIP": {
-                            "type": "string",
-                            "description": "Specific loadBalancer IP for the LAPI service",
-                            "default": "\"\""
-                        },
-                        "loadBalancerClass": {
-                            "type": "string",
-                            "description": "LoadBalancer class for the LAPI service",
-                            "default": "\"\""
-                        },
-                        "externalTrafficPolicy": {
-                            "type": "string",
-                            "description": "External traffic policy for the LAPI service",
-                            "default": "\"\""
-                        }
-                    }
-                },
-                "tolerations": {
-                    "type": "array",
-                    "description": "Tolerations for scheduling LAPI pods",
-                    "default": "[]",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "topologySpreadConstraints": {
-                    "type": "array",
-                    "description": "Topology spread constraints for LAPI pods",
-                    "default": "[]",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "metrics": {
-                    "type": "object",
-                    "properties": {
-                        "enabled": {
-                            "type": "boolean",
-                            "description": "Enable service monitoring for Prometheus (exposes port 6060)",
-                            "default": true
-                        },
-                        "serviceMonitor": {
-                            "type": "object",
-                            "properties": {
-                                "enabled": {
-                                    "type": "boolean",
-                                    "description": "[object] Create a ServiceMonitor resource for Prometheus",
-                                    "default": "true"
-                                }
-                            }
-                        },
-                        "podMonitor": {
-                            "type": "object",
-                            "properties": {
-                                "enabled": {
-                                    "type": "boolean",
-                                    "description": "Enables podMonitor",
-                                    "default": false
-                                },
-                                "additionalLabels": {
-                                    "type": "object",
-                                    "description": "additional labels for podMoNITOR [WIP]",
-                                    "default": {}
-                                }
-                            }
-                        }
-                    }
-                },
-                "strategy": {
-                    "type": "object",
-                    "properties": {
-                        "type": {
-                            "type": "string",
-                            "description": "Deployment strategy for the LAPI deployment",
-                            "default": "\"\""
-                        }
-                    }
-                },
-                "secrets": {
-                    "type": "object",
-                    "properties": {
-                        "csLapiSecret": {
-                            "type": "string",
-                            "description": "Shared LAPI secret (randomly generated if not specified, must be >64 chars)",
-                            "default": "\"\""
-                        },
-                        "registrationToken": {
-                            "type": "string",
-                            "description": "Registration token for AppSec (randomly generated if not specified, must be >48 chars)",
-                            "default": "\"\""
-                        }
-                    }
-                },
-                "storeCAPICredentialsInSecret": {
-                    "type": "boolean",
-                    "description": "[object] Store Central API credentials in a Secret (required if LAPI replicas > 1)",
-                    "default": "false"
-                }
-            }
-        },
-        "agent": {
-            "type": "object",
-            "properties": {
-                "enabled": {
-                    "type": "boolean",
-                    "description": "[object] Enable CrowdSec agent (enabled by default)",
-                    "default": "true"
-                },
-                "isDeployment": {
-                    "type": "boolean",
-                    "description": "[object] Deploy agent as a Deployment instead of a DaemonSet",
-                    "default": "false"
-                },
-                "lapiURL": {
-                    "type": "string",
-                    "description": "URL of the LAPI for the agent to connect to (defaults to internal service URL)",
-                    "default": "\"\""
-                },
-                "lapiHost": {
-                    "type": "string",
-                    "description": "Host of the LAPI for the agent to connect to",
-                    "default": "\"\""
-                },
-                "lapiPort": {
-                    "type": "number",
-                    "description": "Port of the LAPI for the agent to connect to",
-                    "default": 8080
-                },
-                "replicas": {
-                    "type": "number",
-                    "description": "Number of replicas when deploying as a Deployment",
-                    "default": 1
-                },
-                "ports": {
-                    "type": "array",
-                    "description": "Custom container ports to expose (default: metrics port 6060 if enabled)",
-                    "default": "[]",
-                    "items": {
-                        "type": "string"
+                        "$ref": "#/definitions/Acquisition"
                     }
                 },
                 "additionalAcquisition": {
                     "type": "array",
-                    "description": "Extra log acquisition sources (see https://docs.crowdsec.net/docs/next/data_sources/intro)",
-                    "default": "[]",
                     "items": {
-                        "type": "string"
-                    }
-                },
-                "acquisition": {
-                    "type": "array",
-                    "description": "Pod log acquisition definitions (namespace, podName, program, etc.)",
-                    "default": "[]",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "priorityClassName": {
-                    "type": "string",
-                    "description": "Priority class name for agent pods",
-                    "default": "\"\""
-                },
-                "extraInitContainers": {
-                    "type": "array",
-                    "description": "Extra init containers for agent pods",
-                    "default": "[]",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "extraVolumes": {
-                    "type": "array",
-                    "description": "Extra volumes for agent pods",
-                    "default": "[]",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "extraVolumeMounts": {
-                    "type": "array",
-                    "description": "Extra volume mounts for agent pods",
-                    "default": "[]",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "persistentVolume": {
-                    "type": "object",
-                    "properties": {
-                        "config": {
-                            "type": "object",
-                            "properties": {
-                                "enabled": {
-                                    "type": "boolean",
-                                    "description": "[object] Enable persistent volume for agent config",
-                                    "default": "false"
-                                },
-                                "accessModes": {
-                                    "type": "array",
-                                    "description": "Access modes for the config PVC",
-                                    "default": "[]",
-                                    "items": {
-                                        "type": "string"
-                                    }
-                                },
-                                "storageClassName": {
-                                    "type": "string",
-                                    "description": "StorageClass name for the config PVC",
-                                    "default": "\"\""
-                                },
-                                "existingClaim": {
-                                    "type": "string",
-                                    "description": "Existing PVC name to use for config",
-                                    "default": "\"\""
-                                },
-                                "size": {
-                                    "type": "string",
-                                    "description": "Requested size for the config PVC",
-                                    "default": "\"\""
-                                }
+                        "anyOf": [
+                            {
+                                "$ref": "#/definitions/FileSource"
+                            },
+                            {
+                                "$ref": "#/definitions/JournaldSource"
+                            },
+                            {
+                                "$ref": "#/definitions/CloudwatchSource"
+                            },
+                            {
+                                "$ref": "#/definitions/KinesisSource"
+                            },
+                            {
+                                "$ref": "#/definitions/S3Source"
+                            },
+                            {
+                                "$ref": "#/definitions/SyslogSource"
+                            },
+                            {
+                                "$ref": "#/definitions/DockerSource"
+                            },
+                            {
+                                "$ref": "#/definitions/KafkaSource"
+                            },
+                            {
+                                "$ref": "#/definitions/WinEventLogSource"
+                            },
+                            {
+                                "$ref": "#/definitions/LokiSource"
+                            },
+                            {
+                                "$ref": "#/definitions/HttpSource"
+                            },
+                            {
+                                "$ref": "#/definitions/KubernetesSource"
+                            },
+                            {
+                                "$ref": "#/definitions/VictoriaLogsSource"
                             }
-                        }
-                    }
-                },
-                "hostVarLog": {
-                    "type": "boolean",
-                    "description": "[object] Mount hostPath `/var/log` into the agent pod",
-                    "default": "true"
-                },
-                "env": {
-                    "type": "array",
-                    "description": "Environment variables passed to the crowdsecurity/crowdsec container",
-                    "default": "[]",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "tolerations": {
-                    "type": "array",
-                    "description": "Tolerations for scheduling agent pods",
-                    "default": "[]",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "metrics": {
-                    "type": "object",
-                    "properties": {
-                        "enabled": {
-                            "type": "boolean",
-                            "description": "Enable service monitoring for Prometheus (exposes port 6060)",
-                            "default": true
-                        },
-                        "serviceMonitor": {
-                            "type": "object",
-                            "properties": {
-                                "enabled": {
-                                    "type": "boolean",
-                                    "description": "Create a ServiceMonitor resource for Prometheus",
-                                    "default": false
-                                }
-                            }
-                        },
-                        "podMonitor": {
-                            "type": "object",
-                            "properties": {
-                                "enabled": {
-                                    "type": "boolean",
-                                    "description": "Create a PodMonitor resource for Prometheus",
-                                    "default": false
-                                }
-                            }
-                        }
-                    }
-                },
-                "service": {
-                    "type": "object",
-                    "properties": {
-                        "type": {
-                            "type": "string",
-                            "description": "Kubernetes Service type for agent",
-                            "default": "\"\""
-                        },
-                        "externalIPs": {
-                            "type": "array",
-                            "description": "External IPs assigned to the agent Service",
-                            "default": "[]",
-                            "items": {
-                                "type": "string"
-                            }
-                        },
-                        "loadBalancerIP": {
-                            "type": "string",
-                            "description": "Fixed LoadBalancer IP for the agent Service",
-                            "default": "\"\""
-                        },
-                        "loadBalancerClass": {
-                            "type": "string",
-                            "description": "LoadBalancer class for the agent Service",
-                            "default": "\"\""
-                        },
-                        "externalTrafficPolicy": {
-                            "type": "string",
-                            "description": "External traffic policy for the agent Service",
-                            "default": "\"\""
-                        },
-                        "ports": {
-                            "type": "array",
-                            "description": "Custom service ports (default: metrics port 6060 if enabled)",
-                            "default": "[]",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                },
-                "wait_for_lapi": {
-                    "type": "object",
-                    "properties": {
-                        "image": {
-                            "type": "object",
-                            "properties": {
-                                "repository": {
-                                    "type": "string",
-                                    "description": "Repository for the wait-for-lapi init container image",
-                                    "default": "\"\""
-                                },
-                                "pullPolicy": {
-                                    "type": "string",
-                                    "description": "Image pull policy for the wait-for-lapi init container",
-                                    "default": "\"\""
-                                },
-                                "tag": {
-                                    "type": "string",
-                                    "description": "Image tag for the wait-for-lapi init container",
-                                    "default": "\"\""
-                                }
-                            }
-                        }
+                        ]
                     }
                 }
-            }
+            },
+            "title": "Agent",
+            "required": [
+                "acquisition"
+            ]
         },
-        "appsec": {
+        "Acquisition": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "namespace": {
+                    "type": "string"
+                },
+                "podName": {
+                    "type": "string"
+                },
+                "program": {
+                    "type": "string"
+                },
+                "poll_without_inotify": {
+                    "type": "boolean",
+                    "default": false
+                }
+            },
+            "required": [
+                "namespace",
+                "podName",
+                "program"
+            ],
+            "title": "Acquisition"
+        },
+        "Config": {
             "type": "object",
             "properties": {
-                "enabled": {
+                "parsers": {
+                    "$ref": "#/definitions/Parsers"
+                },
+                "scenarios": {
+                    "$ref": "#/definitions/Scenarios"
+                },
+                "postoverflows": {
+                    "$ref": "#/definitions/Postoverflows"
+                },
+                "profiles.yaml": {
+                    "type": "string"
+                },
+                "notifications": {
+                    "$ref": "#/definitions/Notifications"
+                },
+                "simulation.yaml": {
+                    "type": "string"
+                },
+                "console.yaml": {
+                    "type": "string"
+                },
+                "capi_whitelists.yaml": {
+                    "type": "string"
+                },
+                "config.yaml.local": {
+                    "type": "string"
+                },
+                "agent_config.yaml.local": {
+                    "type": "string"
+                },
+                "appsec_config.yaml.local": {
+                    "type": "string"
+                }
+            },
+            "title": "Config"
+        },
+        "Notifications": {
+            "type": "object",
+            "title": "Notifications"
+        },
+        "Parsers": {
+            "type": "object",
+            "title": "Parsers"
+        },
+        "Postoverflows": {
+            "type": "object",
+            "title": "Postoverflows"
+        },
+        "Scenarios": {
+            "type": "object",
+            "title": "Scenarios"
+        },
+        "Labels": {
+            "type": "object",
+            "description": "Object of labels to apply",
+            "patternProperties": {
+                "^.*$": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        }
+                    ]
+                }
+            },
+            "additionalProperties": false
+        },
+        "FileSource": {
+            "type": "object",
+            "description": "https://docs.crowdsec.net/docs/next/log_processor/data_sources/file/",
+            "additionalProperties": false,
+            "properties": {
+                "source": {
+                    "const": "file"
+                },
+                "labels": {
+                    "$ref": "#/definitions/Labels"
+                },
+                "force_inotify": {
                     "type": "boolean",
-                    "description": "[object] Enable AppSec component (disabled by default)",
-                    "default": "false"
+                    "default": false,
+                    "description": "If set to true, force an inotify watch on the log files folder, even if there is no log in it."
                 },
-                "lapiURL": {
+                "poll_without_inotify": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "If set to true, will poll the files using os.Stat instead of using inotify"
+                },
+                "filenames": {
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "description": "A list of path to files to tail. Globbing is supported. Required if filename is not provided."
+                    }
+                },
+                "filename": {
                     "type": "string",
-                    "description": "URL the AppSec component uses to reach LAPI (defaults to internal service URL)",
-                    "default": "\"\""
+                    "description": "A single path to a file to tail. Globbing is supported. Required if filenames is not provided."
+                }
+            },
+            "oneOf": [
+                {
+                    "required": [
+                        "filename"
+                    ]
                 },
-                "lapiHost": {
+                {
+                    "required": [
+                        "filenames"
+                    ]
+                }
+            ],
+            "required": [
+                "source"
+            ]
+        },
+        "JournaldSource": {
+            "type": "object",
+            "description": "https://docs.crowdsec.net/docs/next/log_processor/data_sources/journald/",
+            "additionalProperties": false,
+            "properties": {
+                "source": {
+                    "const": "journalctl"
+                },
+                "labels": {
+                    "$ref": "#/definitions/Labels"
+                },
+                "journalctl_filter": {
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "description": "A list of journalctl filters. This is mandatory."
+                    }
+                }
+            },
+            "required": [
+                "source",
+                "journalctl_filter"
+            ]
+        },
+        "CloudwatchSource": {
+            "type": "object",
+            "description": "https://docs.crowdsec.net/docs/next/log_processor/data_sources/cloudwatch/",
+            "additionalProperties": false,
+            "properties": {
+                "source": {
+                    "const": "cloudwatch"
+                },
+                "labels": {
+                    "$ref": "#/definitions/Labels"
+                },
+                "group_name": {
                     "type": "string",
-                    "description": "Hostname the AppSec component uses to reach LAPI",
-                    "default": "\"\""
+                    "description": "Name of the group to monitor, exact match."
                 },
-                "lapiPort": {
+                "stream_regexp": {
+                    "type": "string",
+                    "description": "A RE2 expression that will restrict streams within the group that will be monitored."
+                },
+                "stream_name": {
+                    "type": "string",
+                    "description": "Name of stream to monitor, exact match."
+                },
+                "prepend_cloudwatch_timestamp": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "When set to true (default: false), prepend the cloudwatch event timestamp to the generated log string. This is intended for cases where you log itself wouldn't contain timestamp."
+                },
+                "aws_profile": {
+                    "type": "string",
+                    "description": "The aws profile to use to poll cloudwatch, relies on your ~/.aws/config/."
+                },
+                "aws_config_dir": {
+                    "type": "string",
+                    "default": "/root/.aws",
+                    "description": "The path to your ~/.aws/, defaults to /root/.aws"
+                }
+            },
+            "patternProperties": {
+                "^.+_limit$": {
                     "type": "number",
-                    "description": "Port the AppSec component uses to reach LAPI",
-                    "default": 8080
+                    "description": "https://docs.crowdsec.net/docs/next/data_sources/cloudwatch/#_limit"
                 },
-                "replicas": {
-                    "type": "number",
-                    "description": "Number of replicas for the AppSec Deployment",
-                    "default": 1
-                },
-                "acquisitions": {
-                    "type": "array",
-                    "description": "AppSec acquisitions (datasource listeners), e.g. appsec listener on 7422",
-                    "default": "[]",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "priorityClassName": {
+                "^.+_interval$": {
                     "type": "string",
-                    "description": "Priority class name for AppSec pods",
-                    "default": "\"\""
+                    "description": "https://docs.crowdsec.net/docs/next/data_sources/cloudwatch/#_interval"
+                }
+            },
+            "anyOf": [
+                {
+                    "required": [
+                        "source",
+                        "group_name",
+                        "stream_regexp"
+                    ]
                 },
-                "extraInitContainers": {
+                {
+                    "required": [
+                        "source",
+                        "group_name",
+                        "stream_name"
+                    ]
+                }
+            ]
+        },
+        "DockerSource": {
+            "type": "object",
+            "description": "https://docs.crowdsec.net/docs/next/log_processor/data_sources/docker/",
+            "additionalProperties": false,
+            "properties": {
+                "source": {
+                    "const": "docker"
+                },
+                "labels": {
+                    "$ref": "#/definitions/Labels"
+                },
+                "container_name": {
                     "type": "array",
-                    "description": "Extra init containers for AppSec pods",
-                    "default": "[]",
                     "items": {
-                        "type": "string"
+                        "type": "string",
+                        "description": "List of containers names to monitor."
                     }
                 },
-                "extraVolumes": {
+                "container_id": {
                     "type": "array",
-                    "description": "Extra volumes for AppSec pods",
-                    "default": "[]",
                     "items": {
-                        "type": "string"
+                        "type": "string",
+                        "description": "List of containers IDs to monitor."
                     }
                 },
-                "extraVolumeMounts": {
+                "container_name_regexp": {
                     "type": "array",
-                    "description": "Extra volume mounts for AppSec pods",
-                    "default": "[]",
                     "items": {
-                        "type": "string"
+                        "type": "string",
+                        "description": "List of regexp matching containers names to monitor."
                     }
                 },
-                "env": {
+                "container_id_regexp": {
                     "type": "array",
-                    "description": "Environment variables for the AppSec container (collections/configs/rules toggles, etc.)",
-                    "default": "[]",
                     "items": {
-                        "type": "string"
+                        "type": "string",
+                        "description": "List of regexp matching containers ID to monitor."
                     }
                 },
-                "tolerations": {
-                    "type": "array",
-                    "description": "Tolerations for scheduling AppSec pods",
-                    "default": "[]",
-                    "items": {
-                        "type": "string"
+                "docker_host": {
+                    "type": "string",
+                    "default": "unix:///var/run/docker.sock",
+                    "description": "Docker host."
+                },
+                "until": {
+                    "type": "string",
+                    "description": "Read logs until timestamp (e.g. 2013-01-02T13:23:37Z) or relative (e.g. 42m for 42 minutes)."
+                },
+                "since": {
+                    "type": "string",
+                    "description": "Read logs since timestamp (e.g. 2013-01-02T13:23:37Z) or relative (e.g. 42m for 42 minutes)."
+                },
+                "check_interval": {
+                    "type": "string",
+                    "default": "1s",
+                    "description": "Relative interval (e.g. 5s for 5 seconds) to check for new containers matching the configuration."
+                },
+                "follow_stdout": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Follow stdout containers logs."
+                },
+                "follow_stderr": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Follow stderr containers logs."
+                }
+            },
+            "anyOf": [
+                {
+                    "required": [
+                        "source",
+                        "container_name"
+                    ]
+                },
+                {
+                    "required": [
+                        "source",
+                        "container_id"
+                    ]
+                },
+                {
+                    "required": [
+                        "source",
+                        "container_name_regexp"
+                    ]
+                },
+                {
+                    "required": [
+                        "source",
+                        "container_id_regexp"
+                    ]
+                }
+            ]
+        },
+        "KinesisSource": {
+            "type": "object",
+            "description": "https://docs.crowdsec.net/docs/next/log_processor/data_sources/kinesis/",
+            "additionalProperties": false,
+            "allOf": [
+                {
+                    "if": {
+                        "properties": {
+                            "use_enhanced_fanout": {
+                                "const": false
+                            }
+                        }
+                    },
+                    "then": {
+                        "required": [
+                            "stream_name"
+                        ]
                     }
                 },
-                "metrics": {
+                {
+                    "if": {
+                        "properties": {
+                            "use_enhanced_fanout": {
+                                "const": false
+                            }
+                        }
+                    },
+                    "then": {
+                        "required": [
+                            "stream_name"
+                        ]
+                    }
+                },
+                {
+                    "if": {
+                        "properties": {
+                            "use_enhanced_fanout": {
+                                "const": true
+                            }
+                        }
+                    },
+                    "then": {
+                        "required": [
+                            "consumer_name",
+                            "stream_arn"
+                        ]
+                    }
+                }
+            ],
+            "properties": {
+                "source": {
+                    "const": "kinesis"
+                },
+                "labels": {
+                    "$ref": "#/definitions/Labels"
+                },
+                "stream_name": {
+                    "type": "string",
+                    "description": "The name of the kinesis stream you want to read logs from."
+                },
+                "stream_arn": {
+                    "type": "string",
+                    "description": "The ARN of the kinesis stream you want to read logs from."
+                },
+                "use_enhanced_fanout": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Whether to use enhanced fan-out (dedicated throughput for a consumer) or not. This option will incur additional AWS costs."
+                },
+                "consumer_name": {
+                    "type": "string",
+                    "description": "Name of the consumer. Required when enhanced_fan_out is true."
+                },
+                "from_subscription": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Whether the logs are coming from a Cloudwatch subscription filter or not. When Cloudwatch writes logs to a kinesis stream, they are base64-encoded and gzipped, and the actual log message is part of a JSON object."
+                },
+                "aws_profile": {
+                    "type": "string",
+                    "description": "The aws profile to use to poll cloudwatch, relies on your ~/.aws/config/."
+                },
+                "aws_config_dir": {
+                    "type": "string",
+                    "default": "/root/.aws",
+                    "description": "The path to your ~/.aws/, defaults to /root/.aws"
+                },
+                "aws_region": {
+                    "type": "string",
+                    "description": "Optional, the data source will automatically the standard AWS env vars if present."
+                }
+            },
+            "required": [
+                "source"
+            ]
+        },
+        "S3Source": {
+            "type": "object",
+            "description": "https://docs.crowdsec.net/docs/data_sources/s3",
+            "additionalProperties": false,
+            "allOf": [
+                {
+                    "if": {
+                        "properties": {
+                            "polling_method": {
+                                "const": "sqs"
+                            }
+                        }
+                    },
+                    "then": {
+                        "required": [
+                            "sqs_name"
+                        ]
+                    }
+                },
+                {
+                    "if": {
+                        "properties": {
+                            "polling_method": {
+                                "const": "list"
+                            }
+                        }
+                    },
+                    "then": {
+                        "required": [
+                            "bucket_name"
+                        ]
+                    }
+                },
+                {
+                    "if": {
+                        "properties": {
+                            "polling_method": {
+                                "const": true
+                            }
+                        }
+                    },
+                    "then": {
+                        "required": [
+                            "sqs",
+                            "list"
+                        ]
+                    }
+                },
+                {
+                    "if": {
+                        "properties": {
+                            "sqs_format": {
+                                "const": true
+                            }
+                        }
+                    },
+                    "then": {
+                        "required": [
+                            "eventbridge",
+                            "s3notification"
+                        ]
+                    }
+                }                
+            ],
+            "properties": {
+                "source": {
+                    "const": "s3"
+                },
+                "labels": {
+                    "$ref": "#/definitions/Labels"
+                },
+                "polling_method": {
+                    "type": "string",
+                    "description": "How to detect new files in a bucket."
+                },
+                "polling_interval": {
+                    "type": "string",
+                    "description": "How often in seconds the Security Engine will check for new objects in a bucket when using the `list` polling method."
+                },
+                "sqs_name": {
+                    "type": "string",
+                    "description": "Name of the SQS queue to poll."
+                },
+                "sqs_format": {
+                    "type": "string",
+                    "description": "Format of the body inside the SQS messages."
+                },
+                "bucket_name": {
+                    "type": "string",
+                    "description": "Name of the bucket to poll."
+                },
+                "prefix": {
+                    "type": "string",
+                    "description": "Only read objects matching this prefix when `polling_method` is `list`."
+                },
+                "aws_profile": {
+                    "type": "string",
+                    "description": "The aws profile to use to poll cloudwatch, relies on your ~/.aws/config/."
+                },
+                "aws_region": {
+                    "type": "string",
+                    "description": "Optional, the data source will automatically the standard AWS env vars if present."
+                },
+                "aws_endpoint": {
+                    "type": "string",
+                    "description": "Optional, Endpoint for AWS API."
+                }
+            },
+            "required": [
+                "source"
+            ]
+        },
+        "SyslogSource": {
+            "type": "object",
+            "description": "https://docs.crowdsec.net/docs/next/log_processor/data_sources/syslog/",
+            "additionalProperties": false,
+            "properties": {
+                "source": {
+                    "const": "syslog"
+                },
+                "labels": {
+                    "$ref": "#/definitions/Labels"
+                },
+                "listen_addr": {
+                    "type": "string",
+                    "default": "127.0.0.1",
+                    "description": "Address on which the syslog will listen."
+                },
+                "listen_port": {
+                    "type": "number",
+                    "default": 514,
+                    "description": "UDP port used by the syslog server."
+                },
+                "max_message_len": {
+                    "type": "number",
+                    "default": 2048,
+                    "description": "Maximum length of a syslog message (including priority and facility)."
+                }
+            },
+            "required": [
+                "source"
+            ]
+        },
+        "HttpSource": {
+            "type": "object",
+            "description": "https://docs.crowdsec.net/docs/next/log_processor/data_sources/http/",
+            "additionalProperties": false,
+            "properties": {
+                "source": {
+                    "const": "http"
+                },
+                "labels": {
+                    "$ref": "#/definitions/Labels"
+                },
+                "listen_addr": {
+                    "type": "string",
+                    "description": "The address to listen on (e.g., 127.0.0.1:8088)."
+                },
+                "path": {
+                    "type": "string",
+                    "description": "The endpoint path to listen on. Default is /."
+                },
+                "auth_type": {
+                    "type": "string",
+                    "enum": [
+                        "basic_auth",
+                        "headers",
+                        "mtls"
+                    ],
+                    "description": "The authentication type to use."
+                },
+                "basic_auth": {
                     "type": "object",
                     "properties": {
-                        "enabled": {
+                        "username": {
+                            "type": "string",
+                            "description": "The username to use for basic authentication."
+                        },
+                        "password": {
+                            "type": "string",
+                            "description": "The password to use for basic authentication."
+                        }
+                    },
+                    "required": [
+                        "username",
+                        "password"
+                    ]
+                },
+                "headers": {
+                    "type": "object",
+                    "description": "A list of headers to check for authentication."
+                },
+                "tls": {
+                    "type": "object",
+                    "properties": {
+                        "server_cert": {
+                            "type": "string",
+                            "description": "The server certificate path."
+                        },
+                        "server_key": {
+                            "type": "string",
+                            "description": "The server key path."
+                        },
+                        "ca_cert": {
+                            "type": "string",
+                            "description": "The CA certificate path."
+                        }
+                    },
+                    "required": [
+                        "server_cert",
+                        "server_key"
+                    ]
+                },
+                "custom_status_code": {
+                    "type": "number",
+                    "description": "The status code to return"
+                },
+                "custom_headers": {
+                    "type": "object",
+                    "description": "A list of headers to return."
+                },
+                "max_body_size": {
+                    "type": "number",
+                    "description": "The maximum size of the body to accept."
+                },
+                "timeout": {
+                    "type": "string",
+                    "description": "The timeout to wait for a request."
+                }
+            },
+            "required": [
+                "source",
+                "listen_addr",
+                "auth_type"
+            ]
+        },
+        "KafkaSource": {
+            "type": "object",
+            "description": "https://docs.crowdsec.net/docs/next/log_processor/data_sources/kafka",
+            "additionalProperties": false,
+            "properties": {
+                "source": {
+                    "const": "kafka"
+                },
+                "labels": {
+                    "$ref": "#/definitions/Labels"
+                },
+                "brokers": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "description": "The name of the kafka brockers to connect to."
+                },
+                "topic": {
+                    "type": "string",
+                    "description": "The topic name you want to read logs from."
+                },
+                "timeout": {
+                    "type": "number"
+                },
+                "tls": {
+                    "type": "object",
+                    "properties": {
+                        "insecure_skip_verify": {
                             "type": "boolean",
-                            "description": "Enable service monitoring (exposes metrics on 6060; AppSec listener typically 7422)",
-                            "default": true
+                            "default": false,
+                            "description": "To disable security checks on the certificate."
                         },
-                        "serviceMonitor": {
-                            "type": "object",
-                            "properties": {
-                                "enabled": {
-                                    "type": "boolean",
-                                    "description": "Create a ServiceMonitor for Prometheus scraping",
-                                    "default": false
-                                }
-                            }
-                        },
-                        "podMonitor": {
-                            "type": "object",
-                            "properties": {
-                                "enabled": {
-                                    "type": "boolean",
-                                    "description": "Create a PodMonitor for Prometheus scraping",
-                                    "default": false
-                                }
-                            }
-                        }
-                    }
-                },
-                "service": {
-                    "type": "object",
-                    "properties": {
-                        "type": {
+                        "client_cert": {
                             "type": "string",
-                            "description": "Kubernetes Service type for AppSec",
-                            "default": "\"\""
+                            "description": "Th eclient certificate path. Optional, when you want to enable TLS with client certificate."
                         },
-                        "externalIPs": {
-                            "type": "array",
-                            "description": "External IPs for the AppSec Service",
-                            "default": "[]",
-                            "items": {
-                                "type": "string"
-                            }
-                        },
-                        "loadBalancerIP": {
+                        "client_key": {
                             "type": "string",
-                            "description": "Fixed LoadBalancer IP for the AppSec Service",
-                            "default": "\"\""
+                            "description": "The client key path. Optional, when you want to enable TLS with client certificate."
                         },
-                        "loadBalancerClass": {
+                        "ca_cert": {
                             "type": "string",
-                            "description": "LoadBalancer class for the AppSec Service",
-                            "default": "\"\""
-                        },
-                        "externalTrafficPolicy": {
-                            "type": "string",
-                            "description": "External traffic policy for the AppSec Service",
-                            "default": "\"\""
-                        }
-                    }
-                },
-                "wait_for_lapi": {
-                    "type": "object",
-                    "properties": {
-                        "image": {
-                            "type": "object",
-                            "properties": {
-                                "repository": {
-                                    "type": "string",
-                                    "description": "Repository for the wait-for-lapi init con",
-                                    "default": "\"\""
-                                },
-                                "pullPolicy": {
-                                    "type": "string",
-                                    "description": "Image pull policy for the wait-for-lapi init container",
-                                    "default": "\"\""
-                                },
-                                "tag": {
-                                    "type": "string",
-                                    "description": "Image tag for the wait-for-lapi init container",
-                                    "default": "1.28"
-                                }
-                            }
+                            "description": "The CA certificate path. Optional, when you want to enable TLS with client certificate."
                         }
                     }
                 }
-            }
+            },
+            "required": [
+                "source",
+                "brokers"
+            ]
+        },
+        "WinEventLogSource": {
+            "type": "object",
+            "description": "https://docs.crowdsec.net/docs/next/log_processor/data_sources/windows_evt_log/",
+            "additionalProperties": false,
+            "allOf": [
+                {
+                    "if": {
+                        "not": {
+                            "properties": {
+                                "xpath_query": {
+                                    "type": "#/definitions/nonEmptyString"
+                                }
+                            }
+                        }
+                    },
+                    "then": {
+                        "required": [
+                            "event_channel"
+                        ]
+                    }
+                },
+                {
+                    "if": {
+                        "properties": {
+                            "event_channel": {
+                                "type": "#/definitions/nonEmptyString"
+                            }
+                        }
+                    },
+                    "then": {
+                        "required": [
+                            "event_level",
+                            "event_ids"
+                        ]
+                    }
+                },
+                {
+                    "if": {
+                        "not": {
+                            "properties": {
+                                "event_channel": {
+                                    "type": "#/definitions/nonEmptyString"
+                                }
+                            }
+                        }
+                    },
+                    "then": {
+                        "required": [
+                            "xpath_query"
+                        ]
+                    }
+                }
+            ],
+            "properties": {
+                "source": {
+                    "const": "wineventlog"
+                },
+                "labels": {
+                    "$ref": "#/definitions/Labels"
+                },
+                "event_channel": {
+                    "type": "string",
+                    "description": "The name of the channel to read events from."
+                },
+                "event_level": {
+                    "enum": [
+                        "VERBOSE",
+                        "INFORMATION",
+                        "WARNING",
+                        "ERROR",
+                        "CRITICAL"
+                    ],
+                    "description": "The log level of the events to read."
+                },
+                "event_ids": {
+                    "type": "string",
+                    "description": "List of event IDs you want to match."
+                },
+                "xpath_query": {
+                    "type": "string",
+                    "description": "A custom XPath query to read events. You can refer to the Windows documentation for more information: https://docs.microsoft.com/en-us/windows/win32/wes/consuming-events"
+                },
+                "pretty_name": {
+                    "type": "string",
+                    "description": "Pretty name to use for the datasource in the metrics (cscli metrics). This parameter is optional, but strongly recommanded, as by default the full xpath query will be displayed in the metrics, which can be hard to read."
+                }
+            },
+            "required": [
+                "source"
+            ]
+        },
+        "LokiSource": {
+            "type": "object",
+            "description": "https://docs.crowdsec.net/docs/next/log_processor/data_sources/loki/",
+            "properties": {
+                "source": {
+                    "const": "loki"
+                },
+                "url": {
+                    "type": "string",
+                    "format": "uri",
+                    "description": "The URL of the Loki instance"
+                },
+                "limit": {
+                    "type": "integer",
+                    "description": "The maximum number of log entries to fetch in one query"
+                },
+                "prefix": {
+                    "type": "string",
+                    "description": "Prefix for the Loki API endpoints"
+                },
+                "headers": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    },
+                    "description": "HTTP headers to include in requests to Loki"
+                },
+                "wait_for_ready": {
+                    "type": "string",
+                    "description": "The retry interval at startup before giving on loki."
+                },
+                "query": {
+                    "type": "string",
+                    "description": "https://grafana.com/docs/loki/latest/query/log_queries/"
+                },
+                "auth": {
+                    "type": "object",
+                    "properties": {
+                        "username": {
+                            "type": "string",
+                            "description": "Username for authentication with Loki"
+                        },
+                        "password": {
+                            "type": "string",
+                            "description": "Password for authentication with Loki"
+                        }
+                    },
+                    "required": ["username", "password"],
+                    "description": "Authentication credentials for Loki"
+                },
+                "max_failure_duration": {
+                    "type": "string",
+                    "description": "The maximum duration loki is allowed to be unavailable (once startup is successful) before giving up on the data source."
+                },
+                "labels": {
+                    "$ref": "#/definitions/Labels"
+                }
+            },
+            "required": ["source", "url", "query"]
+        },
+        "KubernetesSource": {
+            "type": "object",
+            "description": "https://docs.crowdsec.net/docs/next/log_processor/data_sources/kubernetes_audit/",
+            "additionalProperties": false,
+            "properties": {
+                "source": {
+                    "const": "k8s-audit"
+                },
+                "labels": {
+                    "$ref": "#/definitions/Labels"
+                },
+                "listen_addr": {
+                    "type": "string",
+                    "default": "127.0.0.1",
+                    "description": "Address on which the syslog will listen."
+                },
+                "listen_port": {
+                    "type": "number",
+                    "default": 9876,
+                    "description": "The port on which the datasource will listen."
+                },
+                "webhook_path": {
+                    "type": "string",
+                    "default": "/webhook",
+                    "description": "The path on which the datasource will accept requests from kubernetes."
+                }
+            },
+            "required": [
+                "source",
+                "listen_addr",
+                "listen_port",
+                "webhook_path"
+            ]
+        },
+        "VictoriaLogsSource": {
+            "type": "object",
+            "description": "https://docs.crowdsec.net/docs/next/data_sources/victorialogs",
+            "properties": {
+                "source": {
+                    "const": "victorialogs"
+                },
+                "url": {
+                    "type": "string",
+                    "format": "uri",
+                    "description": "The URL of the VictoriaLogs instance"
+                },
+                "limit": {
+                    "type": "integer",
+                    "description": "The maximum number of log entries to fetch in one query"
+                },
+                "prefix": {
+                    "type": "string",
+                    "description": "Prefix for the VictoriaLogs API endpoints"
+                },
+                "headers": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    },
+                    "description": "HTTP headers to include in requests to VictoriaLogs"
+                },
+                "wait_for_ready": {
+                    "type": "string",
+                    "description": "The retry interval at startup before giving on VictoriaLogs."
+                },
+                "query": {
+                    "type": "string",
+                    "description": "https://docs.victoriametrics.com/victorialogs/logsql/"
+                },
+                "since": {
+                    "type": "string",
+                    "description": "Read logs since timestamp (e.g. 2013-01-02T13:23:37Z) or relative (e.g. 42m for 42 minutes)."
+                },
+                "auth": {
+                    "type": "object",
+                    "properties": {
+                        "username": {
+                            "type": "string",
+                            "description": "Username for authentication with VictoriaLogs"
+                        },
+                        "password": {
+                            "type": "string",
+                            "description": "Password for authentication with VictoriaLogs"
+                        }
+                    },
+                    "required": [
+                        "username",
+                        "password"
+                    ],
+                    "description": "Authentication credentials for VictoriaLogs"
+                },
+                "max_failure_duration": {
+                    "type": "string",
+                    "description": "The maximum duration VictoriaLogs is allowed to be unavailable (once startup is successful) before giving up on the data source."
+                },
+                "labels": {
+                    "$ref": "#/definitions/Labels"
+                }
+            },
+            "required": [
+                "source",
+                "url",
+                "query"
+            ]
         }
     }
 }

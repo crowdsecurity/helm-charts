@@ -370,7 +370,7 @@ controller:
 | `config.simulation.yaml`                     | This file is usually handled by the agent.                                                                                          | `""`    |
 | `config.console.yaml`                        | This file is usually handled by the agent.                                                                                          | `""`    |
 | `config.capi_whitelists.yaml`                | This file is deprecated in favor of centralized allowlists see https://docs.crowdsec.net/docs/next/local_api/centralized_allowlists | `""`    |
-| `config.profiles.yaml`                       | For custo mcThis file is mounted in the lapi pod                                                                                    | `""`    |
+| `config.profiles.yaml`                       | Use for defining custom profiles                                                                                                    | `""`    |
 | `config.config.yaml.local`                   | main configuration file local overriden values. This is merged with main configuration file.                                        | `""`    |
 | `config.notifications`                       | notification on alert configuration                                                                                                 | `{}`    |
 | `config.agent_config.yaml.local`             | This configuration file is merged with agent pod main configuration file                                                            | `""`    |
@@ -507,8 +507,8 @@ controller:
 | `agent.service.labels`                           | Labels applied to the agent Service                                                        | `{}`    |
 | `agent.service.annotations`                      | Annotations applied to the agent Service                                                   | `{}`    |
 | `agent.service.externalIPs`                      | External IPs assigned to the agent Service                                                 | `[]`    |
-| `agent.service.loadBalancerIP`                   | Fixed LoadBalancer IP for the agent Service                                                | `""`    |
-| `agent.service.loadBalancerClass`                | LoadBalancer class for the agent Service                                                   | `""`    |
+| `agent.service.loadBalancerIP`                   | Fixed LoadBalancer IP for the agent Service                                                | `nil`   |
+| `agent.service.loadBalancerClass`                | LoadBalancer class for the agent Service                                                   | `nil`   |
 | `agent.service.externalTrafficPolicy`            | External traffic policy for the agent Service                                              | `""`    |
 | `agent.service.ports`                            | Custom service ports (default: metrics port 6060 if enabled)                               | `[]`    |
 | `agent.wait_for_lapi.image.repository`           | Repository for the wait-for-lapi init container image                                      | `""`    |
@@ -547,8 +547,8 @@ controller:
 | `appsec.service.labels`                          | Additional labels for the AppSec Service                                                   | `{}`    |
 | `appsec.service.annotations`                     | Annotations to apply to the LAPI ingress object                                            | `{}`    |
 | `appsec.service.externalIPs`                     | External IPs for the AppSec Service                                                        | `[]`    |
-| `appsec.service.loadBalancerIP`                  | Fixed LoadBalancer IP for the AppSec Service                                               | `""`    |
-| `appsec.service.loadBalancerClass`               | LoadBalancer class for the AppSec Service                                                  | `""`    |
+| `appsec.service.loadBalancerIP`                  | Fixed LoadBalancer IP for the AppSec Service                                               | `nil`   |
+| `appsec.service.loadBalancerClass`               | LoadBalancer class for the AppSec Service                                                  | `nil`   |
 | `appsec.service.externalTrafficPolicy`           | External traffic policy for the AppSec Service                                             | `""`    |
 | `appsec.wait_for_lapi.image.repository`          | Repository for the wait-for-lapi init con                                                  | `""`    |
 | `appsec.wait_for_lapi.image.pullPolicy`          | Image pull policy for the wait-for-lapi init container                                     | `""`    |
