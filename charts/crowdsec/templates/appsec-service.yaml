@@ -28,14 +28,13 @@ spec:
   externalTrafficPolicy: {{ .Values.appsec.service.externalTrafficPolicy | quote }}
   {{- end }}
   ports:
+    {{- with .Values.appsec.service.ports }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
     - port: 6060
       targetPort: 6060
       protocol: TCP
       name: metrics
-    - port: 7422
-      targetPort: 7422
-      protocol: TCP
-      name: appsec
   selector:
     k8s-app: {{ .Release.Name }}
     type: appsec
