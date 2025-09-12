@@ -5,27 +5,45 @@ on:
     branches:
       - main
     paths:
-      - 'charts/*/templates/**'
-      - 'charts/*/README.md.gotmpl'
-      - 'charts/*/*.yaml'
+      - "charts/**/values.yaml"
+      - "charts/**/README.md" # ensure section exists; regen when touched
+      - ".github/workflows/release.yaml"
+  # Adjust if your chart lives elsewhere
+env:
+  CHART_DIR: charts/crowdsec
 
 jobs:
   update-readme:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.ref }}
+          persist-credentials: true
 
-      - name: Run helm-docs
+      - name: Set up Node.js (readme-generator requires Node 22.x)
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install readme-generator-for-helm
+        run: npm i -g @bitnami/readme-generator-for-helm@2.7.2
+
+      - name: Generate README.md & values.schema.json
         run: |
-          GOBIN=$PWD go install github.com/norwoodj/helm-docs/cmd/helm-docs@v1.14.2
-          ./helm-docs --sort-values-order file
-          rm helm-docs
+          for CHART_DIR in crowdsec crowdsec-traefik-bouncer helloworld; do \
+          readme-generator \
+            --values charts/$CHART_DIR/"values.yaml" \
+            --readme charts/$CHART_DIR/"README.md" \
+            --schema "/tmp/schema.json""
+          done
 
       - name: Commit bump
         uses: EndBug/add-and-commit@v9
         with:
+          message: "chore(charts): regenerate README.md"
           branch: main
-          message: 'Regenerate chart README.md'
 
   release:
     needs: update-readme
