@@ -384,9 +384,9 @@ lapi:
     # -- See the documentation: https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack#prometheusioscrape
     # -- See also: https://github.com/prometheus-community/helm-charts/issues/106#issuecomment-700847774
     podMonitor:
-      ## @param lapi.metrics.podMonitor.enabled Enables podMonitor
+      ## @param lapi.metrics.podMonitor.enabled Enables prometheus operator podMonitor
       enabled: false
-      ## @param lapi.metrics.podMonitor.additionalLabels additional labels for podMoNITOR [WIP]
+      ## @param lapi.metrics.podMonitor.additionalLabels additional labels for podMonitor
       additionalLabels: {}
 
   strategy:
