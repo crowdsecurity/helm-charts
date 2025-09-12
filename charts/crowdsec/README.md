@@ -229,7 +229,9 @@ and all the log processors will keep connecting randomly to any of the available
 
 Below a basic configuration for AppSec (WAF)
 
-```
+<details> 
+  <summary>Basic WAF configuration</summary>
+```yaml
 # your-values.yaml (option 1)
 appsec:
   enabled: true
@@ -244,8 +246,17 @@ appsec:
     - name: COLLECTIONS
       value: "crowdsecurity/appsec-virtual-patching"
 ```
+</details>
 
-Or you can also use your own custom configurations and rules for AppSec:
+You can directly use this snippet [Download values.yaml](https://raw.githubusercontent.com/crowdsecurity/helm-charts/main/charts/crowdsec/crowdsec-waf-values.yaml) with
+
+``` sh
+helm install crowdsec crowdsec/crowdsec -f crowdsec-values.yaml -f crowdsec-waf-values.yaml -n crowdsec
+```
+
+
+<details>
+  <summary>Custom WAF configuration</summary>
 
 ```yaml
 # your-values.yaml (option 2)
@@ -272,6 +283,14 @@ appsec:
     - name: COLLECTIONS
       value: "crowdsecurity/appsec-virtual-patching crowdsecurity/appsec-crs"
 ```
+</details>
+
+You can directly use this snippet [Download values.yaml](https://raw.githubusercontent.com/crowdsecurity/helm-charts/main/charts/crowdsec/crowdsec-custom-waf-values.yaml) with
+
+``` sh
+helm install crowdsec crowdsec/crowdsec -f crowdsec-values.yaml -f crowdsec-custom-waf-values.yaml -n crowdsec
+```
+
 
 ### With Traefik
 
