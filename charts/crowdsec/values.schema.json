@@ -73,6 +73,10 @@
                 "enabled": {
                     "type": "boolean"
                 },
+                "serviceAccountName": {
+                    "type": "string",
+                    "description": "Optional, the serviceAccountName used in the deployment."
+                },
                 "acquisition": {
                     "type": "array",
                     "items": {
