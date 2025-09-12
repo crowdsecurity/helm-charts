@@ -1,6 +1,6 @@
 # crowdsec
 
-![Version: 0.19.5](https://img.shields.io/badge/Version-0.19.5-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v1.6.10](https://img.shields.io/badge/AppVersion-v1.6.10-informational?style=flat-square)
+![Version: 0.20.0](https://img.shields.io/badge/Version-0.20.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v1.7.0](https://img.shields.io/badge/AppVersion-v1.7.0-informational?style=flat-square)
 
 Crowdsec helm chart is an open-source, lightweight agent to detect and respond to bad behaviours.
 
@@ -396,14 +396,6 @@ controller:
 | lapi.extraVolumes | list | `[]` | Extra volumes to be added to lapi pods |
 | lapi.extraVolumeMounts | list | `[]` | Extra volumeMounts to be added to lapi pods |
 | lapi.resources | object | `{"limits":{"cpu":"500m","memory":"500Mi"},"requests":{"cpu":"500m","memory":"500Mi"}}` | resources for lapi |
-| lapi.dashboard.enabled | bool | `false` | Enable Metabase Dashboard (by default disabled) |
-| lapi.dashboard.env | list | `[]` | see https://www.metabase.com/docs/latest/configuring-metabase/environment-variables |
-| lapi.dashboard.image.repository | string | `"metabase/metabase"` | docker image repository name |
-| lapi.dashboard.image.pullPolicy | string | `"IfNotPresent"` | pullPolicy |
-| lapi.dashboard.image.tag | string | `"v0.46.6.1"` | docker image tag |
-| lapi.dashboard.assetURL | string | `"https://crowdsec-statics-assets.s3-eu-west-1.amazonaws.com/metabase_sqlite.zip"` | Metabase SQLite static DB containing Dashboards |
-| lapi.dashboard.resources | object | `{}` | resources for metabase dashboard |
-| lapi.dashboard.ingress | object | `{"annotations":{"nginx.ingress.kubernetes.io/backend-protocol":"HTTP"},"enabled":false,"host":"","ingressClassName":""}` | Enable ingress object |
 | lapi.persistentVolume | object | `{"config":{"accessModes":["ReadWriteOnce"],"enabled":true,"existingClaim":"","size":"100Mi","storageClassName":""},"data":{"accessModes":["ReadWriteOnce"],"enabled":true,"existingClaim":"","size":"1Gi","storageClassName":""}}` | Enable persistent volumes |
 | lapi.persistentVolume.data | object | `{"accessModes":["ReadWriteOnce"],"enabled":true,"existingClaim":"","size":"1Gi","storageClassName":""}` | Persistent volume for data folder. Stores e.g. registered bouncer api keys |
 | lapi.persistentVolume.config | object | `{"accessModes":["ReadWriteOnce"],"enabled":true,"existingClaim":"","size":"100Mi","storageClassName":""}` | Persistent volume for config folder. Stores e.g. online api credentials |
@@ -500,7 +492,7 @@ controller:
 | appsec.livenessProbe | object | `{"failureThreshold":3,"httpGet":{"path":"/metrics","port":"metrics","scheme":"HTTP"},"periodSeconds":10,"successThreshold":1,"timeoutSeconds":5}` | livenessProbe for appsec |
 | appsec.readinessProbe | object | `{"failureThreshold":3,"httpGet":{"path":"/metrics","port":"metrics","scheme":"HTTP"},"periodSeconds":10,"successThreshold":1,"timeoutSeconds":5}` | readinessProbe for appsec |
 | appsec.startupProbe | object | `{"failureThreshold":30,"httpGet":{"path":"/metrics","port":"metrics","scheme":"HTTP"},"periodSeconds":10,"successThreshold":1,"timeoutSeconds":5}` | startupProbe for appsec |
-| appsec.metrics | object | `{"enabled":true,"podMonitor":{"additionalLabels":{},"enabled":false},"serviceMonitor":{"additionalLabels":{},"enabled":false}}` | Enable service monitoring (exposes "metrics" port "6060" for Prometheus and "7422" for AppSec)  |
+| appsec.metrics | object | `{"enabled":true,"podMonitor":{"additionalLabels":{},"enabled":false},"serviceMonitor":{"additionalLabels":{},"enabled":false}}` | Enable service monitoring (exposes "metrics" port "6060" for Prometheus and "7422" for AppSec) |
 | appsec.metrics.serviceMonitor | object | `{"additionalLabels":{},"enabled":false}` | See also: https://github.com/prometheus-community/helm-charts/issues/106#issuecomment-700847774 |
 | appsec.metrics.podMonitor | object | `{"additionalLabels":{},"enabled":false}` | See also: https://github.com/prometheus-community/helm-charts/issues/106#issuecomment-700847774 |
 | appsec.wait_for_lapi | object | `{"image":{"pullPolicy":"IfNotPresent","repository":"busybox","tag":"1.28"}}` | wait-for-lapi init container |
