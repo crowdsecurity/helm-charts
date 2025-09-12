@@ -66,6 +66,8 @@ spec:
           {{- if .Values.tls.enabled }}
           - name: LOCAL_API_URL
             value: https://localhost:8080
+          - name: AGENTS_ALLOWED_OU
+            value: agent-ou,appsec-ou
           {{- else }}
           - name: LOCAL_API_URL
             value: http://localhost:8080
