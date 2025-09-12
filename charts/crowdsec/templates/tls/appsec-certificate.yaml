@@ -41,8 +41,8 @@ metadata:
   namespace: {{ .Release.Namespace }}
 spec:
   dnsNames:
-    - {{ .Release.Name }}-service.{{ .Release.Namespace }}
-    - {{ .Release.Name }}-service.{{ .Release.Namespace }}.svc.cluster.local
+    - {{ .Release.Name }}-appsec-service.{{ .Release.Namespace }}
+    - {{ .Release.Name }}-appsec-service.{{ .Release.Namespace }}.svc.cluster.local
     - localhost
   secretName: {{ .Release.Name }}-appsec-server-tls
   duration: {{ .Values.tls.certManager.duration }}
