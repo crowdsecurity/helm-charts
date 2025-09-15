@@ -812,6 +812,10 @@
                     "type": "string",
                     "description": "The topic name you want to read logs from."
                 },
+                "group_id": {
+                    "type": "string",
+                    "description": "Group id to use with the kafka consumer group."
+                },
                 "timeout": {
                     "type": "number"
                 },
