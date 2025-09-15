@@ -2,30 +2,40 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-# Required parameters to be passed to the image env variables
+## @section Bouncer
 bouncer:
-  # -- bouncer api key (need to be generated from crowdsec agent)
+  ## @param bouncer.crowdsec_bouncer_api_key [string] Bouncer API key (must be generated from CrowdSec agent)
   crowdsec_bouncer_api_key: ""
-  # -- crowdsec lapi host (ie: crowdsec-service.crowdsec.svc.cluster.local:8080)
+  ## @param bouncer.crowdsec_agent_host [string] CrowdSec LAPI host (e.g. crowdsec-service.crowdsec.svc.cluster.local:8080)
   crowdsec_agent_host: ""
-  # -- crowdsec_bouncer_gin_mode sets the mode of the app
+  ## @param bouncer.crowdsec_bouncer_gin_mode [string] Gin mode for the bouncer app (debug, release, test)
   crowdsec_bouncer_gin_mode: "debug"
-  # -- environment variables
+  ## @param bouncer.env [array] Additional environment variables for the bouncer container
   env: []
 
+## @param replicaCount Number of replicas for the bouncer Deployment
 replicaCount: 1
 
+## @section Image
 image:
+  ## @param image.repository [string] Container image repository
   repository: fbonalair/traefik-crowdsec-bouncer
+  ## @param image.pullPolicy [string] Image pull policy (Always, IfNotPresent, Never)
   pullPolicy: IfNotPresent
-  # Overrides the image tag whose default is the chart appVersion.
+  ## @param image.tag [string] Image tag (defaults to chart appVersion if empty)
   tag: ""
+
+## @param imagePullSecrets [array] Image pull secrets (list of objects with `name` field)
 imagePullSecrets: []
+
+## @param podAnnotations [object] Annotations applied to bouncer pods
 podAnnotations: {}
 
+## @param podSecurityContext [object] Pod-level security context
 podSecurityContext: {}
   # fsGroup: 2000
 
+## @param securityContext [object] Container-level security context
 securityContext: {}
   # capabilities:
   #   drop:
@@ -34,15 +44,16 @@ securityContext: {}
   # runAsNonRoot: true
   # runAsUser: 1000
 
+## @section Service
 service:
+  ## @param service.type [string] Kubernetes Service type
   type: ClusterIP
+  ## @param service.port Service port for the bouncer
   port: 80
 
+## @section Resources
+## @param resources [object] Resource requests and limits for bouncer pods
 resources: {}
-  # We usually recommend not to specify default resources and to leave this as a conscious
-  # choice for the user. This also increases chances charts run on environments with little
-  # resources, such as Minikube. If you do want to specify resources, uncomment the following
-  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
   # limits:
   #   cpu: 100m
   #   memory: 128Mi
@@ -50,10 +61,14 @@ resources: {}
   #   cpu: 100m
   #   memory: 128Mi
 
+## @param nodeSelector [object] Node selector rules for scheduling pods
 nodeSelector: {}
 
+## @param tolerations [array] Tolerations for scheduling pods
 tolerations: []
 
+## @param affinity [object] Affinity rules for scheduling pods
 affinity: {}
 
+## @param priorityClassName [string] PriorityClass name for pods
 priorityClassName: ""
