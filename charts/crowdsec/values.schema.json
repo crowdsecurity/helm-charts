@@ -256,6 +256,26 @@
                 "filename": {
                     "type": "string",
                     "description": "A single path to a file to tail. Globbing is supported. Required if filenames is not provided."
+                },
+                "exclude_regexps": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "description": "List of regular expressions to exclude files from being tailed."
+                },
+                "max_buffer_size": {
+                    "type": "integer",
+                    "description": "Maximum buffer size for file reading."
+                },
+                "discovery_poll_enable": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Enable periodic discovery polling for new files."
+                },
+                "discovery_poll_interval": {
+                    "type": "string",
+                    "description": "Interval for discovery polling (e.g., '30s', '1m')."
                 }
             },
             "oneOf": [
