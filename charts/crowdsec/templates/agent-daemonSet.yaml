@@ -21,6 +21,9 @@ spec:
       annotations:
         checksum/agent-configmap: {{ include (print $.Template.BasePath "/agent-configmap.yaml") . | sha256sum }}
         checksum/acquis-configmap: {{ include (print $.Template.BasePath "/acquis-configmap.yaml") . | sha256sum }}
+        {{- if or (not .Values.tls.enabled) (not .Values.tls.appsec.tlsClientAuth) }}
+        internal/local-api-credentials: ""
+        {{- end }}
         {{- if .Values.podAnnotations }}
 {{ toYaml .Values.podAnnotations | trim | indent 8 }}
         {{- end }}
@@ -37,6 +40,9 @@ spec:
 {{ toYaml .Values.agent.podLabels | trim | indent 8 }}
         {{- end }}
     spec:
+      {{- if or (not .Values.tls.enabled) (not .Values.tls.appsec.tlsClientAuth) }}
+      serviceAccountName: {{ .Release.Name }}-config
+      {{- end }}
       {{- with .Values.agent.tolerations }}
       tolerations:
         {{- toYaml . | nindent 8 }}
@@ -47,10 +53,123 @@ spec:
       {{- end }}
       initContainers:
       {{- if or (not .Values.tls.enabled) (not .Values.tls.agent.tlsClientAuth) }}
+      {{- if .Values.utils.kubectl.enabled }}
+      - name: install-kubectl
+        image: "{{ .Values.utils.kubectl.image.repository }}:{{ .Values.utils.kubectl.image.tag }}"
+        imagePullPolicy: {{ .Values.utils.kubectl.image.pullPolicy }}
+        command:
+          - sh
+          - "-c"
+          - |
+            for f in $FILES_TO_COPY; do
+              f_name=$(basename "$f")
+
+              if test ! -f "$f"; then
+                echo "File $f not found, ignoring"
+                continue
+              fi
+
+              rm -rf "/utils/$f_name"
+              install -v -Dm755 "$f" "/utils/$f_name"
+            done
+        env:
+          - name: FILES_TO_COPY
+            value: {{ .Values.utils.kubectl.files | default "/usr/bin/kubectl" }}
+        resources:
+          limits:
+            memory: 100Mi
+          requests:
+            cpu: 1m
+            memory: 10Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          privileged: false
+          runAsUser: 65534
+          runAsGroup: 65534
+        volumeMounts:
+          - name: crowdsec-utils
+            mountPath: /utils
+      {{- end }}
+      {{- if .Values.utils.openssl.enabled }}
+      - name: install-openssl
+        image: "{{ .Values.utils.openssl.image.repository }}:{{ .Values.utils.openssl.image.tag }}"
+        imagePullPolicy: {{ .Values.utils.openssl.image.pullPolicy }}
+        command:
+          - sh
+          - "-c"
+          - |
+            for f in $FILES_TO_COPY; do
+              f_name=$(basename "$f")
+
+              if test ! -f "$f"; then
+                echo "File $f not found, ignoring"
+                continue
+              fi
+
+              rm -rf "/utils/$f_name"
+              install -v -Dm755 "$f" "/utils/$f_name"
+            done
+        env:
+          - name: FILES_TO_COPY
+            value: {{ .Values.utils.openssl.files | default "/usr/bin/openssl /usr/lib/libcrypto.so.3 /usr/lib/libssl.so.3" }}
+        resources:
+          limits:
+            memory: 100Mi
+          requests:
+            cpu: 1m
+            memory: 10Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          privileged: false
+          runAsUser: 65534
+          runAsGroup: 65534
+        volumeMounts:
+          - name: crowdsec-utils
+            mountPath: /utils
+      {{- end }}
       - name: wait-for-lapi-and-register
         image: "{{ .Values.image.repository | default "crowdsecurity/crowdsec" }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
-        command: ['sh', '-c', 'until nc "$LAPI_HOST" "$LAPI_PORT" -z; do echo waiting for lapi to start; sleep 5; done; ln -s /staging/etc/crowdsec /etc/crowdsec && cscli lapi register --machine "$USERNAME" -u "$LAPI_URL" --token "$REGISTRATION_TOKEN" && cp /etc/crowdsec/local_api_credentials.yaml /tmp_config/local_api_credentials.yaml']
+        command:
+          - sh
+          - "-c"
+          - |
+            until nc "$LAPI_HOST" "$LAPI_PORT" -z; do
+              echo waiting for lapi to start
+              sleep 5
+            done
+
+            ln -s /staging/etc/crowdsec /etc/crowdsec
+
+            export PATH=/utils:$PATH
+            export LD_LIBRARY_PATH=/utils
+
+            if test -n "$EXISTING_CREDENTIALS"; then
+              set -e
+              echo "$EXISTING_CREDENTIALS" | base64 -d > /tmp/local_api_credentials.yaml.enc
+              openssl aes-256-cbc -d -pbkdf2 -pass env:ENCRYPTION_SECRET -in /tmp/local_api_credentials.yaml.enc -out /tmp/local_api_credentials.yaml
+              install -Dm644 /tmp/local_api_credentials.yaml /etc/crowdsec/local_api_credentials.yaml
+              set +e
+
+              cscli lapi status &>/dev/null
+              val=$?
+
+              if test $val -eq 0
+              then
+                echo "Credentials found and valid"
+                exit 0
+              else
+                echo "Credentials found but not valid, trying re-register"
+              fi
+            fi
+
+            set -e
+            cscli lapi register --machine "$USERNAME" -u "$LAPI_URL" --token "$REGISTRATION_TOKEN"
+            cp /etc/crowdsec/local_api_credentials.yaml /tmp_config/local_api_credentials.yaml
+
+            openssl aes-256-cbc -e -pbkdf2 -pass env:ENCRYPTION_SECRET -in /etc/crowdsec/local_api_credentials.yaml -out /tmp/local_api_credentials.yaml.enc
+            SECRET=$(base64 -w0 /tmp/local_api_credentials.yaml.enc)
+            kubectl annotate --overwrite pod $POD_NAME internal/local-api-credentials=$SECRET &>/dev/null
       {{- else }}
       - name: wait-for-lapi
         image: "{{ .Values.agent.wait_for_lapi.image.repository }}:{{ .Values.agent.wait_for_lapi.image.tag }}"
@@ -68,6 +187,8 @@ spec:
           privileged: false
         {{- if or (not .Values.tls.enabled) (not .Values.tls.agent.tlsClientAuth) }}
         volumeMounts:
+          - name: crowdsec-utils
+            mountPath: /utils
           - name: crowdsec-config
             mountPath: /tmp_config
         {{- end }}
@@ -84,6 +205,19 @@ spec:
                 fieldPath: metadata.name
           - name: LAPI_URL
             value: "{{ .Values.agent.lapiURL | default (printf "http://%s-service.%s:8080" .Release.Name .Release.Namespace) }}"
+          - name: ENCRYPTION_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: {{ include "config.encryptionSecretName" . }}
+                key: encryptionSecret
+          - name: POD_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+          - name: EXISTING_CREDENTIALS
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.annotations['internal/local-api-credentials']
           {{- end }}
           - name: LAPI_HOST
             value: "{{ .Values.agent.lapiHost | default (printf "%s-service.%s" .Release.Name .Release.Namespace) }}"
@@ -251,6 +385,8 @@ spec:
           name: acquis-configmap
       {{- if or (not .Values.tls.enabled) (not .Values.tls.agent.tlsClientAuth) }}
       - name: crowdsec-config
+        emptyDir: {}
+      - name: crowdsec-utils
         emptyDir: {}
       {{- end }}
       {{- if .Values.agent.hostVarLog }}
