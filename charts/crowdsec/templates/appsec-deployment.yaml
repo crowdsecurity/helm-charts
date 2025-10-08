@@ -120,6 +120,8 @@ spec:
             value: "true"
           - name: DISABLE_ONLINE_API
             value: "true"
+          - name: CROWDSEC_BYPASS_DB_VOLUME_CHECK
+            value: "true"
 
           # appsec - lapi authentication, with TLS or password
 
