@@ -2,7 +2,7 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-## @param replicaCount [number] Number of replicas for the Deployment
+## @param replicaCount Number of replicas for the Deployment
 replicaCount: 1
 
 image:
@@ -22,7 +22,7 @@ fullnameOverride: ""
 
 serviceAccount:
   # Specifies whether a service account should be created
-  ## @param serviceAccount.create [boolean] Whether a ServiceAccount should be created
+  ## @param serviceAccount.create  Whether a ServiceAccount should be created
   create: true
   # Annotations to add to the service account
   ## @param serviceAccount.annotations [object] Annotations to add to the ServiceAccount
@@ -53,11 +53,11 @@ service:
   name: helloworld
   ## @param service.type [string] Kubernetes Service type
   type: ClusterIP
-  ## @param service.port [number] Service port
+  ## @param service.port Service port
   port: 5678
 
 ingress:
-  ## @param ingress.enabled [boolean] Enable Ingress
+  ## @param ingress.enabled  Enable Ingress
   enabled: false
   ## @param ingress.class [string] IngressClass name to use
   class: "nginx"
