@@ -36,7 +36,7 @@ jobs:
           readme-generator \
             --values charts/$CHART_DIR/"values.yaml" \
             --readme charts/$CHART_DIR/"README.md" \
-            --schema "/tmp/schema.json""
+            --schema "/tmp/schema.json"
           done
 
       - name: Commit bump
