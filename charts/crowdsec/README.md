@@ -398,7 +398,7 @@ controller:
 | `tls.caBundle`                               | pem format CA collection                                                                                                            | `true`  |
 | `tls.insecureSkipVerify`                     |                                                                                                                                     | `false` |
 | `tls.certManager`                            | Use of a cluster certManager configuration                                                                                          | `{}`    |
-| `tls.certManager.enabled`                    | [object] Use of a cluster cert manager                                                                                              | `true`  |
+| `tls.certManager.enabled`                    | Use of a cluster cert manager                                                                                                       | `true`  |
 | `tls.certManager.secretTemplate`             | secret configuration                                                                                                                | `{}`    |
 | `tls.certManager.secretTemplate.annotations` | add annotation to generated secret                                                                                                  | `{}`    |
 | `tls.certManager.secretTemplate.labels`      | add annotation to generated labels                                                                                                  | `{}`    |
@@ -406,10 +406,10 @@ controller:
 | `tls.certManager.renewBefore`                | duration before a certificate’s expiry when cert-manager should start renewing it.                                                  | `""`    |
 | `tls.bouncer.secret`                         | Name of the Kubernetes Secret containing TLS materials for the bouncer                                                              | `""`    |
 | `tls.bouncer.reflector.namespaces`           | List of namespaces from which the bouncer will watch and sync Secrets/ConfigMaps.                                                   | `[]`    |
-| `tls.agent.tlsClientAuth`                    | [object] Enables mutual TLS authentication for the agent when connecting to LAPI.                                                   | `true`  |
+| `tls.agent.tlsClientAuth`                    | Enables mutual TLS authentication for the agent when connecting to LAPI.                                                            | `true`  |
 | `tls.agent.secret`                           | Name of the Secret holding the agent’s TLS certificate and key.                                                                     | `""`    |
 | `tls.agent.reflector.namespaces`             | Namespaces where the agent’s TLS Secret can be reflected/synced.                                                                    | `[]`    |
-| `tls.appsec.tlsClientAuth`                   | [object] Enables mutual TLS authentication for the agent when connecting to LAPI.                                                   | `true`  |
+| `tls.appsec.tlsClientAuth`                   | Enables mutual TLS authentication for the agent when connecting to LAPI.                                                            | `true`  |
 | `tls.appsec.secret`                          | Name of the Secret holding the agent’s TLS certificate and key.                                                                     | `""`    |
 | `tls.appsec.reflector.namespaces`            | Namespaces where the agent’s TLS Secret can be reflected/synced.                                                                    | `[]`    |
 | `tls.lapi.secret`                            | Name of the Secret holding the lapidary's’s TLS certificate and key.                                                                | `""`    |
@@ -417,69 +417,68 @@ controller:
 
 ### secrets
 
-| Name                                          | Description                                                                                                        | Value |
-| --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ | ----- |
-| `secrets.username`                            | Agent username (default is generated randomly)                                                                     | `""`  |
-| `secrets.password`                            | Agent password (default is generated randomly)                                                                     | `""`  |
-| `secrets.externalSecret.name`                 | string Name of the external secret to use (overrides lapi.secrets.csLapiSecret and lapi.secrets.registrationToken) | `""`  |
-| `secrets.externalSecret.name`                 | Name of the external secret to use (overrides lapi.secrets.csLapiSecret and lapi.secrets.registrationToken)        | `""`  |
-| `secrets.externalSecret.csLapiSecretKey`      | [default: csLapiSecret] The key in the external secret that holds the csLapiSecret                                 | `""`  |
-| `secrets.externalSecret.registrationTokenKey` | [default:registrationToken] The key in the external secret that holds the registrationToken                        | `""`  |
+| Name                                          | Description                                                                                                 | Value |
+| --------------------------------------------- | ----------------------------------------------------------------------------------------------------------- | ----- |
+| `secrets.username`                            | Agent username (default is generated randomly)                                                              | `""`  |
+| `secrets.password`                            | Agent password (default is generated randomly)                                                              | `""`  |
+| `secrets.externalSecret.name`                 | Name of the external secret to use (overrides lapi.secrets.csLapiSecret and lapi.secrets.registrationToken) | `""`  |
+| `secrets.externalSecret.csLapiSecretKey`      | The key in the external secret that holds the csLapiSecret                                                  | `""`  |
+| `secrets.externalSecret.registrationTokenKey` | The key in the external secret that holds the registrationToken                                             | `""`  |
 
 ### lapi
 
-| Name                                            | Description                                                                            | Value   |
-| ----------------------------------------------- | -------------------------------------------------------------------------------------- | ------- |
-| `lapi.enabled`                                  | Enable LAPI deployment (enabled by default)                                            | `true`  |
-| `lapi.replicas`                                 | Number of replicas for the Local API                                                   | `1`     |
-| `lapi.env`                                      | Extra environment variables passed to the crowdsecurity/crowdsec container             | `[]`    |
-| `lapi.envFrom`                                  | Environment variables loaded from Kubernetes Secrets or ConfigMaps                     | `[]`    |
-| `lapi.ingress.enabled`                          | [default: false] Enable ingress for the LAPI service                                   | `{}`    |
-| `lapi.ingress.annotations`                      | Annotations to apply to the LAPI ingress object                                        | `{}`    |
-| `lapi.ingress.ingressClassName`                 | IngressClass name for the LAPI ingress                                                 | `""`    |
-| `lapi.ingress.host`                             | Hostname for the LAPI ingress                                                          | `""`    |
-| `lapi.priorityClassName`                        | Pod priority class name                                                                | `""`    |
-| `lapi.deployAnnotations`                        | Annotations applied to the LAPI Deployment                                             | `{}`    |
-| `lapi.podAnnotations`                           | Annotations applied to LAPI pods                                                       | `{}`    |
-| `lapi.podLabels`                                | Labels applied to LAPI pods                                                            | `{}`    |
-| `lapi.extraInitContainers`                      | Additional init containers for LAPI pods                                               | `[]`    |
-| `lapi.extraVolumes`                             | Additional volumes for LAPI pods                                                       | `[]`    |
-| `lapi.extraVolumeMounts`                        | Additional volumeMounts for LAPI pods                                                  | `[]`    |
-| `lapi.resources`                                | Resource requests and limits for the LAPI pods                                         | `{}`    |
-| `lapi.persistentVolume.data.enabled`            | Enable persistent volume for the data folder (stores bouncer API keys)                 | `true`  |
-| `lapi.persistentVolume.data.accessModes`        | Access modes for the data PVC                                                          | `[]`    |
-| `lapi.persistentVolume.data.storageClassName`   | StorageClass name for the data PVC                                                     | `""`    |
-| `lapi.persistentVolume.data.existingClaim`      | Existing PersistentVolumeClaim to use for the data PVC                                 | `""`    |
-| `lapi.persistentVolume.data.size`               | Requested size for the data PVC                                                        | `""`    |
-| `lapi.persistentVolume.config.enabled`          | Enable persistent volume for the config folder (stores API credentials)                | `true`  |
-| `lapi.persistentVolume.config.accessModes`      | Access modes for the config PVC                                                        | `[]`    |
-| `lapi.persistentVolume.config.storageClassName` | StorageClass name for the config PVC                                                   | `""`    |
-| `lapi.persistentVolume.config.existingClaim`    | Existing PersistentVolumeClaim to use for the config PVC                               | `""`    |
-| `lapi.persistentVolume.config.size`             | Requested size for the config PVC                                                      | `""`    |
-| `lapi.service`                                  | Configuration of kubernetes lapi service                                               | `{}`    |
-| `lapi.service.type`                             | Kubernetes service type for LAPI                                                       | `""`    |
-| `lapi.service.labels`                           | Extra labels to add to the LAPI service                                                | `{}`    |
-| `lapi.service.annotations`                      | Extra annotations to add to the LAPI service                                           | `{}`    |
-| `lapi.service.externalIPs`                      | List of external IPs for the LAPI service                                              | `[]`    |
-| `lapi.service.loadBalancerIP`                   | Specific loadBalancer IP for the LAPI service                                          | `""`    |
-| `lapi.service.loadBalancerClass`                | LoadBalancer class for the LAPI service                                                | `""`    |
-| `lapi.service.externalTrafficPolicy`            | External traffic policy for the LAPI service                                           | `""`    |
-| `lapi.nodeSelector`                             | Node selector for scheduling LAPI pods                                                 | `{}`    |
-| `lapi.tolerations`                              | Tolerations for scheduling LAPI pods                                                   | `[]`    |
-| `lapi.dnsConfig`                                | DNS configuration for LAPI pods                                                        | `{}`    |
-| `lapi.affinity`                                 | Affinity rules for LAPI pods                                                           | `{}`    |
-| `lapi.topologySpreadConstraints`                | Topology spread constraints for LAPI pods                                              | `[]`    |
-| `lapi.metrics.enabled`                          | Enable service monitoring for Prometheus (exposes port 6060)                           | `true`  |
-| `lapi.metrics.serviceMonitor.enabled`           | [object] Create a ServiceMonitor resource for Prometheus                               | `true`  |
-| `lapi.metrics.serviceMonitor.additionalLabels`  | Extra labels for the ServiceMonitor                                                    | `{}`    |
-| `lapi.metrics.podMonitor.enabled`               | Enables podMonitor                                                                     | `false` |
-| `lapi.metrics.podMonitor.additionalLabels`      | additional labels for podMoNITOR [WIP]                                                 | `{}`    |
-| `lapi.strategy.type`                            | Deployment strategy for the LAPI deployment                                            | `""`    |
-| `lapi.secrets.csLapiSecret`                     | Shared LAPI secret (randomly generated if not specified, must be >64 chars)            | `""`    |
-| `lapi.secrets.registrationToken`                | Registration token for AppSec (randomly generated if not specified, must be >48 chars) | `""`    |
-| `lapi.extraSecrets`                             | Additional secrets to inject (e.g., external DB password)                              | `{}`    |
-| `lapi.lifecycle`                                | Lifecycle hooks for LAPI pods (postStart, preStop, etc.)                               | `{}`    |
-| `lapi.storeCAPICredentialsInSecret`             | [object] Store Central API credentials in a Secret (required if LAPI replicas > 1)     | `false` |
+| Name                                            | Description                                                                            | Value               |
+| ----------------------------------------------- | -------------------------------------------------------------------------------------- | ------------------- |
+| `lapi.enabled`                                  | Enable LAPI deployment (enabled by default)                                            | `true`              |
+| `lapi.replicas`                                 | Number of replicas for the Local API                                                   | `1`                 |
+| `lapi.env`                                      | Extra environment variables passed to the crowdsecurity/crowdsec container             | `[]`                |
+| `lapi.envFrom`                                  | Environment variables loaded from Kubernetes Secrets or ConfigMaps                     | `[]`                |
+| `lapi.ingress.enabled`                          | Enable ingress for the LAPI service                                                    | `false`             |
+| `lapi.ingress.annotations`                      | Annotations to apply to the LAPI ingress object                                        | `{}`                |
+| `lapi.ingress.ingressClassName`                 | IngressClass name for the LAPI ingress                                                 | `""`                |
+| `lapi.ingress.host`                             | Hostname for the LAPI ingress                                                          | `""`                |
+| `lapi.priorityClassName`                        | Pod priority class name                                                                | `""`                |
+| `lapi.deployAnnotations`                        | Annotations applied to the LAPI Deployment                                             | `{}`                |
+| `lapi.podAnnotations`                           | Annotations applied to LAPI pods                                                       | `{}`                |
+| `lapi.podLabels`                                | Labels applied to LAPI pods                                                            | `{}`                |
+| `lapi.extraInitContainers`                      | Additional init containers for LAPI pods                                               | `[]`                |
+| `lapi.extraVolumes`                             | Additional volumes for LAPI pods                                                       | `[]`                |
+| `lapi.extraVolumeMounts`                        | Additional volumeMounts for LAPI pods                                                  | `[]`                |
+| `lapi.resources`                                | Resource requests and limits for the LAPI pods                                         | `{}`                |
+| `lapi.persistentVolume.data.enabled`            | Enable persistent volume for the data folder (stores bouncer API keys)                 | `true`              |
+| `lapi.persistentVolume.data.accessModes`        | Access modes for the data PVC                                                          | `["ReadWriteOnce"]` |
+| `lapi.persistentVolume.data.storageClassName`   | StorageClass name for the data PVC                                                     | `""`                |
+| `lapi.persistentVolume.data.existingClaim`      | Existing PersistentVolumeClaim to use for the data PVC                                 | `""`                |
+| `lapi.persistentVolume.data.size`               | Requested size for the data PVC                                                        | `""`                |
+| `lapi.persistentVolume.config.enabled`          | Enable persistent volume for the config folder (stores API credentials)                | `true`              |
+| `lapi.persistentVolume.config.accessModes`      | Access modes for the config PVC                                                        | `["ReadWriteOnce"]` |
+| `lapi.persistentVolume.config.storageClassName` | StorageClass name for the config PVC                                                   | `""`                |
+| `lapi.persistentVolume.config.existingClaim`    | Existing PersistentVolumeClaim to use for the config PVC                               | `""`                |
+| `lapi.persistentVolume.config.size`             | Requested size for the config PVC                                                      | `""`                |
+| `lapi.service`                                  | Configuration of kubernetes lapi service                                               | `{}`                |
+| `lapi.service.type`                             | Kubernetes service type for LAPI                                                       | `""`                |
+| `lapi.service.labels`                           | Extra labels to add to the LAPI service                                                | `{}`                |
+| `lapi.service.annotations`                      | Extra annotations to add to the LAPI service                                           | `{}`                |
+| `lapi.service.externalIPs`                      | List of external IPs for the LAPI service                                              | `[]`                |
+| `lapi.service.loadBalancerIP`                   | Specific loadBalancer IP for the LAPI service                                          | `nil`               |
+| `lapi.service.loadBalancerClass`                | LoadBalancer class for the LAPI service                                                | `nil`               |
+| `lapi.service.externalTrafficPolicy`            | External traffic policy for the LAPI service                                           | `""`                |
+| `lapi.nodeSelector`                             | Node selector for scheduling LAPI pods                                                 | `{}`                |
+| `lapi.tolerations`                              | Tolerations for scheduling LAPI pods                                                   | `[]`                |
+| `lapi.dnsConfig`                                | DNS configuration for LAPI pods                                                        | `{}`                |
+| `lapi.affinity`                                 | Affinity rules for LAPI pods                                                           | `{}`                |
+| `lapi.topologySpreadConstraints`                | Topology spread constraints for LAPI pods                                              | `[]`                |
+| `lapi.metrics.enabled`                          | Enable service monitoring for Prometheus (exposes port 6060)                           | `true`              |
+| `lapi.metrics.serviceMonitor.enabled`           | [object] Create a ServiceMonitor resource for Prometheus                               | `true`              |
+| `lapi.metrics.serviceMonitor.additionalLabels`  | Extra labels for the ServiceMonitor                                                    | `{}`                |
+| `lapi.metrics.podMonitor.enabled`               | Enables prometheus operator podMonitor                                                 | `false`             |
+| `lapi.metrics.podMonitor.additionalLabels`      | additional labels for podMonitor                                                       | `{}`                |
+| `lapi.strategy.type`                            | Deployment strategy for the LAPI deployment                                            | `""`                |
+| `lapi.secrets.csLapiSecret`                     | Shared LAPI secret (randomly generated if not specified, must be >64 chars)            | `""`                |
+| `lapi.secrets.registrationToken`                | Registration token for AppSec (randomly generated if not specified, must be >48 chars) | `""`                |
+| `lapi.extraSecrets`                             | Additional secrets to inject (e.g., external DB password)                              | `{}`                |
+| `lapi.lifecycle`                                | Lifecycle hooks for LAPI pods (postStart, preStop, etc.)                               | `{}`                |
+| `lapi.storeCAPICredentialsInSecret`             | [object] Store Central API credentials in a Secret (required if LAPI replicas > 1)     | `false`             |
 
 ### agent
 
