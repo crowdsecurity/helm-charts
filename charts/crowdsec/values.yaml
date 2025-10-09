@@ -172,9 +172,9 @@ tls:
     # -- Add annotations and/or labels to generated secret
     ## @param tls.certManager.secretTemplate [object] secret configuration
     secretTemplate:
-      ## @param tls.certManager.secretTemplate.annotations add annotation to generated secret
+      ## @param tls.certManager.secretTemplate.annotations [object] add annotation to generated secret
       annotations: {}
-      ## @param tls.certManager.secretTemplate.labels add annotation to generated labels
+      ## @param tls.certManager.secretTemplate.labels [object] add annotation to generated labels
       labels: {}
     # -- duration for Certificate resources
     ## @param tls.certManager.duration [string] validity duration of certificate (golang duration string)
@@ -261,7 +261,7 @@ lapi:
   ingress:
     ## @param lapi.ingress.enabled [default: false] Enable ingress for the LAPI service
     enabled: false
-    ## @param lapi.ingress.annotations Annotations to apply to the LAPI ingress object
+    ## @param lapi.ingress.annotations [object] Annotations to apply to the LAPI ingress object
     annotations:
       # we only want http to the backend so we need this annotation
       nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
@@ -298,7 +298,7 @@ lapi:
   ## @param lapi.extraVolumeMounts Additional volumeMounts for LAPI pods
   extraVolumeMounts: []
   # -- resources for lapi
-  ## @param lapi.resources Resource requests and limits for the LAPI pods
+  ## @param lapi.resources [object] Resource requests and limits for the LAPI pods
   resources:
     limits:
       memory: 500Mi
@@ -338,11 +338,11 @@ lapi:
   service:
     ## @param lapi.service.type [string] Kubernetes service type for LAPI
     type: ClusterIP
-    ## @param lapi.service.labels Extra labels to add to the LAPI service
+    ## @param lapi.service.labels [object] Extra labels to add to the LAPI service
     labels: {}
-    ## @param lapi.service.annotations Extra annotations to add to the LAPI service
+    ## @param lapi.service.annotations [object] Extra annotations to add to the LAPI service
     annotations: {}
-    ## @param lapi.service.externalIPs List of external IPs for the LAPI service
+    ## @param lapi.service.externalIPs [array] List of external IPs for the LAPI service
     externalIPs: []
     ## @param lapi.service.loadBalancerIP [string,nullable] Specific loadBalancer IP for the LAPI service
     loadBalancerIP: null
