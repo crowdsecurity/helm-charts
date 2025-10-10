@@ -8,6 +8,7 @@ on:
       - "charts/**/values.yaml"
       - "charts/**/README.md" # ensure section exists; regen when touched
       - ".github/workflows/release.yaml"
+      - "charts/**/Chart.yaml"
   # Adjust if your chart lives elsewhere
 env:
   CHART_DIR: charts/crowdsec
