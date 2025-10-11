@@ -234,6 +234,9 @@ secrets:
     # The key in the secret that holds the registrationToken. Defaults to registrationToken
     ## @param secrets.externalSecret.registrationTokenKey [string] The key in the external secret that holds the registrationToken
     registrationTokenKey: ""
+  encryption:
+    name: ""
+    value: ""
 
 # lapi will deploy pod with crowdsec lapi and dashboard as deployment
 ## @section lapi
@@ -882,3 +885,30 @@ appsec:
       # -- docker image tag
       ## @param appsec.wait_for_lapi.image.tag Image tag for the wait-for-lapi init container
       tag: "1.28"
+
+utils:
+  kubectl:
+    enabled: true
+    image:
+      # -- docker image repository name
+      repository: alpine/k8s
+      # -- pullPolicy
+      pullPolicy: IfNotPresent
+      # -- docker image tag
+      tag: "1.32.7"
+    # Files to copy, separated by space, defaults to /usr/bin/kubectl
+    #
+    # For bitnami image variant, use
+    # files: "/opt/bitnami/kubectl/bin/kubectl"
+    files: ""
+  openssl:
+    enabled: true
+    image:
+      # -- docker image repository name
+      repository: alpine/openssl
+      # -- pullPolicy
+      pullPolicy: IfNotPresent
+      # -- docker image tag
+      tag: "3.5.1"
+    # Files to copy, separated by space. Defaults to /usr/bin/openssl /usr/lib/libcrypto.so.3 /usr/lib/libssl.so.3
+    files: ""
