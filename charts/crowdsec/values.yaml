@@ -320,6 +320,8 @@ lapi:
       storageClassName: ""
       ## @param lapi.persistentVolume.data.existingClaim [string] Existing PersistentVolumeClaim to use for the data PVC
       existingClaim: ""
+      ## @param lapi.persistentVolume.data.subPath [string] subPath to use within the volume
+      subPath: ""
       ## @param lapi.persistentVolume.data.size [string] Requested size for the data PVC
       size: 1Gi
     config:
@@ -332,6 +334,8 @@ lapi:
       storageClassName: ""
       ## @param lapi.persistentVolume.config.existingClaim [string] Existing PersistentVolumeClaim to use for the config PVC
       existingClaim: ""
+      ## @param lapi.persistentVolume.config.subPath [string] subPath to use within the volume
+      subPath: ""
       ## @param lapi.persistentVolume.config.size [string] Requested size for the config PVC
       size: 100Mi
   ## @param lapi.service [object] Configuration of kubernetes lapi service
@@ -523,6 +527,8 @@ agent:
       storageClassName: ""
       ## @param agent.persistentVolume.config.existingClaim [string] Existing PVC name to use for config
       existingClaim: ""
+      ## @param agent.persistentVolume.config.subPath [string] subPath to use within the volume
+      subPath: ""
       ## @param agent.persistentVolume.config.size [string] Requested size for the config PVC
       size: 100Mi
   # -- Enable hostPath to /var/log
