@@ -197,7 +197,11 @@ spec:
           {{ if (.Values.lapi.persistentVolume.data.enabled) }}
           - name: crowdsec-db
             mountPath: /var/lib/crowdsec/data
+            {{- if .Values.lapi.persistentVolume.data.subPath }}
+            subPath: {{ .Values.lapi.persistentVolume.data.subPath }}
+            {{- else}}
             subPath: crowdsec
+            {{- end }}
           {{ end }}
           {{- $crowdsecConfig := "/etc/crowdsec" -}}
           {{- if .Values.lapi.persistentVolume.config.enabled -}}
