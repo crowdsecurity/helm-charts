@@ -203,7 +203,7 @@ if ( isfalse "$USE_TLS" || [ "$CLIENT_CERT_FILE" = "" ] ); then
     lapi_login=$(yq e '.login' "$lapi_credentials_path" 2>/dev/null || echo "")
     lapi_password=$(yq e '.password' "$lapi_credentials_path" 2>/dev/null || echo "")
 
-    if [ "$lapi_login" = "" ] || [ "$lapi_password" = "" ] ; then
+    if [ "$lapi_login" = "null" ] || [ -z "$lapi_login" ] || [ "$lapi_password" = "null" ] || [ -z "$lapi_password" ] ; then
     # Nothing found, probably first run with persistent volume or without secret
         echo "Generate local agent credentials"
         cscli machines add "$CUSTOM_HOSTNAME" --auto --force
@@ -213,8 +213,8 @@ if ( isfalse "$USE_TLS" || [ "$CLIENT_CERT_FILE" = "" ] ); then
             echo "Local agent already registered"
         else
             echo "Registering local agent to lapi from existing credentials"
-            # || true to avoid failing if already registered, as if multiple LAPIs replica are running, they will all try to register at the same time
-            cscli machines add "$lapi_login" -p "$lapi_password" -f /dev/null --force || true
+            # --force is necessary, as multiple LAPI pods may try to register at the same time
+            cscli machines add "$lapi_login" -p "$lapi_password" -f /dev/null --force
         fi
     fi
 fi
