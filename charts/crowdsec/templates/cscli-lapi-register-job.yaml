@@ -1,0 +1,63 @@
+{{- if .Values.lapi.enabled }}
+    {{- if eq (include "StoreLAPICscliCredentialsInSecret" .) "true" }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Release.Name }}-lapi-cscli-register-job
+  labels:
+    k8s-app: {{ .Release.Name }}
+    type: lapi-cscli-register-job
+    version: v1
+    {{- if .Values.podLabels }}
+{{ toYaml .Values.podLabels | trim | indent 4 }}
+    {{- end }}
+  annotations:
+    "helm.sh/hook": "pre-install,pre-upgrade"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+    "helm.sh/hook-weight": "0"
+spec:
+  template:
+    metadata:
+      labels:
+        k8s-app: {{ .Release.Name }}
+        type: lapi-cscli-register-job
+        version: v1
+        {{- if .Values.podLabels }}
+{{ toYaml .Values.podLabels | trim | indent 8 }}
+        {{- end }}
+    spec:
+      serviceAccountName: {{ .Release.Name }}-configmap-updater-sa
+      restartPolicy: OnFailure
+      {{- if .Values.image.pullSecrets }}
+      imagePullSecrets:
+{{ toYaml .Values.image.pullSecrets | indent 8 }}
+      {{- end }}
+      containers:
+        - name: lapi-cscli-register
+          image: "{{ .Values.image.repository | default "crowdsecurity/crowdsec" }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+            - "/bin/bash"
+            - "-c"
+            - |
+                apk update && apk add kubectl
+                set -ex
+                echo "Checking if the secret {{ .Release.Name }}-lapi-cscli-credentials already exists..."
+                if kubectl -n {{ .Release.Namespace }} get secret {{ .Release.Name }}-lapi-cscli-credentials >/dev/null 2>&1; then
+                  echo "Secret already exists. Skipping registration."
+                  exit 0
+                fi
+
+                echo "Secret does not exist. Generating cscli credentials for LAPI."
+                
+                echo "url: http://127.0.0.1:{{ .Values.agent.lapiPort | default "8080" }}" > /tmp/lapi-cscli-credentials.yaml
+                echo "login: lapi-cscli" >> /tmp/lapi-cscli-credentials.yaml
+                echo "password: $(head -c 32 /dev/urandom | base64)" >> /tmp/lapi-cscli-credentials.yaml
+                
+                echo "Creating secret {{ .Release.Name }}-lapi-cscli-credentials..."
+                
+                kubectl create secret generic {{ .Release.Name }}-lapi-cscli-credentials \
+                  -n {{ .Release.Namespace }} \
+                  --from-file=lapi_cscli_credentials.yaml=/tmp/lapi-cscli-credentials.yaml
+    {{- end }}
+{{- end }}

@@ -1,5 +1,8 @@
 #!/bin/bash
 
+#### This is based on the docker entrypoint script, but in k8s, this script is only used for LAPI pods.
+#### Therefore, all agent-related configuration has been removed and check if LAPI is disabled (as the pod will not be created in that case).
+
 # shellcheck disable=SC2292      # allow [ test ] syntax
 # shellcheck disable=SC2310      # allow "if function..." syntax with -e
 
@@ -51,52 +54,6 @@ csv2yaml() {
 # wrap cscli with the correct config file location
 cscli() {
     command cscli -c "$CONFIG_FILE" "$@"
-}
-
-run_hub_update() {
-    index_modification_time=$(stat -c %Y /etc/crowdsec/hub/.index.json 2>/dev/null)
-    # Run cscli hub update if no date or if the index file is older than 24h
-    if [ -z "$index_modification_time" ] || [ $(( $(date +%s) - index_modification_time )) -gt 86400 ]; then
-        cscli hub update --with-content
-    else
-        echo "Skipping hub update, index file is recent"
-    fi
-}
-
-is_mounted() {
-    path=$(readlink -f "$1")
-    mounts=$(awk '{print $2}' /proc/mounts)
-    while true; do
-        if grep -qE ^"$path"$ <<< "$mounts"; then
-            echo "$path was found in a volume"
-            return 0
-        fi
-        path=$(dirname "$path")
-        if [ "$path" = "/" ]; then
-            return 1
-        fi
-    done
-    return 1 #unreachable
-}
-
-run_hub_update_if_from_volume() {
-    if is_mounted "/etc/crowdsec/hub/.index.json"; then
-        echo "Running hub update"
-        run_hub_update
-    else
-        echo "Skipping hub update, index file is not in a volume"
-    fi
-}
-
-run_hub_upgrade_if_from_volume() {
-    isfalse "$NO_HUB_UPGRADE" || return 0
-    if is_mounted "/var/lib/crowdsec/data"; then
-        echo "Running hub upgrade"
-        cscli hub upgrade
-    else
-        echo "Skipping hub upgrade, data directory is not in a volume"
-    fi
-
 }
 
 # conf_get <key> [file_path]
@@ -213,19 +170,6 @@ if [ -n "$CERT_FILE" ] || [ -n "$KEY_FILE" ] ; then
     export LAPI_KEY_FILE=${LAPI_KEY_FILE:-$KEY_FILE}
 fi
 
-# Link the preloaded data files when the data dir is mounted (common case)
-# The symlinks can be overridden by hub upgrade
-for target in "/staging/var/lib/crowdsec/data"/*; do
-    fname="$(basename "$target")"
-    # skip the db and wal files
-    if [[ $fname == crowdsec.db* ]]; then
-        continue
-    fi
-    if [ ! -e "/var/lib/crowdsec/data/$fname" ]; then
-        ln -s "$target" "/var/lib/crowdsec/data/$fname"
-    fi
-done
-
 # Check and prestage /etc/crowdsec
 if [ ! -e "/etc/crowdsec/local_api_credentials.yaml" ] && [ ! -e "/etc/crowdsec/config.yaml" ]; then
     echo "Populating configuration directory..."
@@ -248,40 +192,36 @@ fi
 
 lapi_credentials_path=$(conf_get '.api.client.credentials_path')
 
-if isfalse "$DISABLE_LOCAL_API"; then
-    # generate local agent credentials (even if agent is disabled, cscli needs a
-    # connection to the API)
-    if ( isfalse "$USE_TLS" || [ "$CLIENT_CERT_FILE" = "" ] ); then
-        if yq -e '.login==strenv(CUSTOM_HOSTNAME)' "$lapi_credentials_path" >/dev/null && ( cscli machines list -o json | yq -e 'any_c(.machineId==strenv(CUSTOM_HOSTNAME))' >/dev/null ); then
+# generate local agent credentials (even if agent is disabled, cscli needs a
+# connection to the API)
+if ( isfalse "$USE_TLS" || [ "$CLIENT_CERT_FILE" = "" ] ); then
+    ## We have 2 possibilities here:
+    ## - LAPI creds are stored in a secret then copied to /etc/crowdsec/local_api_credentials.yaml or /etc/crowdsec/ is persistent. If so, we check if the machine is registered, and register it if not.
+    ## - LAPI creds are not stored in a secret (1st run with persistent volume, or any run without secret). In this case we check if the machine is registered, and register it if not.
+    echo "Check if local agent needs to be registered"
+
+    lapi_login=$(yq e '.login' "$lapi_credentials_path" 2>/dev/null || echo "")
+    lapi_password=$(yq e '.password' "$lapi_credentials_path" 2>/dev/null || echo "")
+
+    if [ "$lapi_login" = "" ] || [ "$lapi_password" = "" ] ; then
+    # Nothing found, probably first run with persistent volume or without secret
+        echo "Generate local agent credentials"
+        cscli machines add "$CUSTOM_HOSTNAME" --auto --force
+    else
+        echo "Local agent credentials found"
+        if ( cscli machines list -o json | yq -e 'any_c(.machineId==strenv(CUSTOM_HOSTNAME))' >/dev/null ); then
             echo "Local agent already registered"
         else
-            echo "Generate local agent credentials"
-            # if the db is persistent but the credentials are not, we need to
-            # delete the old machine to generate new credentials
-            cscli machines delete "$CUSTOM_HOSTNAME" >/dev/null 2>&1 || true
-            cscli machines add "$CUSTOM_HOSTNAME" --auto --force
+            echo "Registering local agent to lapi from existing credentials"
+            # || true to avoid failing if already registered, as if multiple LAPIs replica are running, they will all try to register at the same time
+            cscli machines add "$lapi_login" -p "$lapi_password" -f /dev/null --force || true
         fi
-    fi
-
-    echo "Check if lapi needs to register an additional agent"
-    # pre-registration is not needed with TLS authentication, but we can have TLS transport with user/pw
-    if [ "$AGENT_USERNAME" != "" ] && [ "$AGENT_PASSWORD" != "" ] ; then
-        # re-register because pw may have been changed
-        cscli machines add "$AGENT_USERNAME" --password "$AGENT_PASSWORD" -f /dev/null --force
-        echo "Agent registered to lapi"
     fi
 fi
 
 # ----------------
 
 conf_set_if "$LOCAL_API_URL" '.url = strenv(LOCAL_API_URL)' "$lapi_credentials_path"
-
-if istrue "$DISABLE_LOCAL_API"; then
-    # we only use the envvars that are actually defined
-    # in case of persistent configuration
-    conf_set_if "$AGENT_USERNAME" '.login = strenv(AGENT_USERNAME)' "$lapi_credentials_path"
-    conf_set_if "$AGENT_PASSWORD" '.password = strenv(AGENT_PASSWORD)' "$lapi_credentials_path"
-fi
 
 conf_set_if "$INSECURE_SKIP_VERIFY" '.api.client.insecure_skip_verify = env(INSECURE_SKIP_VERIFY)'
 
@@ -303,7 +243,7 @@ if istrue "$DISABLE_ONLINE_API"; then
     conf_set 'del(.api.server.online_client)'
 fi
 
-if isfalse "$DISABLE_LOCAL_API" && isfalse "$DISABLE_ONLINE_API" ; then
+if isfalse "$DISABLE_ONLINE_API" ; then
     CONFIG_DIR=$(conf_get '.config_paths.config_dir')
     export CONFIG_DIR
     config_exists=$(conf_get '.api.server.online_client | has("credentials_path")')
@@ -322,7 +262,7 @@ if isfalse "$DISABLE_LOCAL_API" && isfalse "$DISABLE_ONLINE_API" ; then
 fi
 
 # Enroll instance if enroll key is provided
-if isfalse "$DISABLE_LOCAL_API" && isfalse "$DISABLE_ONLINE_API" && [ "$ENROLL_KEY" != "" ]; then
+if isfalse "$DISABLE_ONLINE_API" && [ "$ENROLL_KEY" != "" ]; then
     enroll_args=""
     if [ "$ENROLL_INSTANCE_NAME" != "" ]; then
         enroll_args="--name $ENROLL_INSTANCE_NAME"
@@ -349,7 +289,7 @@ if [ "$GID" != "" ]; then
     fi
 fi
 
-if isfalse "$DISABLE_LOCAL_API" && istrue "$USE_TLS"; then
+if istrue "$USE_TLS"; then
     agents_allowed_yaml=$(csv2yaml "$AGENTS_ALLOWED_OU")
     export agents_allowed_yaml
     bouncers_allowed_yaml=$(csv2yaml "$BOUNCERS_ALLOWED_OU")
@@ -365,84 +305,6 @@ fi
 
 conf_set_if "$PLUGIN_DIR" '.config_paths.plugin_dir = strenv(PLUGIN_DIR)'
 
-## Install hub items
-
-run_hub_update_if_from_volume || true
-run_hub_upgrade_if_from_volume || true
-
-cscli_if_clean parsers install crowdsecurity/docker-logs
-cscli_if_clean parsers install crowdsecurity/cri-logs
-
-if [ "$COLLECTIONS" != "" ]; then
-    # shellcheck disable=SC2086
-    cscli_if_clean collections install "$(difference "$COLLECTIONS" "$DISABLE_COLLECTIONS")"
-fi
-
-if [ "$PARSERS" != "" ]; then
-    # shellcheck disable=SC2086
-    cscli_if_clean parsers install "$(difference "$PARSERS" "$DISABLE_PARSERS")"
-fi
-
-if [ "$SCENARIOS" != "" ]; then
-    # shellcheck disable=SC2086
-    cscli_if_clean scenarios install "$(difference "$SCENARIOS" "$DISABLE_SCENARIOS")"
-fi
-
-if [ "$POSTOVERFLOWS" != "" ]; then
-    # shellcheck disable=SC2086
-    cscli_if_clean postoverflows install "$(difference "$POSTOVERFLOWS" "$DISABLE_POSTOVERFLOWS")"
-fi
-
-if [ "$CONTEXTS" != "" ]; then
-    # shellcheck disable=SC2086
-    cscli_if_clean contexts install "$(difference "$CONTEXTS" "$DISABLE_CONTEXTS")"
-fi
-
-if [ "$APPSEC_CONFIGS" != "" ]; then
-    # shellcheck disable=SC2086
-    cscli_if_clean appsec-configs install "$(difference "$APPSEC_CONFIGS" "$DISABLE_APPSEC_CONFIGS")"
-fi
-
-if [ "$APPSEC_RULES" != "" ]; then
-    # shellcheck disable=SC2086
-    cscli_if_clean appsec-rules install "$(difference "$APPSEC_RULES" "$DISABLE_APPSEC_RULES")"
-fi
-
-## Remove collections, parsers, scenarios & postoverflows
-if [ "$DISABLE_COLLECTIONS" != "" ]; then
-    # shellcheck disable=SC2086
-    cscli_if_clean collections remove "$DISABLE_COLLECTIONS" --force
-fi
-
-if [ "$DISABLE_PARSERS" != "" ]; then
-    # shellcheck disable=SC2086
-    cscli_if_clean parsers remove "$DISABLE_PARSERS" --force
-fi
-
-if [ "$DISABLE_SCENARIOS" != "" ]; then
-    # shellcheck disable=SC2086
-    cscli_if_clean scenarios remove "$DISABLE_SCENARIOS" --force
-fi
-
-if [ "$DISABLE_POSTOVERFLOWS" != "" ]; then
-    # shellcheck disable=SC2086
-    cscli_if_clean postoverflows remove "$DISABLE_POSTOVERFLOWS" --force
-fi
-
-if [ "$DISABLE_CONTEXTS" != "" ]; then
-    # shellcheck disable=SC2086
-    cscli_if_clean contexts remove "$DISABLE_CONTEXTS" --force
-fi
-
-if [ "$DISABLE_APPSEC_CONFIGS" != "" ]; then
-    # shellcheck disable=SC2086
-    cscli_if_clean appsec-configs remove "$DISABLE_APPSEC_CONFIGS" --force
-fi
-
-if [ "$DISABLE_APPSEC_RULES" != "" ]; then
-    # shellcheck disable=SC2086
-    cscli_if_clean appsec-rules remove "$DISABLE_APPSEC_RULES" --force
-fi
 
 ## Register bouncers via env
 for BOUNCER in $(compgen -A variable | grep -i BOUNCER_KEY); do
@@ -471,34 +333,11 @@ shopt -u nullglob extglob
 
 # set all options before validating the configuration
 
-conf_set_if "$CAPI_WHITELISTS_PATH" '.api.server.capi_whitelists_path = strenv(CAPI_WHITELISTS_PATH)'
 conf_set_if "$METRICS_PORT" '.prometheus.listen_port=env(METRICS_PORT)'
-
-if istrue "$DISABLE_LOCAL_API"; then
-    conf_set '.api.server.enable=false'
-else
-    conf_set '.api.server.enable=true'
-fi
 
 ARGS=""
 if [ "$CONFIG_FILE" != "" ]; then
     ARGS="-c $CONFIG_FILE"
-fi
-
-if [ "$DSN" != "" ]; then
-    ARGS="$ARGS -dsn ${DSN}"
-fi
-
-if [ "$TYPE" != "" ]; then
-    ARGS="$ARGS -type $TYPE"
-fi
-
-if istrue "$TEST_MODE"; then
-    ARGS="$ARGS -t"
-fi
-
-if istrue "$DISABLE_AGENT"; then
-    ARGS="$ARGS -no-cs"
 fi
 
 if istrue "$LEVEL_TRACE"; then

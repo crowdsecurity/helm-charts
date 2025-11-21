@@ -17,7 +17,7 @@ metadata:
 rules:
     - apiGroups: [""]
       resources: ["secrets"]
-      resourceNames: ["{{ .Release.Name }}-capi-credentials"]
+      resourceNames: ["{{ .Release.Name }}-capi-credentials", "{{ .Release.Name }}-lapi-cscli-credentials"]
       verbs: ["get", "patch"]
     - apiGroups: [""]
       resources: ["secrets"]
