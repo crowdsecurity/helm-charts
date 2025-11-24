@@ -429,6 +429,9 @@ agent:
   # -- Switch to Deployment instead of DaemonSet (In some cases, you may want to deploy the agent as a Deployment)
   ## @param agent.isDeployment [default: false] [object] Deploy agent as a Deployment instead of a DaemonSet
   isDeployment: false
+  # -- serviceAccountName for the deployment
+  ## @param agent.serviceAccountName [string] Service account name for the agent pods 
+  serviceAccountName: ""
   # -- lapiURL for agent to connect to (default is the lapi service URL)
   ## @param agent.lapiURL [string] URL of the LAPI for the agent to connect to (defaults to internal service URL)
   lapiURL: ""

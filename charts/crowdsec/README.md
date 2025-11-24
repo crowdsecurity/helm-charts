@@ -4,21 +4,28 @@
 
 Crowdsec helm chart is an open-source, lightweight agent to detect and respond to bad behaviours.
 
-- [Chart Repository](#chart-repository)
-- [Installing the Chart](#installing-the-chart)
-- [Uninstalling the Chart](#uninstalling-the-chart)
-- [Authentication](#authentication)
-  - [Auto registration token](#auto-registration-token)
-  - [TLS client authentication](#tls-client-authentication)
-  - [Cleaning of stale agents / appsec registration in the LAPI](#cleaning-of-stale-agents--appsec-registration-in-the-lapi)
-- [HA configuration for the LAPI pods](#ha-configuration-for-the-lapi-pods)
-  - [Database setup](#database-setup)
-  - [CrowdSec setup](#crowdsec-setup)
-  - [HA Test](#ha-test)
-- [Setup for AppSec (WAF)](#setup-for-appsec-waf)
-  - [With Traefik](#with-traefik)
-  - [With Nginx](#with-nginx)
-- [Values](#values)
+- [crowdsec](#crowdsec)
+  - [Chart Repository](#chart-repository)
+  - [Installing the Chart](#installing-the-chart)
+  - [Uninstalling the Chart](#uninstalling-the-chart)
+  - [Authentication](#authentication)
+    - [Auto registration token](#auto-registration-token)
+    - [TLS client authentication](#tls-client-authentication)
+    - [Cleaning of stale agents / appsec registration in the LAPI](#cleaning-of-stale-agents--appsec-registration-in-the-lapi)
+  - [HA configuration for the LAPI pods](#ha-configuration-for-the-lapi-pods)
+    - [Database setup](#database-setup)
+    - [CrowdSec setup](#crowdsec-setup)
+    - [HA Test](#ha-test)
+  - [Setup for AppSec (WAF)](#setup-for-appsec-waf)
+    - [With Traefik](#with-traefik)
+    - [With Nginx](#with-nginx)
+  - [Parameters](#parameters)
+    - [Global](#global)
+    - [Image](#image)
+    - [Configuration](#configuration)
+    - [secrets](#secrets)
+    - [lapi](#lapi)
+    - [agent](#agent)
 
 ## Chart Repository
 
@@ -195,7 +202,6 @@ config:
             - "192.168.0.0/16"
             - "10.0.0.0/8"
             - "172.16.0.0/12"
-
 ```
 
 and install the crowdsec chart.
@@ -250,10 +256,9 @@ appsec:
 
 You can directly use this snippet [Download values.yaml](https://raw.githubusercontent.com/crowdsecurity/helm-charts/main/charts/crowdsec/crowdsec-waf-values.yaml) with
 
-``` sh
+```sh
 helm install crowdsec crowdsec/crowdsec -f crowdsec-values.yaml -f crowdsec-waf-values.yaml -n crowdsec
 ```
-
 
 <details>
   <summary>Custom WAF configuration</summary>
@@ -283,14 +288,14 @@ appsec:
     - name: COLLECTIONS
       value: "crowdsecurity/appsec-virtual-patching crowdsecurity/appsec-crs"
 ```
+
 </details>
 
 You can directly use this snippet [Download values.yaml](https://raw.githubusercontent.com/crowdsecurity/helm-charts/main/charts/crowdsec/crowdsec-custom-waf-values.yaml) with
 
-``` sh
+```sh
 helm install crowdsec crowdsec/crowdsec -f crowdsec-values.yaml -f crowdsec-custom-waf-values.yaml -n crowdsec
 ```
-
 
 ### With Traefik
 
@@ -488,6 +493,7 @@ controller:
 | ------------------------------------------------ | ------------------------------------------------------------------------------------------ | ------- |
 | `agent.enabled`                                  | [object] Enable CrowdSec agent (enabled by default)                                        | `true`  |
 | `agent.isDeployment`                             | [object] Deploy agent as a Deployment instead of a DaemonSet                               | `false` |
+| `agent.serviceAccountName`                       | Service account name for the agent pods                                                    | `""`    |
 | `agent.lapiURL`                                  | URL of the LAPI for the agent to connect to (defaults to internal service URL)             | `""`    |
 | `agent.lapiHost`                                 | Host of the LAPI for the agent to connect to                                               | `""`    |
 | `agent.lapiPort`                                 | Port of the LAPI for the agent to connect to                                               | `8080`  |
@@ -574,4 +580,3 @@ controller:
 | `appsec.wait_for_lapi.image.repository`          | Repository for the wait-for-lapi init con                                                  | `""`    |
 | `appsec.wait_for_lapi.image.pullPolicy`          | Image pull policy for the wait-for-lapi init container                                     | `""`    |
 | `appsec.wait_for_lapi.image.tag`                 | Image tag for the wait-for-lapi init container                                             | `1.28`  |
-

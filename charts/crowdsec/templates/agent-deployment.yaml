@@ -39,6 +39,9 @@ spec:
 {{ toYaml .Values.agent.podLabels | trim | indent 8 }}
         {{- end }}
     spec:
+      {{- if .Values.agent.serviceAccountName }}
+      serviceAccountName: {{ .Values.agent.serviceAccountName }}
+      {{- end }}
       {{- with .Values.agent.tolerations }}
       tolerations:
         {{- toYaml . | nindent 8 }}
