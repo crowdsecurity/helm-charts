@@ -229,7 +229,9 @@ and all the log processors will keep connecting randomly to any of the available
 
 Below a basic configuration for AppSec (WAF)
 
-```
+<details> 
+  <summary>Basic WAF configuration</summary>
+```yaml
 # your-values.yaml (option 1)
 appsec:
   enabled: true
@@ -244,8 +246,17 @@ appsec:
     - name: COLLECTIONS
       value: "crowdsecurity/appsec-virtual-patching"
 ```
+</details>
 
-Or you can also use your own custom configurations and rules for AppSec:
+You can directly use this snippet [Download values.yaml](https://raw.githubusercontent.com/crowdsecurity/helm-charts/main/charts/crowdsec/crowdsec-waf-values.yaml) with
+
+``` sh
+helm install crowdsec crowdsec/crowdsec -f crowdsec-values.yaml -f crowdsec-waf-values.yaml -n crowdsec
+```
+
+
+<details>
+  <summary>Custom WAF configuration</summary>
 
 ```yaml
 # your-values.yaml (option 2)
@@ -272,6 +283,14 @@ appsec:
     - name: COLLECTIONS
       value: "crowdsecurity/appsec-virtual-patching crowdsecurity/appsec-crs"
 ```
+</details>
+
+You can directly use this snippet [Download values.yaml](https://raw.githubusercontent.com/crowdsecurity/helm-charts/main/charts/crowdsec/crowdsec-custom-waf-values.yaml) with
+
+``` sh
+helm install crowdsec crowdsec/crowdsec -f crowdsec-values.yaml -f crowdsec-custom-waf-values.yaml -n crowdsec
+```
+
 
 ### With Traefik
 
@@ -338,164 +357,221 @@ controller:
           value: "true"
 ```
 
-## Values
+## Parameters
 
-| Key | Type | Default | Description |
-|-----|------|---------|-------------|
-| container_runtime | string | `"docker"` | for raw logs format: json or cri (docker|containerd) |
-| image.repository | string | `"crowdsecurity/crowdsec"` | docker image repository name |
-| image.pullPolicy | string | `"IfNotPresent"` | pullPolicy |
-| image.pullSecrets | list | `[]` | pullSecrets |
-| image.tag | string | `""` | docker image tag |
-| podAnnotations | object | `{}` | Annotations to be added to pods |
-| podLabels | object | `{}` | Labels to be added to pods |
-| config.parsers | object | `{"s00-raw":{},"s01-parse":{},"s02-enrich":{}}` | To better understand stages in parsers, you can take a look at https://docs.crowdsec.net/docs/next/parsers/intro/ Those files are only mounted in the agent pods |
-| config.scenarios | object | `{}` | to better understand how to write a scenario, you can take a look at https://docs.crowdsec.net/docs/next/scenarios/intro Those files are only mounted in the agent pods |
-| config.postoverflows | object | `{"s00-enrich":{},"s01-whitelist":{}}` | to better understand how to write a postoverflow, you can take a look at (https://docs.crowdsec.net/docs/next/whitelist/create/#whitelist-in-postoverflows) Those files are only mounted in the agent pods |
-| config."simulation.yaml" | string | `""` | Simulation configuration (https://docs.crowdsec.net/docs/next/scenarios/simulation/) This file is only mounted in the agent pods |
-| config."console.yaml" | string | `""` |  |
-| config."capi_whitelists.yaml" | string | `""` |  |
-| config."profiles.yaml" | string | `""` | Profiles configuration (https://docs.crowdsec.net/docs/next/profiles/format/#profile-configuration-example) This file is only mounted in the lapi pod |
-| config."config.yaml.local" | string | `"api:\n  server:\n    auto_registration: # Activate if not using TLS for authentication\n      enabled: true\n      token: \"${REGISTRATION_TOKEN}\" # /!\\ Do not modify this variable (auto-generated and handled by the chart)\n      allowed_ranges: # /!\\ Make sure to adapt to the pod IP ranges used by your cluster\n        - \"127.0.0.1/32\"\n        - \"192.168.0.0/16\"\n        - \"10.0.0.0/8\"\n        - \"172.16.0.0/12\"\n# db_config:\n#   type:     postgresql\n#   user:     crowdsec\n#   password: ${DB_PASSWORD}\n#   db_name:  crowdsec\n#   host:     192.168.0.2\n#   port:     5432\n#   sslmode:  require\n"` | General configuration (https://docs.crowdsec.net/docs/configuration/crowdsec_configuration/#configuration-example) This file is only mounted in the lapi pod |
-| config.notifications | object | `{}` | notifications configuration (https://docs.crowdsec.net/docs/next/notification_plugins/intro) Those files are only mounted in the lapi pod |
-| config."agent_config.yaml.local" | string | `""` |  |
-| config."appsec_config.yaml.local" | string | `""` |  |
-| tls.enabled | bool | `false` |  |
-| tls.caBundle | bool | `true` |  |
-| tls.insecureSkipVerify | bool | `false` |  |
-| tls.certManager.enabled | bool | `true` |  |
-| tls.certManager.issuerRef | object | `{}` | Use existing issuer to sign certificates. Leave empty to generate a self-signed issuer |
-| tls.certManager.secretTemplate | object | `{"annotations":{},"labels":{}}` | Add annotations and/or labels to generated secret |
-| tls.certManager.duration | string | `"2160h"` | duration for Certificate resources |
-| tls.certManager.renewBefore | string | `"720h"` | renewBefore for Certificate resources |
-| tls.bouncer.secret | string | `"{{ .Release.Name }}-bouncer-tls"` |  |
-| tls.bouncer.reflector.namespaces | list | `[]` |  |
-| tls.agent.tlsClientAuth | bool | `true` |  |
-| tls.agent.secret | string | `"{{ .Release.Name }}-agent-tls"` |  |
-| tls.agent.reflector.namespaces | list | `[]` |  |
-| tls.appsec.tlsClientAuth | bool | `true` |  |
-| tls.appsec.secret | string | `"{{ .Release.Name }}-agent-tls"` |  |
-| tls.appsec.reflector.namespaces | list | `[]` |  |
-| tls.lapi.secret | string | `"{{ .Release.Name }}-lapi-tls"` |  |
-| tls.lapi.reflector.namespaces | list | `[]` |  |
-| secrets.username | string | `""` | agent username (default is generated randomly) |
-| secrets.password | string | `""` | agent password (default is generated randomly) |
-| secrets.externalSecret.name | string | `""` |  |
-| secrets.externalSecret.csLapiSecretKey | string | `""` |  |
-| secrets.externalSecret.registrationTokenKey | string | `""` |  |
-| lapi.enabled | bool | `true` | enable lapi (by default enabled) |
-| lapi.replicas | int | `1` | replicas for local API |
-| lapi.env | list | `[]` | environment variables from crowdsecurity/crowdsec docker image |
-| lapi.envFrom | list | `[]` |  |
-| lapi.ingress | object | `{"annotations":{"nginx.ingress.kubernetes.io/backend-protocol":"HTTP"},"enabled":false,"host":"","ingressClassName":""}` | Enable ingress lapi object |
-| lapi.priorityClassName | string | `""` | pod priority class name |
-| lapi.deployAnnotations | object | `{}` | Annotations to be added to lapi deployment |
-| lapi.podAnnotations | object | `{}` | Annotations to be added to lapi pods, if global podAnnotations are not set |
-| lapi.podLabels | object | `{}` | Labels to be added to lapi pods, if global podLabels are not set |
-| lapi.extraInitContainers | list | `[]` | Extra init containers to be added to lapi pods |
-| lapi.extraVolumes | list | `[]` | Extra volumes to be added to lapi pods |
-| lapi.extraVolumeMounts | list | `[]` | Extra volumeMounts to be added to lapi pods |
-| lapi.resources | object | `{"limits":{"cpu":"500m","memory":"500Mi"},"requests":{"cpu":"500m","memory":"500Mi"}}` | resources for lapi |
-| lapi.persistentVolume | object | `{"config":{"accessModes":["ReadWriteOnce"],"enabled":true,"existingClaim":"","size":"100Mi","storageClassName":""},"data":{"accessModes":["ReadWriteOnce"],"enabled":true,"existingClaim":"","size":"1Gi","storageClassName":""}}` | Enable persistent volumes |
-| lapi.persistentVolume.data | object | `{"accessModes":["ReadWriteOnce"],"enabled":true,"existingClaim":"","size":"1Gi","storageClassName":""}` | Persistent volume for data folder. Stores e.g. registered bouncer api keys |
-| lapi.persistentVolume.config | object | `{"accessModes":["ReadWriteOnce"],"enabled":true,"existingClaim":"","size":"100Mi","storageClassName":""}` | Persistent volume for config folder. Stores e.g. online api credentials |
-| lapi.service.type | string | `"ClusterIP"` |  |
-| lapi.service.labels | object | `{}` |  |
-| lapi.service.annotations | object | `{}` |  |
-| lapi.service.externalIPs | list | `[]` |  |
-| lapi.service.loadBalancerIP | string | `nil` |  |
-| lapi.service.loadBalancerClass | string | `nil` |  |
-| lapi.service.externalTrafficPolicy | string | `"Cluster"` |  |
-| lapi.nodeSelector | object | `{}` | nodeSelector for lapi |
-| lapi.tolerations | list | `[]` | tolerations for lapi |
-| lapi.dnsConfig | object | `{}` | dnsConfig for lapi |
-| lapi.affinity | object | `{}` | affinity for lapi |
-| lapi.topologySpreadConstraints | list | `[]` | topologySpreadConstraints for lapi |
-| lapi.metrics | object | `{"enabled":true,"podMonitor":{"additionalLabels":{},"enabled":false},"serviceMonitor":{"additionalLabels":{},"enabled":false}}` | Enable service monitoring (exposes "metrics" port "6060" for Prometheus) |
-| lapi.metrics.serviceMonitor | object | `{"additionalLabels":{},"enabled":false}` | See also: https://github.com/prometheus-community/helm-charts/issues/106#issuecomment-700847774 |
-| lapi.metrics.podMonitor | object | `{"additionalLabels":{},"enabled":false}` | See also: https://github.com/prometheus-community/helm-charts/issues/106#issuecomment-700847774 |
-| lapi.strategy.type | string | `"Recreate"` |  |
-| lapi.secrets.csLapiSecret | string | `""` | Shared LAPI secret. Will be generated randomly if not specified. Size must be > 64 characters |
-| lapi.secrets.registrationToken | string | `""` | Registration Token for Appsec. Will be generated randomly if not specified. Size must be > 48 characters |
-| lapi.extraSecrets | object | `{}` | Any extra secrets you may need (for example, external DB password) |
-| lapi.lifecycle | object | `{}` |  |
-| lapi.storeCAPICredentialsInSecret | bool | `false` | If set to true, the Central API credentials will be stored in a secret (to use when lapi replicas > 1) |
-| agent.enabled | bool | `true` | enable agent (by default enabled) |
-| agent.isDeployment | bool | `false` | Switch to Deployment instead of DaemonSet (In some cases, you may want to deploy the agent as a Deployment) |
-| agent.lapiURL | string | `""` | lapiURL for agent to connect to (default is the lapi service URL) |
-| agent.lapiHost | string | `""` | lapiHost for agent to connect to (default is the lapi service) |
-| agent.lapiPort | int | `8080` | lapiPort for agent to connect to (default is the lapi service port) |
-| agent.replicas | int | `1` | replicas for agent if isDeployment is set to true |
-| agent.strategy | object | `{"type":"Recreate"}` | strategy for agent if isDeployment is set to true |
-| agent.ports | list | `[]` | add your custom ports here, by default we expose port 6060 for metrics if metrics is enabled |
-| agent.additionalAcquisition | list | `[]` | To add custom acquisitions using available datasources (https://docs.crowdsec.net/docs/next/data_sources/intro) |
-| agent.acquisition | list | `[]` | Specify each pod you want to process it logs (namespace, podName and program) |
-| agent.priorityClassName | string | `""` | pod priority class name |
-| agent.daemonsetAnnotations | object | `{}` | Annotations to be added to agent daemonset |
-| agent.deploymentAnnotations | object | `{}` | Annotations to be added to agent deployment |
-| agent.podAnnotations | object | `{}` | Annotations to be added to agent pods, if global podAnnotations are not set |
-| agent.podLabels | object | `{}` | Labels to be added to agent pods, if global podLabels are not set |
-| agent.extraInitContainers | list | `[]` | Extra init containers to be added to agent pods |
-| agent.extraVolumes | list | `[]` | Extra volumes to be added to agent pods |
-| agent.extraVolumeMounts | list | `[]` | Extra volumeMounts to be added to agent pods |
-| agent.resources.limits.memory | string | `"250Mi"` |  |
-| agent.resources.limits.cpu | string | `"500m"` |  |
-| agent.resources.requests.cpu | string | `"500m"` |  |
-| agent.resources.requests.memory | string | `"250Mi"` |  |
-| agent.persistentVolume | object | `{"config":{"accessModes":["ReadWriteOnce"],"enabled":false,"existingClaim":"","size":"100Mi","storageClassName":""}}` | Enable persistent volumes |
-| agent.persistentVolume.config | object | `{"accessModes":["ReadWriteOnce"],"enabled":false,"existingClaim":"","size":"100Mi","storageClassName":""}` | Persistent volume for config folder. Stores local config (parsers, scenarios etc.) |
-| agent.hostVarLog | bool | `true` | Enable hostPath to /var/log |
-| agent.env | list | `[]` | environment variables from crowdsecurity/crowdsec docker image |
-| agent.nodeSelector | object | `{}` | nodeSelector for agent |
-| agent.tolerations | list | `[]` | tolerations for agent |
-| agent.affinity | object | `{}` | affinity for agent |
-| agent.livenessProbe | object | `{"failureThreshold":3,"httpGet":{"path":"/metrics","port":"metrics","scheme":"HTTP"},"periodSeconds":10,"successThreshold":1,"timeoutSeconds":5}` | livenessProbe for agent |
-| agent.readinessProbe | object | `{"failureThreshold":3,"httpGet":{"path":"/metrics","port":"metrics","scheme":"HTTP"},"periodSeconds":10,"successThreshold":1,"timeoutSeconds":5}` | readinessProbe for agent |
-| agent.startupProbe | object | `{"failureThreshold":30,"httpGet":{"path":"/metrics","port":"metrics","scheme":"HTTP"},"periodSeconds":10,"successThreshold":1,"timeoutSeconds":5}` | startupProbe for agent |
-| agent.metrics | object | `{"enabled":true,"podMonitor":{"additionalLabels":{},"enabled":false},"serviceMonitor":{"additionalLabels":{},"enabled":false}}` | Enable service monitoring (exposes "metrics" port "6060" for Prometheus) |
-| agent.metrics.serviceMonitor | object | `{"additionalLabels":{},"enabled":false}` | See also: https://github.com/prometheus-community/helm-charts/issues/106#issuecomment-700847774 |
-| agent.metrics.podMonitor | object | `{"additionalLabels":{},"enabled":false}` | See also: https://github.com/prometheus-community/helm-charts/issues/106#issuecomment-700847774 |
-| agent.service.type | string | `"ClusterIP"` |  |
-| agent.service.labels | object | `{}` |  |
-| agent.service.annotations | object | `{}` |  |
-| agent.service.externalIPs | list | `[]` |  |
-| agent.service.loadBalancerIP | string | `nil` |  |
-| agent.service.loadBalancerClass | string | `nil` |  |
-| agent.service.externalTrafficPolicy | string | `"Cluster"` |  |
-| agent.service.ports | list | `[]` | ports for agent service, if metrics is enabled, it will expose port 6060 by default |
-| agent.wait_for_lapi | object | `{"image":{"pullPolicy":"IfNotPresent","repository":"busybox","tag":"1.28"}}` | wait-for-lapi init container |
-| agent.wait_for_lapi.image.repository | string | `"busybox"` | docker image repository name |
-| agent.wait_for_lapi.image.pullPolicy | string | `"IfNotPresent"` | pullPolicy |
-| agent.wait_for_lapi.image.tag | string | `"1.28"` | docker image tag |
-| appsec | object | `{"acquisitions":[],"affinity":{},"configs":{},"deployAnnotations":{},"enabled":false,"env":[],"extraInitContainers":[],"extraVolumeMounts":[],"extraVolumes":[],"lapiHost":"","lapiPort":8080,"lapiURL":"","livenessProbe":{"failureThreshold":3,"httpGet":{"path":"/metrics","port":"metrics","scheme":"HTTP"},"periodSeconds":10,"successThreshold":1,"timeoutSeconds":5},"metrics":{"enabled":true,"podMonitor":{"additionalLabels":{},"enabled":false},"serviceMonitor":{"additionalLabels":{},"enabled":false}},"nodeSelector":{},"podAnnotations":{},"podLabels":{},"priorityClassName":"","readinessProbe":{"failureThreshold":3,"httpGet":{"path":"/metrics","port":"metrics","scheme":"HTTP"},"periodSeconds":10,"successThreshold":1,"timeoutSeconds":5},"replicas":1,"resources":{"limits":{"cpu":"500m","memory":"250Mi"},"requests":{"cpu":"500m","memory":"250Mi"}},"rules":{},"service":{"annotations":{},"externalIPs":[],"externalTrafficPolicy":"Cluster","labels":{},"loadBalancerClass":null,"loadBalancerIP":null,"type":"ClusterIP"},"startupProbe":{"failureThreshold":30,"httpGet":{"path":"/metrics","port":"metrics","scheme":"HTTP"},"periodSeconds":10,"successThreshold":1,"timeoutSeconds":5},"strategy":{"type":"Recreate"},"tolerations":[],"wait_for_lapi":{"image":{"pullPolicy":"IfNotPresent","repository":"busybox","tag":"1.28"}}}` | Enable AppSec (https://docs.crowdsec.net/docs/next/appsec/intro) |
-| appsec.enabled | bool | `false` | Enable AppSec (by default disabled) |
-| appsec.lapiURL | string | `""` | lapiURL for agent to connect to (default is the lapi service URL) |
-| appsec.lapiHost | string | `""` | lapiHost for agent to connect to (default is the lapi service) |
-| appsec.lapiPort | int | `8080` | lapiPort for agent to connect to (default is the lapi service port) |
-| appsec.replicas | int | `1` | replicas for Appsec |
-| appsec.strategy | object | `{"type":"Recreate"}` | strategy for appsec deployment |
-| appsec.acquisitions | list | `[]` | Additional acquisitions for AppSec |
-| appsec.configs | object | `{}` | appsec_configs (https://docs.crowdsec.net/docs/next/appsec/configuration): key is the filename, value is the config content |
-| appsec.rules | object | `{}` | appsec_rules (https://docs.crowdsec.net/docs/next/appsec/rules_syntax) |
-| appsec.priorityClassName | string | `""` | priorityClassName for appsec pods |
-| appsec.deployAnnotations | object | `{}` | Annotations to be added to appsec deployment |
-| appsec.podAnnotations | object | `{}` | podAnnotations for appsec pods |
-| appsec.podLabels | object | `{}` | podLabels for appsec pods |
-| appsec.extraInitContainers | list | `[]` | extraInitContainers for appsec pods |
-| appsec.extraVolumes | list | `[]` | Extra volumes to be added to appsec pods |
-| appsec.extraVolumeMounts | list | `[]` | Extra volumeMounts to be added to appsec pods |
-| appsec.resources | object | `{"limits":{"cpu":"500m","memory":"250Mi"},"requests":{"cpu":"500m","memory":"250Mi"}}` | resources for appsec pods |
-| appsec.env | list | `[]` | environment variables |
-| appsec.nodeSelector | object | `{}` | nodeSelector for appsec |
-| appsec.tolerations | list | `[]` | tolerations for appsec |
-| appsec.affinity | object | `{}` | affinity for appsec |
-| appsec.livenessProbe | object | `{"failureThreshold":3,"httpGet":{"path":"/metrics","port":"metrics","scheme":"HTTP"},"periodSeconds":10,"successThreshold":1,"timeoutSeconds":5}` | livenessProbe for appsec |
-| appsec.readinessProbe | object | `{"failureThreshold":3,"httpGet":{"path":"/metrics","port":"metrics","scheme":"HTTP"},"periodSeconds":10,"successThreshold":1,"timeoutSeconds":5}` | readinessProbe for appsec |
-| appsec.startupProbe | object | `{"failureThreshold":30,"httpGet":{"path":"/metrics","port":"metrics","scheme":"HTTP"},"periodSeconds":10,"successThreshold":1,"timeoutSeconds":5}` | startupProbe for appsec |
-| appsec.metrics | object | `{"enabled":true,"podMonitor":{"additionalLabels":{},"enabled":false},"serviceMonitor":{"additionalLabels":{},"enabled":false}}` | Enable service monitoring (exposes "metrics" port "6060" for Prometheus and "7422" for AppSec) |
-| appsec.metrics.serviceMonitor | object | `{"additionalLabels":{},"enabled":false}` | See also: https://github.com/prometheus-community/helm-charts/issues/106#issuecomment-700847774 |
-| appsec.metrics.podMonitor | object | `{"additionalLabels":{},"enabled":false}` | See also: https://github.com/prometheus-community/helm-charts/issues/106#issuecomment-700847774 |
-| appsec.wait_for_lapi | object | `{"image":{"pullPolicy":"IfNotPresent","repository":"busybox","tag":"1.28"}}` | wait-for-lapi init container |
-| appsec.wait_for_lapi.image.repository | string | `"busybox"` | docker image repository name |
-| appsec.wait_for_lapi.image.pullPolicy | string | `"IfNotPresent"` | pullPolicy |
-| appsec.wait_for_lapi.image.tag | string | `"1.28"` | docker image tag |
+### Global
+
+| Name                | Description                                                   | Value    |
+| ------------------- | ------------------------------------------------------------- | -------- |
+| `container_runtime` | [string] for raw logs format: json or cri (docker|containerd) | `docker` |
+
+### Image
+
+| Name                | Description                                               | Value                    |
+| ------------------- | --------------------------------------------------------- | ------------------------ |
+| `image.repository`  | [string] docker image repository name                     | `crowdsecurity/crowdsec` |
+| `image.pullPolicy`  | [string] Image pull policy (Always, IfNotPresent, Never)  | `IfNotPresent`           |
+| `image.pullSecrets` | Image pull secrets (array of objects with a 'name' field) | `[]`                     |
+| `image.tag`         | docker image tag (empty defaults to chart AppVersion)     | `""`                     |
+| `podAnnotations`    | podAnnotations to be added to pods (string:string map)    | `{}`                     |
+| `podLabels`         | Labels to be added to pods (string:string map)            | `{}`                     |
+
+### Configuration
+
+| Name                                         | Description                                                                                                                         | Value   |
+| -------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- | ------- |
+| `config.parsers.s00-raw`                     | First step custom parsers definitions, usually used to label logs                                                                   | `{}`    |
+| `config.parsers.s01-parse`                   | Second step custom parsers definitions, usually to normalize logs into events                                                       | `{}`    |
+| `config.parsers.s02-enrich`                  | Third step custom parsers definitions, usually to enrich events                                                                     | `{}`    |
+| `config.scenarios`                           | Custom raw scenarios definition see https://docs.crowdsec.net/docs/next/log_processor/scenarios/intro                               | `{}`    |
+| `config.postoverflows.s00-enrich`            | First step custom postoverflows definitions, usually used to enrich overflow events                                                 | `{}`    |
+| `config.postoverflows.s01-whitelist`         | Second step custom postoverflows definitions, usually used to whitelist events                                                      | `{}`    |
+| `config.simulation.yaml`                     | This file is usually handled by the agent.                                                                                          | `""`    |
+| `config.console.yaml`                        | This file is usually handled by the agent.                                                                                          | `""`    |
+| `config.capi_whitelists.yaml`                | This file is deprecated in favor of centralized allowlists see https://docs.crowdsec.net/docs/next/local_api/centralized_allowlists | `""`    |
+| `config.profiles.yaml`                       | Use for defining custom profiles                                                                                                    | `""`    |
+| `config.config.yaml.local`                   | main configuration file local overriden values. This is merged with main configuration file.                                        | `""`    |
+| `config.notifications`                       | notification on alert configuration                                                                                                 | `{}`    |
+| `config.agent_config.yaml.local`             | This configuration file is merged with agent pod main configuration file                                                            | `""`    |
+| `config.appsec_config.yaml.local`            | This configuration file is merged with appsec pod main configuration file                                                           | `""`    |
+| `tls.enabled`                                | Is tls enabled ?                                                                                                                    | `false` |
+| `tls.caBundle`                               | pem format CA collection                                                                                                            | `true`  |
+| `tls.insecureSkipVerify`                     |                                                                                                                                     | `false` |
+| `tls.certManager`                            | Use of a cluster certManager configuration                                                                                          | `{}`    |
+| `tls.certManager.enabled`                    | Use of a cluster cert manager                                                                                                       | `true`  |
+| `tls.certManager.secretTemplate`             | secret configuration                                                                                                                | `{}`    |
+| `tls.certManager.secretTemplate.annotations` | add annotation to generated secret                                                                                                  | `{}`    |
+| `tls.certManager.secretTemplate.labels`      | add annotation to generated labels                                                                                                  | `{}`    |
+| `tls.certManager.duration`                   | validity duration of certificate (golang duration string)                                                                           | `""`    |
+| `tls.certManager.renewBefore`                | duration before a certificate’s expiry when cert-manager should start renewing it.                                                  | `""`    |
+| `tls.bouncer.secret`                         | Name of the Kubernetes Secret containing TLS materials for the bouncer                                                              | `""`    |
+| `tls.bouncer.reflector.namespaces`           | List of namespaces from which the bouncer will watch and sync Secrets/ConfigMaps.                                                   | `[]`    |
+| `tls.agent.tlsClientAuth`                    | Enables mutual TLS authentication for the agent when connecting to LAPI.                                                            | `true`  |
+| `tls.agent.secret`                           | Name of the Secret holding the agent’s TLS certificate and key.                                                                     | `""`    |
+| `tls.agent.reflector.namespaces`             | Namespaces where the agent’s TLS Secret can be reflected/synced.                                                                    | `[]`    |
+| `tls.appsec.tlsClientAuth`                   | Enables mutual TLS authentication for the agent when connecting to LAPI.                                                            | `true`  |
+| `tls.appsec.secret`                          | Name of the Secret holding the agent’s TLS certificate and key.                                                                     | `""`    |
+| `tls.appsec.reflector.namespaces`            | Namespaces where the agent’s TLS Secret can be reflected/synced.                                                                    | `[]`    |
+| `tls.lapi.secret`                            | Name of the Secret holding the lapidary's’s TLS certificate and key.                                                                | `""`    |
+| `tls.lapi.reflector.namespaces`              | Namespaces where the LAPI TLS Secret can be reflected/synced.                                                                       | `[]`    |
+
+### secrets
+
+| Name                                          | Description                                                                                                 | Value |
+| --------------------------------------------- | ----------------------------------------------------------------------------------------------------------- | ----- |
+| `secrets.username`                            | Agent username (default is generated randomly)                                                              | `""`  |
+| `secrets.password`                            | Agent password (default is generated randomly)                                                              | `""`  |
+| `secrets.externalSecret.name`                 | Name of the external secret to use (overrides lapi.secrets.csLapiSecret and lapi.secrets.registrationToken) | `""`  |
+| `secrets.externalSecret.csLapiSecretKey`      | The key in the external secret that holds the csLapiSecret                                                  | `""`  |
+| `secrets.externalSecret.registrationTokenKey` | The key in the external secret that holds the registrationToken                                             | `""`  |
+
+### lapi
+
+| Name                                            | Description                                                                            | Value               |
+| ----------------------------------------------- | -------------------------------------------------------------------------------------- | ------------------- |
+| `lapi.enabled`                                  | Enable LAPI deployment (enabled by default)                                            | `true`              |
+| `lapi.replicas`                                 | Number of replicas for the Local API                                                   | `1`                 |
+| `lapi.env`                                      | Extra environment variables passed to the crowdsecurity/crowdsec container             | `[]`                |
+| `lapi.envFrom`                                  | Environment variables loaded from Kubernetes Secrets or ConfigMaps                     | `[]`                |
+| `lapi.ingress.enabled`                          | Enable ingress for the LAPI service                                                    | `false`             |
+| `lapi.ingress.annotations`                      | Annotations to apply to the LAPI ingress object                                        | `{}`                |
+| `lapi.ingress.ingressClassName`                 | IngressClass name for the LAPI ingress                                                 | `""`                |
+| `lapi.ingress.host`                             | Hostname for the LAPI ingress                                                          | `""`                |
+| `lapi.priorityClassName`                        | Pod priority class name                                                                | `""`                |
+| `lapi.deployAnnotations`                        | Annotations applied to the LAPI Deployment                                             | `{}`                |
+| `lapi.podAnnotations`                           | Annotations applied to LAPI pods                                                       | `{}`                |
+| `lapi.podLabels`                                | Labels applied to LAPI pods                                                            | `{}`                |
+| `lapi.extraInitContainers`                      | Additional init containers for LAPI pods                                               | `[]`                |
+| `lapi.extraVolumes`                             | Additional volumes for LAPI pods                                                       | `[]`                |
+| `lapi.extraVolumeMounts`                        | Additional volumeMounts for LAPI pods                                                  | `[]`                |
+| `lapi.resources`                                | Resource requests and limits for the LAPI pods                                         | `{}`                |
+| `lapi.persistentVolume.data.enabled`            | Enable persistent volume for the data folder (stores bouncer API keys)                 | `true`              |
+| `lapi.persistentVolume.data.accessModes`        | Access modes for the data PVC                                                          | `["ReadWriteOnce"]` |
+| `lapi.persistentVolume.data.storageClassName`   | StorageClass name for the data PVC                                                     | `""`                |
+| `lapi.persistentVolume.data.existingClaim`      | Existing PersistentVolumeClaim to use for the data PVC                                 | `""`                |
+| `lapi.persistentVolume.data.subPath`            | subPath to use within the volume                                                       | `""`                |
+| `lapi.persistentVolume.data.size`               | Requested size for the data PVC                                                        | `""`                |
+| `lapi.persistentVolume.config.enabled`          | Enable persistent volume for the config folder (stores API credentials)                | `true`              |
+| `lapi.persistentVolume.config.accessModes`      | Access modes for the config PVC                                                        | `["ReadWriteOnce"]` |
+| `lapi.persistentVolume.config.storageClassName` | StorageClass name for the config PVC                                                   | `""`                |
+| `lapi.persistentVolume.config.existingClaim`    | Existing PersistentVolumeClaim to use for the config PVC                               | `""`                |
+| `lapi.persistentVolume.config.subPath`          | subPath to use within the volume                                                       | `""`                |
+| `lapi.persistentVolume.config.size`             | Requested size for the config PVC                                                      | `""`                |
+| `lapi.service`                                  | Configuration of kubernetes lapi service                                               | `{}`                |
+| `lapi.service.type`                             | Kubernetes service type for LAPI                                                       | `""`                |
+| `lapi.service.labels`                           | Extra labels to add to the LAPI service                                                | `{}`                |
+| `lapi.service.annotations`                      | Extra annotations to add to the LAPI service                                           | `{}`                |
+| `lapi.service.externalIPs`                      | List of external IPs for the LAPI service                                              | `[]`                |
+| `lapi.service.loadBalancerIP`                   | Specific loadBalancer IP for the LAPI service                                          | `nil`               |
+| `lapi.service.loadBalancerClass`                | LoadBalancer class for the LAPI service                                                | `nil`               |
+| `lapi.service.externalTrafficPolicy`            | External traffic policy for the LAPI service                                           | `""`                |
+| `lapi.nodeSelector`                             | Node selector for scheduling LAPI pods                                                 | `{}`                |
+| `lapi.tolerations`                              | Tolerations for scheduling LAPI pods                                                   | `[]`                |
+| `lapi.dnsConfig`                                | DNS configuration for LAPI pods                                                        | `{}`                |
+| `lapi.affinity`                                 | Affinity rules for LAPI pods                                                           | `{}`                |
+| `lapi.topologySpreadConstraints`                | Topology spread constraints for LAPI pods                                              | `[]`                |
+| `lapi.metrics.enabled`                          | Enable service monitoring for Prometheus (exposes port 6060)                           | `true`              |
+| `lapi.metrics.serviceMonitor.enabled`           | [object] Create a ServiceMonitor resource for Prometheus                               | `true`              |
+| `lapi.metrics.serviceMonitor.additionalLabels`  | Extra labels for the ServiceMonitor                                                    | `{}`                |
+| `lapi.metrics.podMonitor.enabled`               | Enables prometheus operator podMonitor                                                 | `false`             |
+| `lapi.metrics.podMonitor.additionalLabels`      | additional labels for podMonitor                                                       | `{}`                |
+| `lapi.strategy.type`                            | Deployment strategy for the LAPI deployment                                            | `""`                |
+| `lapi.secrets.csLapiSecret`                     | Shared LAPI secret (randomly generated if not specified, must be >64 chars)            | `""`                |
+| `lapi.secrets.registrationToken`                | Registration token for AppSec (randomly generated if not specified, must be >48 chars) | `""`                |
+| `lapi.extraSecrets`                             | Additional secrets to inject (e.g., external DB password)                              | `{}`                |
+| `lapi.lifecycle`                                | Lifecycle hooks for LAPI pods (postStart, preStop, etc.)                               | `{}`                |
+| `lapi.storeCAPICredentialsInSecret`             | [object] Store Central API credentials in a Secret (required if LAPI replicas > 1)     | `false`             |
+
+### agent
+
+| Name                                             | Description                                                                                | Value   |
+| ------------------------------------------------ | ------------------------------------------------------------------------------------------ | ------- |
+| `agent.enabled`                                  | [object] Enable CrowdSec agent (enabled by default)                                        | `true`  |
+| `agent.isDeployment`                             | [object] Deploy agent as a Deployment instead of a DaemonSet                               | `false` |
+| `agent.lapiURL`                                  | URL of the LAPI for the agent to connect to (defaults to internal service URL)             | `""`    |
+| `agent.lapiHost`                                 | Host of the LAPI for the agent to connect to                                               | `""`    |
+| `agent.lapiPort`                                 | Port of the LAPI for the agent to connect to                                               | `8080`  |
+| `agent.replicas`                                 | Number of replicas when deploying as a Deployment                                          | `1`     |
+| `agent.strategy`                                 | Deployment strategy when `isDeployment` is true                                            | `{}`    |
+| `agent.ports`                                    | Custom container ports to expose (default: metrics port 6060 if enabled)                   | `[]`    |
+| `agent.additionalAcquisition`                    | Extra log acquisition sources (see https://docs.crowdsec.net/docs/next/data_sources/intro) | `[]`    |
+| `agent.acquisition`                              | Pod log acquisition definitions (namespace, podName, program, etc.)                        | `[]`    |
+| `agent.priorityClassName`                        | Priority class name for agent pods                                                         | `""`    |
+| `agent.daemonsetAnnotations`                     | Annotations applied to the agent DaemonSet                                                 | `{}`    |
+| `agent.deploymentAnnotations`                    | Annotations applied to the agent Deployment                                                | `{}`    |
+| `agent.podAnnotations`                           | Annotations applied to agent pods                                                          | `{}`    |
+| `agent.podLabels`                                | Labels applied to agent pods                                                               | `{}`    |
+| `agent.extraInitContainers`                      | Extra init containers for agent pods                                                       | `[]`    |
+| `agent.extraVolumes`                             | Extra volumes for agent pods                                                               | `[]`    |
+| `agent.extraVolumeMounts`                        | Extra volume mounts for agent pods                                                         | `[]`    |
+| `agent.resources`                                | Resource requests and limits for agent pods                                                | `{}`    |
+| `agent.persistentVolume.config.enabled`          | [object] Enable persistent volume for agent config                                         | `false` |
+| `agent.persistentVolume.config.accessModes`      | Access modes for the config PVC                                                            | `[]`    |
+| `agent.persistentVolume.config.storageClassName` | StorageClass name for the config PVC                                                       | `""`    |
+| `agent.persistentVolume.config.existingClaim`    | Existing PVC name to use for config                                                        | `""`    |
+| `agent.persistentVolume.config.subPath`          | subPath to use within the volume                                                           | `""`    |
+| `agent.persistentVolume.config.size`             | Requested size for the config PVC                                                          | `""`    |
+| `agent.hostVarLog`                               | [object] Mount hostPath `/var/log` into the agent pod                                      | `true`  |
+| `agent.env`                                      | Environment variables passed to the crowdsecurity/crowdsec container                       | `[]`    |
+| `agent.nodeSelector`                             | Node selector for agent pods                                                               | `{}`    |
+| `agent.tolerations`                              | Tolerations for scheduling agent pods                                                      | `[]`    |
+| `agent.affinity`                                 | Affinity rules for agent pods                                                              | `{}`    |
+| `agent.livenessProbe`                            | Liveness probe configuration for agent pods                                                | `{}`    |
+| `agent.readinessProbe`                           | Readiness probe configuration for agent pods                                               | `{}`    |
+| `agent.startupProbe`                             | Startup probe configuration for agent pods                                                 | `{}`    |
+| `agent.metrics.enabled`                          | Enable service monitoring for Prometheus (exposes port 6060)                               | `true`  |
+| `agent.metrics.serviceMonitor.enabled`           | Create a ServiceMonitor resource for Prometheus                                            | `false` |
+| `agent.metrics.serviceMonitor.additionalLabels`  | Extra labels for the ServiceMonitor                                                        | `{}`    |
+| `agent.metrics.podMonitor.enabled`               | Create a PodMonitor resource for Prometheus                                                | `false` |
+| `agent.metrics.podMonitor.additionalLabels`      | Extra labels for the PodMonitor                                                            | `{}`    |
+| `agent.service.type`                             | Kubernetes Service type for agent                                                          | `""`    |
+| `agent.service.labels`                           | Labels applied to the agent Service                                                        | `{}`    |
+| `agent.service.annotations`                      | Annotations applied to the agent Service                                                   | `{}`    |
+| `agent.service.externalIPs`                      | External IPs assigned to the agent Service                                                 | `[]`    |
+| `agent.service.loadBalancerIP`                   | Fixed LoadBalancer IP for the agent Service                                                | `nil`   |
+| `agent.service.loadBalancerClass`                | LoadBalancer class for the agent Service                                                   | `nil`   |
+| `agent.service.externalTrafficPolicy`            | External traffic policy for the agent Service                                              | `""`    |
+| `agent.service.ports`                            | Custom service ports (default: metrics port 6060 if enabled)                               | `[]`    |
+| `agent.wait_for_lapi.image.repository`           | Repository for the wait-for-lapi init container image                                      | `""`    |
+| `agent.wait_for_lapi.image.pullPolicy`           | Image pull policy for the wait-for-lapi init container                                     | `""`    |
+| `agent.wait_for_lapi.image.tag`                  | Image tag for the wait-for-lapi init container                                             | `""`    |
+| `appsec.enabled`                                 | [object] Enable AppSec component (disabled by default)                                     | `false` |
+| `appsec.lapiURL`                                 | URL the AppSec component uses to reach LAPI (defaults to internal service URL)             | `""`    |
+| `appsec.lapiHost`                                | Hostname the AppSec component uses to reach LAPI                                           | `""`    |
+| `appsec.lapiPort`                                | Port the AppSec component uses to reach LAPI                                               | `8080`  |
+| `appsec.replicas`                                | Number of replicas for the AppSec Deployment                                               | `1`     |
+| `appsec.strategy`                                | Deployment strategy for AppSec                                                             | `{}`    |
+| `appsec.acquisitions`                            | AppSec acquisitions (datasource listeners), e.g. appsec listener on 7422                   | `[]`    |
+| `appsec.configs`                                 | AppSec configs (key = filename, value = file content)                                      | `{}`    |
+| `appsec.rules`                                   | AppSec rule files (key = filename, value = file content)                                   | `{}`    |
+| `appsec.priorityClassName`                       | Priority class name for AppSec pods                                                        | `""`    |
+| `appsec.deployAnnotations`                       | Annotations added to the AppSec Deployment                                                 | `{}`    |
+| `appsec.podAnnotations`                          | Annotations added to AppSec pods                                                           | `{}`    |
+| `appsec.podLabels`                               | Labels added to AppSec pods                                                                | `{}`    |
+| `appsec.extraInitContainers`                     | Extra init containers for AppSec pods                                                      | `[]`    |
+| `appsec.extraVolumes`                            | Extra volumes for AppSec pods                                                              | `[]`    |
+| `appsec.extraVolumeMounts`                       | Extra volume mounts for AppSec pods                                                        | `[]`    |
+| `appsec.resources`                               | Resource requests and limits for AppSec pods                                               | `{}`    |
+| `appsec.env`                                     | Environment variables for the AppSec container (collections/configs/rules toggles, etc.)   | `[]`    |
+| `appsec.nodeSelector`                            | Node selector for scheduling AppSec pods                                                   | `{}`    |
+| `appsec.tolerations`                             | Tolerations for scheduling AppSec pods                                                     | `[]`    |
+| `appsec.affinity`                                | Affinity rules for scheduling AppSec pods                                                  | `{}`    |
+| `appsec.livenessProbe`                           | Liveness probe configuration for AppSec pods                                               | `{}`    |
+| `appsec.readinessProbe`                          | Readiness probe configuration for AppSec pods                                              | `{}`    |
+| `appsec.startupProbe`                            | Startup probe configuration for AppSec pods                                                | `{}`    |
+| `appsec.metrics.enabled`                         | Enable service monitoring (exposes metrics on 6060; AppSec listener typically 7422)        | `true`  |
+| `appsec.metrics.serviceMonitor.enabled`          | Create a ServiceMonitor for Prometheus scraping                                            | `false` |
+| `appsec.metrics.serviceMonitor.additionalLabels` | Extra labels for the ServiceMonitor                                                        | `{}`    |
+| `appsec.metrics.podMonitor.enabled`              | Create a PodMonitor for Prometheus scraping                                                | `false` |
+| `appsec.metrics.podMonitor.additionalLabels`     | Extra labels for the PodMonitor                                                            | `{}`    |
+| `appsec.service.type`                            | Kubernetes Service type for AppSec                                                         | `""`    |
+| `appsec.service.labels`                          | Additional labels for the AppSec Service                                                   | `{}`    |
+| `appsec.service.annotations`                     | Annotations to apply to the LAPI ingress object                                            | `{}`    |
+| `appsec.service.externalIPs`                     | External IPs for the AppSec Service                                                        | `[]`    |
+| `appsec.service.loadBalancerIP`                  | Fixed LoadBalancer IP for the AppSec Service                                               | `nil`   |
+| `appsec.service.loadBalancerClass`               | LoadBalancer class for the AppSec Service                                                  | `nil`   |
+| `appsec.service.externalTrafficPolicy`           | External traffic policy for the AppSec Service                                             | `""`    |
+| `appsec.wait_for_lapi.image.repository`          | Repository for the wait-for-lapi init con                                                  | `""`    |
+| `appsec.wait_for_lapi.image.pullPolicy`          | Image pull policy for the wait-for-lapi init container                                     | `""`    |
+| `appsec.wait_for_lapi.image.tag`                 | Image tag for the wait-for-lapi init container                                             | `1.28`  |
+
