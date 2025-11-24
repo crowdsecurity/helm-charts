@@ -877,7 +877,7 @@
                         "not": {
                             "properties": {
                                 "xpath_query": {
-                                    "type": "#/definitions/nonEmptyString"
+                                    "$ref": "#/definitions/nonEmptyString"
                                 }
                             }
                         }
@@ -892,7 +892,7 @@
                     "if": {
                         "properties": {
                             "event_channel": {
-                                "type": "#/definitions/nonEmptyString"
+                                "$ref": "#/definitions/nonEmptyString"
                             }
                         }
                     },
@@ -908,7 +908,7 @@
                         "not": {
                             "properties": {
                                 "event_channel": {
-                                    "type": "#/definitions/nonEmptyString"
+                                    "$ref": "#/definitions/nonEmptyString"
                                 }
                             }
                         }
