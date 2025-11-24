@@ -17,29 +17,3 @@ http://{{ .Release.Name }}-service:8080
 http://{{ .Release.Name }}-appsec-service:7422
 {{- end }}
 
-{{ if .Values.lapi.dashboard.enabled }}
-## Dashboard information
-
-You can access to the dashboard using : 
-{{- if .Values.lapi.dashboard.ingress.enabled }}
-    {{- if .Values.lapi.dashboard.ingress.tls }}
-    {{- with (index .Values.lapi.dashboard.ingress.tls 0) }}
-    {{- range .hosts }}
-https://{{- . }}
-    {{- end }}
-    {{- end }}
-    {{- else }}
-http://{{- .Values.lapi.dashboard.ingress.host }}
-    {{end}}
-{{- else }}
-http://{{ .Release.Name }}-service
-{{- end }}
-{{- end }}
-
-{{- if .Values.lapi.enabled }}
-The default credentials are : 
-login : crowdsec@crowdsec.net
-password : !!Cr0wdS3c_M3t4b4s3??
-
-Please update the password when you connect to metabase for the first time.
-{{- end }}

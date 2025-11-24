@@ -4,46 +4,56 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-# -- for raw logs format: json or cri (docker|containerd)
+## @section Global
+## @param container_runtime [default: docker] [string] for raw logs format: json or cri (docker|containerd)
 container_runtime: docker
 
+## @section Image
 image:
-  # -- docker image repository name
+  ## @param image.repository [default: crowdsecurity/crowdsec] [string] docker image repository name
   repository: crowdsecurity/crowdsec
-  # -- pullPolicy
+
+  ## @param image.pullPolicy [default: IfNotPresent] [string] Image pull policy (Always, IfNotPresent, Never)
   pullPolicy: IfNotPresent
-  # -- pullSecrets
+
+  ## @param image.pullSecrets Image pull secrets (array of objects with a 'name' field)
   pullSecrets: []
     # - name: ""
-  # -- docker image tag
+
+  ## @param image.tag [string] docker image tag (empty defaults to chart AppVersion)
   tag: ""
 
-# -- Annotations to be added to pods
+## @param podAnnotations [object] podAnnotations to be added to pods (string:string map)
 podAnnotations: {}
   # Uncomment the following lines if you use Prometheus Helm Chart rather than Prometheus Operator.
   # prometheus.io/scrape: 'true'
   # prometheus.io/port: '6060'
 
-# -- Labels to be added to pods
+## @param podLabels [object] Labels to be added to pods (string:string map)
 podLabels: {}
 
 # Here you can specify your own custom configuration to be loaded in crowdsec agent or lapi
 # Each config needs to be a multi-line using '|' in YAML specs
 # for the agent those configs will be loaded : parsers, scenarios, postoverflows, simulation.yaml
 # for the lapi those configs will be loaded : profiles.yaml, notifications, console.yaml
+## @section Configuration
 config:
   # -- To better understand stages in parsers, you can take a look at https://docs.crowdsec.net/docs/next/parsers/intro/
   # Those files are only mounted in the agent pods
   parsers:
+    ## @param config.parsers.s00-raw First step custom parsers definitions, usually used to label logs
     s00-raw: {}
+    ## @param config.parsers.s01-parse Second step custom parsers definitions, usually to normalize logs into events
     s01-parse: {}
       # example-parser.yaml: |
       #   filter: "evt.Line.Labels.type == 'myProgram'"
       #   onsuccess: next_stage
       #   ....
+    ## @param config.parsers.s02-enrich Third step custom parsers definitions, usually to enrich events
     s02-enrich: {}
   # -- to better understand how to write a scenario, you can take a look at https://docs.crowdsec.net/docs/next/scenarios/intro
   # Those files are only mounted in the agent pods
+  ## @param config.scenarios Custom raw scenarios definition see https://docs.crowdsec.net/docs/next/log_processor/scenarios/intro
   scenarios: {}
     # myScenario.yaml: |
     #   type: trigger
@@ -51,48 +61,55 @@ config:
     #    description: "Detect bruteforce on myService"
     #    filter: "evt.Meta.log_type == 'auth_bf_log'"
     #    ...
-  # -- to better understand how to write a postoverflow, you can take a look at (https://docs.crowdsec.net/docs/next/whitelist/create/#whitelist-in-postoverflows)
+  # -- to better understand how to write a postoverflow, you can take a look at (https://docs.crowdsec.net/docs/next/log_processor/parsers/intro#postoverflows)
   # Those files are only mounted in the agent pods
   postoverflows:
+    ## @param config.postoverflows.s00-enrich First step custom postoverflows definitions, usually used to enrich overflow events
     s00-enrich: {}
       # rdnsEnricher.yaml: |
       #   ...
+    ## @param config.postoverflows.s01-whitelist Second step custom postoverflows definitions, usually used to whitelist events
     s01-whitelist: {}
       # myRdnsWhitelist.yaml: |
       #   ...
   # -- Simulation configuration (https://docs.crowdsec.net/docs/next/scenarios/simulation/)
   # This file is only mounted in the agent pods
+  ## @param config.simulation.yaml This file is usually handled by the agent.
   simulation.yaml: ""
-    #  |
-    # simulation: false
-    # exclusions:
-    #  - crowdsecurity/ssh-bf
+  #  |
+  # simulation: false
+  # exclusions:
+  #  - crowdsecurity/ssh-bf
   # This file is only mounted in the lapi pod
+  ## @param config.console.yaml This file is usually handled by the agent.
   console.yaml: ""
-    #   |
-    # share_manual_decisions: true
-    # share_tainted: true
-    # share_custom: true
+  #   |
+  # share_manual_decisions: true
+  # share_tainted: true
+  # share_custom: true
   # This file is only mounted in the lapi pod
   # Deprecated in favor of centralized allowlists (https://docs.crowdsec.net/docs/next/local_api/centralized_allowlists)
+  ## @param config.capi_whitelists.yaml This file is deprecated in favor of centralized allowlists see https://docs.crowdsec.net/docs/next/local_api/centralized_allowlists
   capi_whitelists.yaml: ""
-    #   |
-    # ips:
-    # - 1.2.3.4
-    # - 2.3.4.5
-    # cidrs:
-    # - 1.2.3.0/24
+  #   |
+  # ips:
+  # - 1.2.3.4
+  # - 2.3.4.5
+  # cidrs:
+  # - 1.2.3.0/24
   # -- Profiles configuration (https://docs.crowdsec.net/docs/next/profiles/format/#profile-configuration-example)
   # This file is only mounted in the lapi pod
+  ## @param config.profiles.yaml Use for defining custom profiles
   profiles.yaml: ""
-    #   |
-    #  name: default_ip_remediation
-    #  debug: true
-    #  filters:
-    #    - Alert.Remediation == true && Alert.GetScope() == "Ip"
-    #  ...
+  #   |
+  #  name: default_ip_remediation
+  #  debug: true
+  #  filters:
+  #    - Alert.Remediation == true && Alert.GetScope() == "Ip"
+  #  ...
   # -- General configuration (https://docs.crowdsec.net/docs/configuration/crowdsec_configuration/#configuration-example)
-  # This file is only mounted in the lapi pod
+  # This file is mounted in the lapi pod
+  ## @param config.config.yaml.local [string] main configuration file local overriden values. This is merged with main configuration file.
   config.yaml.local: |
     api:
       server:
@@ -104,16 +121,17 @@ config:
             - "192.168.0.0/16"
             - "10.0.0.0/8"
             - "172.16.0.0/12"
-    # db_config:
-    #   type:     postgresql
-    #   user:     crowdsec
-    #   password: ${DB_PASSWORD}
-    #   db_name:  crowdsec
-    #   host:     192.168.0.2
-    #   port:     5432
-    #   sslmode:  require
+  # db_config:
+  #   type:     postgresql
+  #   user:     crowdsec
+  #   password: ${DB_PASSWORD}
+  #   db_name:  crowdsec
+  #   host:     192.168.0.2
+  #   port:     5432
+  #   sslmode:  require
   # -- notifications configuration (https://docs.crowdsec.net/docs/next/notification_plugins/intro)
   # Those files are only mounted in the lapi pod
+  ## @param config.notifications notification on alert configuration
   notifications: {}
     # email.yaml: |
     #   type: email
@@ -124,58 +142,83 @@ config:
     # slack.yaml: ""
     # http.yaml: ""
     # splunk.yaml: ""
-  
+
   # General configuration (https://docs.crowdsec.net/docs/configuration/crowdsec_configuration/#configuration-example)
-  # This file is only mounted in the agent pod
+  # This file is mounted in the agent pod
+  ## @param config.agent_config.yaml.local This configuration file is merged with agent pod main configuration file
   agent_config.yaml.local: ""
-  
+
   # General configuration (https://docs.crowdsec.net/docs/configuration/crowdsec_configuration/#configuration-example)
-  # This file is only mounted in the appsec pod
+  # This file is mounted in the appsec pod
+  ## @param config.appsec_config.yaml.local This configuration file is merged with appsec pod main configuration file
   appsec_config.yaml.local: ""
 
+# @section tls
 tls:
+  ## @param tls.enabled  Is tls enabled ?
   enabled: false
+  ## @param tls.caBundle  pem format CA collection
   caBundle: true
+  ## @param tls.insecureSkipVerify
   insecureSkipVerify: false
+  ## @param tls.certManager [object] Use of a cluster certManager configuration
   certManager:
+    ## @param tls.certManager.enabled [default: true] Use of a cluster cert manager
     enabled: true
     # -- Use existing issuer to sign certificates. Leave empty to generate a self-signed issuer
     issuerRef: {}
       # name: ""
       # kind: "ClusterIssuer"
     # -- Add annotations and/or labels to generated secret
+    ## @param tls.certManager.secretTemplate [object] secret configuration
     secretTemplate:
+      ## @param tls.certManager.secretTemplate.annotations [object] add annotation to generated secret
       annotations: {}
+      ## @param tls.certManager.secretTemplate.labels [object] add annotation to generated labels
       labels: {}
     # -- duration for Certificate resources
+    ## @param tls.certManager.duration [string] validity duration of certificate (golang duration string)
     duration: 2160h # 90d
     # -- renewBefore for Certificate resources
+    ## @param tls.certManager.renewBefore [string] duration before a certificate’s expiry when cert-manager should start renewing it.
     renewBefore: 720h # 30d
   bouncer:
+    ## @param tls.bouncer.secret [string] Name of the Kubernetes Secret containing TLS materials for the bouncer
     secret: "{{ .Release.Name }}-bouncer-tls"
     reflector:
+      ## @param tls.bouncer.reflector.namespaces [array] List of namespaces from which the bouncer will watch and sync Secrets/ConfigMaps.
       namespaces: []
   agent:
+    ## @param tls.agent.tlsClientAuth [default: true] Enables mutual TLS authentication for the agent when connecting to LAPI.
     tlsClientAuth: true
+    ## @param tls.agent.secret [string] Name of the Secret holding the agent’s TLS certificate and key.
     secret: "{{ .Release.Name }}-agent-tls"
     reflector:
+      ## @param tls.agent.reflector.namespaces [array] Namespaces where the agent’s TLS Secret can be reflected/synced.
       namespaces: []
   appsec:
+    ## @param tls.appsec.tlsClientAuth [default: true] Enables mutual TLS authentication for the agent when connecting to LAPI.
     tlsClientAuth: true
+    ## @param tls.appsec.secret [string] Name of the Secret holding the agent’s TLS certificate and key.
     secret: "{{ .Release.Name }}-agent-tls"
     reflector:
+      ## @param tls.appsec.reflector.namespaces [array] Namespaces where the agent’s TLS Secret can be reflected/synced.
       namespaces: []
   lapi:
+    ## @param tls.lapi.secret [string] Name of the Secret holding the lapidary's’s TLS certificate and key.
     secret: "{{ .Release.Name }}-lapi-tls"
     reflector:
+      ## @param tls.lapi.reflector.namespaces [array] Namespaces where the LAPI TLS Secret can be reflected/synced.
       namespaces: []
-
 # If you want to specify secrets that will be used for all your crowdsec-agents
 # secrets can be provided as env variables
+## @section secrets
 secrets:
   # -- agent username (default is generated randomly)
+  ## @param secrets.username [string] Agent username (default is generated randomly)
   username: ""
   # -- agent password (default is generated randomly)
+  ## @param secrets.password [string] Agent password (default is generated randomly)
   password: ""
   # Use an external secret for csLapiSecret and registrationToken.
   #
@@ -183,24 +226,32 @@ secrets:
   # lapi.secrets.registrationToken values are ignored
   externalSecret:
     # Name of the secret to use
+    ## @param secrets.externalSecret.name [string] Name of the external secret to use (overrides lapi.secrets.csLapiSecret and lapi.secrets.registrationToken)
     name: ""
     # The key in the secret that holds the csLapiSecret. Defaults to csLapiSecret
+    ## @param secrets.externalSecret.csLapiSecretKey [string] The key in the external secret that holds the csLapiSecret
     csLapiSecretKey: ""
     # The key in the secret that holds the registrationToken. Defaults to registrationToken
+    ## @param secrets.externalSecret.registrationTokenKey [string] The key in the external secret that holds the registrationToken
     registrationTokenKey: ""
 
 # lapi will deploy pod with crowdsec lapi and dashboard as deployment
+## @section lapi
 lapi:
   # -- enable lapi (by default enabled)
+  ## @param lapi.enabled  Enable LAPI deployment (enabled by default)
   enabled: true
   # -- replicas for local API
+  ## @param lapi.replicas  Number of replicas for the Local API
   replicas: 1
   # -- environment variables from crowdsecurity/crowdsec docker image
+  ## @param lapi.env [array] Extra environment variables passed to the crowdsecurity/crowdsec container
   env: []
     # by default disable the agent because it only needs the local API.
     #- name: DISABLE_AGENT
     #  value: "true"
   # Allows you to load environment variables from kubernetes secret or config map
+  ## @param lapi.envFrom Environment variables loaded from Kubernetes Secrets or ConfigMaps
   envFrom: []
     # - secretRef:
     #     name: env-secret
@@ -208,37 +259,46 @@ lapi:
     #     name: config-map
   # -- Enable ingress lapi object
   ingress:
+    ## @param lapi.ingress.enabled [default: false] Enable ingress for the LAPI service
     enabled: false
+    ## @param lapi.ingress.annotations [object] Annotations to apply to the LAPI ingress object
     annotations:
       # we only want http to the backend so we need this annotation
       nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
     # labels: {}
+    ## @param lapi.ingress.ingressClassName [string] IngressClass name for the LAPI ingress
     ingressClassName: "" # nginx
+    ## @param lapi.ingress.host [string] Hostname for the LAPI ingress
     host: "" # crowdsec-api.example.com
     # tls: {}
-
   # -- pod priority class name
+  ## @param lapi.priorityClassName [string] Pod priority class name
   priorityClassName: ""
 
   # -- Annotations to be added to lapi deployment
+  ## @param lapi.deployAnnotations Annotations applied to the LAPI Deployment
   deployAnnotations: {}
 
   # -- Annotations to be added to lapi pods, if global podAnnotations are not set
+  ## @param lapi.podAnnotations Annotations applied to LAPI pods
   podAnnotations: {}
-
   # -- Labels to be added to lapi pods, if global podLabels are not set
+  ## @param lapi.podLabels Labels applied to LAPI pods
   podLabels: {}
 
   # -- Extra init containers to be added to lapi pods
+  ## @param lapi.extraInitContainers Additional init containers for LAPI pods
   extraInitContainers: []
 
   # -- Extra volumes to be added to lapi pods
+  ## @param lapi.extraVolumes Additional volumes for LAPI pods
   extraVolumes: []
 
   # -- Extra volumeMounts to be added to lapi pods
+  ## @param lapi.extraVolumeMounts Additional volumeMounts for LAPI pods
   extraVolumeMounts: []
-
   # -- resources for lapi
+  ## @param lapi.resources [object] Resource requests and limits for the LAPI pods
   resources:
     limits:
       memory: 500Mi
@@ -247,111 +307,107 @@ lapi:
       cpu: 500m
       memory: 500Mi
 
-  dashboard:
-    # -- Enable Metabase Dashboard (by default disabled)
-    enabled: false
-    # -- environment variables from metabase/metabase docker image
-    # -- see https://www.metabase.com/docs/latest/configuring-metabase/environment-variables
-    env: []
-    image:
-      # -- docker image repository name
-      repository: metabase/metabase
-      # -- pullPolicy
-      pullPolicy: IfNotPresent
-      # -- docker image tag
-      tag: "v0.46.6.1"
-    # -- Metabase SQLite static DB containing Dashboards
-    assetURL: https://crowdsec-statics-assets.s3-eu-west-1.amazonaws.com/metabase_sqlite.zip
-
-    ## Ref: http://kubernetes.io/docs/user-guide/compute-resources/
-    # -- resources for metabase dashboard
-    resources: {}
-      # limits:
-      #   memory: 1Gi
-      #   cpu: 500m
-      # requests:
-      #   cpu: 500m
-      #   memory: 1Gi
-
-    # -- Enable ingress object
-    ingress:
-      enabled: false
-      annotations:
-        # metabase only supports http so we need this annotation
-        nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
-      # labels: {}
-      ingressClassName: "" # nginx
-      host: "" # metabase.example.com
-      # tls: {}
-
   # -- Enable persistent volumes
   persistentVolume:
     # -- Persistent volume for data folder. Stores e.g. registered bouncer api keys
     data:
+      ## @param lapi.persistentVolume.data.enabled Enable persistent volume for the data folder (stores bouncer API keys)
       enabled: true
+      ## @param lapi.persistentVolume.data.accessModes Access modes for the data PVC
       accessModes:
         - ReadWriteOnce
+      ## @param lapi.persistentVolume.data.storageClassName [string] StorageClass name for the data PVC
       storageClassName: ""
+      ## @param lapi.persistentVolume.data.existingClaim [string] Existing PersistentVolumeClaim to use for the data PVC
       existingClaim: ""
+      ## @param lapi.persistentVolume.data.subPath [string] subPath to use within the volume
+      subPath: ""
+      ## @param lapi.persistentVolume.data.size [string] Requested size for the data PVC
       size: 1Gi
-    # -- Persistent volume for config folder. Stores e.g. online api credentials
     config:
+      ## @param lapi.persistentVolume.config.enabled Enable persistent volume for the config folder (stores API credentials)
       enabled: true
+      ## @param lapi.persistentVolume.config.accessModes Access modes for the config PVC
       accessModes:
         - ReadWriteOnce
+      ## @param lapi.persistentVolume.config.storageClassName [string] StorageClass name for the config PVC
       storageClassName: ""
+      ## @param lapi.persistentVolume.config.existingClaim [string] Existing PersistentVolumeClaim to use for the config PVC
       existingClaim: ""
+      ## @param lapi.persistentVolume.config.subPath [string] subPath to use within the volume
+      subPath: ""
+      ## @param lapi.persistentVolume.config.size [string] Requested size for the config PVC
       size: 100Mi
-
+  ## @param lapi.service [object] Configuration of kubernetes lapi service
   service:
+    ## @param lapi.service.type [string] Kubernetes service type for LAPI
     type: ClusterIP
+    ## @param lapi.service.labels [object] Extra labels to add to the LAPI service
     labels: {}
+    ## @param lapi.service.annotations [object] Extra annotations to add to the LAPI service
     annotations: {}
+    ## @param lapi.service.externalIPs [array] List of external IPs for the LAPI service
     externalIPs: []
+    ## @param lapi.service.loadBalancerIP [string,nullable] Specific loadBalancer IP for the LAPI service
     loadBalancerIP: null
+    ## @param lapi.service.loadBalancerClass [string,nullable] LoadBalancer class for the LAPI service
     loadBalancerClass: null
+    ## @param lapi.service.externalTrafficPolicy [string] External traffic policy for the LAPI service
     externalTrafficPolicy: Cluster
-
   # -- nodeSelector for lapi
+  ## @param lapi.nodeSelector [object] Node selector for scheduling LAPI pods
   nodeSelector: {}
   # -- tolerations for lapi
+  ## @param lapi.tolerations [array] Tolerations for scheduling LAPI pods
   tolerations: []
   # -- dnsConfig for lapi
+  ## @param lapi.dnsConfig [object] DNS configuration for LAPI pods
   dnsConfig: {}
   # -- affinity for lapi
+  ## @param lapi.affinity [object] Affinity rules for LAPI pods
   affinity: {}
   # -- topologySpreadConstraints for lapi
+  ## @param lapi.topologySpreadConstraints [array] Topology spread constraints for LAPI pods
   topologySpreadConstraints: []
 
   # -- Enable service monitoring (exposes "metrics" port "6060" for Prometheus)
   metrics:
+    ## @param lapi.metrics.enabled  Enable service monitoring for Prometheus (exposes port 6060)
     enabled: true
     # -- Creates a ServiceMonitor so Prometheus will monitor this service
     # -- Prometheus needs to be configured to watch on all namespaces for ServiceMonitors
     # -- See the documentation: https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack#prometheusioscrape
     # -- See also: https://github.com/prometheus-community/helm-charts/issues/106#issuecomment-700847774
     serviceMonitor:
+      ## @param lapi.metrics.serviceMonitor.enabled [default: true] [object] Create a ServiceMonitor resource for Prometheus
       enabled: false
+      ## @param lapi.metrics.serviceMonitor.additionalLabels [object] Extra labels for the ServiceMonitor
       additionalLabels: {}
     # -- Creates a PodMonitor so Prometheus will monitor all LAPI PODs
     # -- Prometheus needs to be configured to watch on all namespaces for PodMonitors
     # -- See the documentation: https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack#prometheusioscrape
     # -- See also: https://github.com/prometheus-community/helm-charts/issues/106#issuecomment-700847774
     podMonitor:
+      ## @param lapi.metrics.podMonitor.enabled Enables prometheus operator podMonitor
       enabled: false
+      ## @param lapi.metrics.podMonitor.additionalLabels additional labels for podMonitor
       additionalLabels: {}
 
   strategy:
+    ## @param lapi.strategy.type [string] Deployment strategy for the LAPI deployment
     type: Recreate
-
   secrets:
     # -- Shared LAPI secret. Will be generated randomly if not specified. Size must be > 64 characters
+    ## @param lapi.secrets.csLapiSecret [string] Shared LAPI secret (randomly generated if not specified, must be >64 chars)
     csLapiSecret: ""
     # -- Registration Token for Appsec. Will be generated randomly if not specified. Size must be > 48 characters
+    ## @param lapi.secrets.registrationToken [string] Registration token for AppSec (randomly generated if not specified, must be >48 chars)
     registrationToken: ""
   # -- Any extra secrets you may need (for example, external DB password)
+  ## @param lapi.extraSecrets [object] Additional secrets to inject (e.g., external DB password)
   extraSecrets: {}
     # dbPassword: randomPass
+  ## @param lapi.lifecycle [object] Lifecycle hooks for LAPI pods (postStart, preStop, etc.)
   lifecycle: {}
     # preStop:
     #   exec:
@@ -359,37 +415,48 @@ lapi:
     # postStart:
     #   exec:
     #     command: ["/bin/sh", "-c", "echo Hello from the postStart handler > /usr/share/message"]
-  
+
   # -- storeCAPICredentialsInSecret
   # -- If set to true, the Central API credentials will be stored in a secret (to use when lapi replicas > 1)
+  ## @param lapi.storeCAPICredentialsInSecret [default: false] [object] Store Central API credentials in a Secret (required if LAPI replicas > 1)
   storeCAPICredentialsInSecret: false
-
 # agent will deploy pod on every node as daemonSet to read wanted pods logs
+## @section agent
 agent:
   # -- enable agent (by default enabled)
+  ## @param agent.enabled [default:true] [object] Enable CrowdSec agent (enabled by default)
   enabled: true
   # -- Switch to Deployment instead of DaemonSet (In some cases, you may want to deploy the agent as a Deployment)
+  ## @param agent.isDeployment [default: false] [object] Deploy agent as a Deployment instead of a DaemonSet
   isDeployment: false
-  # [optionnal] serviceAccountName for the deployment 
-  # serviceAccountName: crowdsec-sa
+  # -- serviceAccountName for the deployment
+  ## @param agent.serviceAccountName [string] Service account name for the agent pods 
+  serviceAccountName: ""
   # -- lapiURL for agent to connect to (default is the lapi service URL)
+  ## @param agent.lapiURL [string] URL of the LAPI for the agent to connect to (defaults to internal service URL)
   lapiURL: ""
   # -- lapiHost for agent to connect to (default is the lapi service)
+  ## @param agent.lapiHost [string] Host of the LAPI for the agent to connect to
   lapiHost: ""
   # -- lapiPort for agent to connect to (default is the lapi service port)
+  ## @param agent.lapiPort Port of the LAPI for the agent to connect to
   lapiPort: 8080
   # -- replicas for agent if isDeployment is set to true
+  ## @param agent.replicas Number of replicas when deploying as a Deployment
   replicas: 1
   # -- strategy for agent if isDeployment is set to true
+  ## @param agent.strategy [object] Deployment strategy when `isDeployment` is true
   strategy:
     type: Recreate
-  
+
   # -- add your custom ports here, by default we expose port 6060 for metrics if metrics is enabled
+  ## @param agent.ports [array] Custom container ports to expose (default: metrics port 6060 if enabled)
   ports: []
     # - name: http-datasource
     #   containerPort: 8080
     #   protocol: TCP
   # -- To add custom acquisitions using available datasources (https://docs.crowdsec.net/docs/next/data_sources/intro)
+  ## @param agent.additionalAcquisition [array] Extra log acquisition sources (see https://docs.crowdsec.net/docs/next/data_sources/intro)
   additionalAcquisition: []
     # - source: kinesis
     #   stream_name: my-stream
@@ -401,38 +468,48 @@ agent:
     #   labels:
     #     type: syslog
   # -- Specify each pod you want to process it logs (namespace, podName and program)
+  ## @param agent.acquisition [array] Pod log acquisition definitions (namespace, podName, program, etc.)
   acquisition: []
     #- namespace: "" #ingress-nginx
-      # -- to select pod logs to process
+    # -- to select pod logs to process
     #  podName: "" #ingress-nginx-controller-*
-      # -- program name related to specific parser you will use (see https://hub.crowdsec.net/author/crowdsecurity/configurations/docker-logs)
+    # -- program name related to specific parser you will use (see https://hub.crowdsec.net/author/crowdsecurity/configurations/docker-logs)
     #  program: "" #nginx
-      # -- If set to true, will poll the files using os.Stat instead of using inotify
+    # -- If set to true, will poll the files using os.Stat instead of using inotify
     #  poll_without_inotify: false
 
   # -- pod priority class name
+  ## @param agent.priorityClassName [string] Priority class name for agent pods
   priorityClassName: ""
 
   # -- Annotations to be added to agent daemonset
+  ## @param agent.daemonsetAnnotations [object] Annotations applied to the agent DaemonSet
   daemonsetAnnotations: {}
   # -- Annotations to be added to agent deployment
+  ## @param agent.deploymentAnnotations [object] Annotations applied to the agent Deployment
   deploymentAnnotations: {}
 
   # -- Annotations to be added to agent pods, if global podAnnotations are not set
+  ## @param agent.podAnnotations [object] Annotations applied to agent pods
   podAnnotations: {}
 
   # -- Labels to be added to agent pods, if global podLabels are not set
+  ## @param agent.podLabels [object] Labels applied to agent pods
   podLabels: {}
 
   # -- Extra init containers to be added to agent pods
+  ## @param agent.extraInitContainers [array] Extra init containers for agent pods
   extraInitContainers: []
 
   # -- Extra volumes to be added to agent pods
+  ## @param agent.extraVolumes [array] Extra volumes for agent pods
   extraVolumes: []
 
   # -- Extra volumeMounts to be added to agent pods
+  ## @param agent.extraVolumeMounts [array] Extra volume mounts for agent pods
   extraVolumeMounts: []
 
+  ## @param agent.resources [object] Resource requests and limits for agent pods
   resources:
     limits:
       memory: 250Mi
@@ -443,16 +520,25 @@ agent:
   # -- Enable persistent volumes
   persistentVolume:
     # -- Persistent volume for config folder. Stores local config (parsers, scenarios etc.)
+    ## @param agent.persistentVolume.config.enabled [default: false] [object] Enable persistent volume for agent config
     config:
       enabled: false
+      ## @param agent.persistentVolume.config.accessModes [array] Access modes for the config PVC
       accessModes:
         - ReadWriteOnce
+      ## @param agent.persistentVolume.config.storageClassName [string] StorageClass name for the config PVC
       storageClassName: ""
+      ## @param agent.persistentVolume.config.existingClaim [string] Existing PVC name to use for config
       existingClaim: ""
+      ## @param agent.persistentVolume.config.subPath [string] subPath to use within the volume
+      subPath: ""
+      ## @param agent.persistentVolume.config.size [string] Requested size for the config PVC
       size: 100Mi
   # -- Enable hostPath to /var/log
+  ## @param agent.hostVarLog [default: true] [object] Mount hostPath `/var/log` into the agent pod
   hostVarLog: true
   # -- environment variables from crowdsecurity/crowdsec docker image
+  ## @param agent.env Environment variables passed to the crowdsecurity/crowdsec container
   env: []
     # by default we configure the docker-logs parser to be able to parse docker logs in k8s
     # by default we disable local API on the agent pod
@@ -484,13 +570,17 @@ agent:
     #   value: "false"
 
   # -- nodeSelector for agent
+  ## @param agent.nodeSelector [object] Node selector for agent pods
   nodeSelector: {}
   # -- tolerations for agent
+  ## @param agent.tolerations [array] Tolerations for scheduling agent pods
   tolerations: []
   # -- affinity for agent
+  ## @param agent.affinity [object] Affinity rules for agent pods
   affinity: {}
 
   # -- livenessProbe for agent
+  ## @param agent.livenessProbe [object] Liveness probe configuration for agent pods
   livenessProbe:
     httpGet:
       path: /metrics
@@ -502,6 +592,7 @@ agent:
     failureThreshold: 3
 
   # -- readinessProbe for agent
+  ## @param agent.readinessProbe [object] Readiness probe configuration for agent pods
   readinessProbe:
     httpGet:
       path: /metrics
@@ -513,6 +604,7 @@ agent:
     failureThreshold: 3
 
   # -- startupProbe for agent
+  ## @param agent.startupProbe [object] Startup probe configuration for agent pods
   startupProbe:
     httpGet:
       path: /metrics
@@ -525,31 +617,45 @@ agent:
 
   # -- Enable service monitoring (exposes "metrics" port "6060" for Prometheus)
   metrics:
+    ## @param agent.metrics.enabled Enable service monitoring for Prometheus (exposes port 6060)
     enabled: true
     # -- Creates a ServiceMonitor so Prometheus will monitor this service
     # -- Prometheus needs to be configured to watch on all namespaces for ServiceMonitors
     # -- See the documentation: https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack#prometheusioscrape
     # -- See also: https://github.com/prometheus-community/helm-charts/issues/106#issuecomment-700847774
     serviceMonitor:
+      ## @param agent.metrics.serviceMonitor.enabled  Create a ServiceMonitor resource for Prometheus
       enabled: false
+      ## @param agent.metrics.serviceMonitor.additionalLabels [object] Extra labels for the ServiceMonitor
       additionalLabels: {}
     # -- Creates a PodMonitor so Prometheus will monitor all Agent PODs
     # -- Prometheus needs to be configured to watch on all namespaces for PodMonitors
     # -- See the documentation: https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack#prometheusioscrape
     # -- See also: https://github.com/prometheus-community/helm-charts/issues/106#issuecomment-700847774
+
     podMonitor:
+      ## @param agent.metrics.podMonitor.enabled Create a PodMonitor resource for Prometheus
       enabled: false
+      ## @param agent.metrics.podMonitor.additionalLabels [object] Extra labels for the PodMonitor
       additionalLabels: {}
 
   service:
+    ## @param agent.service.type [string] Kubernetes Service type for agent
     type: ClusterIP
+    ## @param agent.service.labels [object] Labels applied to the agent Service
     labels: {}
+    ## @param agent.service.annotations [object] Annotations applied to the agent Service
     annotations: {}
+    ## @param agent.service.externalIPs [array] External IPs assigned to the agent Service
     externalIPs: []
+    ## @param agent.service.loadBalancerIP [string, nullable] Fixed LoadBalancer IP for the agent Service
     loadBalancerIP: null
+    ## @param agent.service.loadBalancerClass [string, nullable] LoadBalancer class for the agent Service
     loadBalancerClass: null
+    ## @param agent.service.externalTrafficPolicy [string] External traffic policy for the agent Service
     externalTrafficPolicy: Cluster
     # -- ports for agent service, if metrics is enabled, it will expose port 6060 by default
+    ## @param agent.service.ports [array] Custom service ports (default: metrics port 6060 if enabled)
     ports: []
       ## add your custom ports here following specific datasource like https://docs.crowdsec.net/docs/next/data_sources/http/
       # - port: 8080
@@ -561,29 +667,39 @@ agent:
   wait_for_lapi:
     image:
       # -- docker image repository name
+      ## @param agent.wait_for_lapi.image.repository [string] Repository for the wait-for-lapi init container image
       repository: busybox
       # -- pullPolicy
+      ## @param agent.wait_for_lapi.image.pullPolicy [string] Image pull policy for the wait-for-lapi init container
       pullPolicy: IfNotPresent
       # -- docker image tag
+      ## @param agent.wait_for_lapi.image.tag [string] Image tag for the wait-for-lapi init container
       tag: "1.28"
 
 # -- Enable AppSec (https://docs.crowdsec.net/docs/next/appsec/intro)
 appsec:
   # -- Enable AppSec (by default disabled)
+  ## @param appsec.enabled [default: false] [object] Enable AppSec component (disabled by default)
   enabled: false
   # -- lapiURL for agent to connect to (default is the lapi service URL)
+  ## @param appsec.lapiURL [string] URL the AppSec component uses to reach LAPI (defaults to internal service URL)
   lapiURL: ""
   # -- lapiHost for agent to connect to (default is the lapi service)
+  ## @param appsec.lapiHost [string] Hostname the AppSec component uses to reach LAPI
   lapiHost: ""
   # -- lapiPort for agent to connect to (default is the lapi service port)
+  ## @param appsec.lapiPort Port the AppSec component uses to reach LAPI
   lapiPort: 8080
   # -- replicas for Appsec
+  ## @param appsec.replicas Number of replicas for the AppSec Deployment
   replicas: 1
   # -- strategy for appsec deployment
+  ## @param appsec.strategy [object] Deployment strategy for AppSec
   strategy:
     type: Recreate
 
   # -- Additional acquisitions for AppSec
+  ## @param appsec.acquisitions [array] AppSec acquisitions (datasource listeners), e.g. appsec listener on 7422
   acquisitions: []
     #- source: appsec
     #  listen_addr: "0.0.0.0:7422"
@@ -592,6 +708,7 @@ appsec:
     #  labels:
     #    type: appsec
   # -- appsec_configs (https://docs.crowdsec.net/docs/next/appsec/configuration): key is the filename, value is the config content
+  ## @param appsec.configs [object] AppSec configs (key = filename, value = file content)
   configs: {}
     #mycustom-appsec-config.yaml: |
     #  name: crowdsecurity/crs-vpatch
@@ -600,10 +717,11 @@ appsec:
     #  outofband_rules:
     #    - crowdsecurity/crs
     #  inband_rules:
-    #    - crowdsecurity/base-config 
+    #    - crowdsecurity/base-config
     #    - crowdsecurity/vpatch-*
   # -- appsec_configs to disable
   # -- appsec_rules (https://docs.crowdsec.net/docs/next/appsec/rules_syntax)
+  ## @param appsec.rules [object] AppSec rule files (key = filename, value = file content)
   rules: {}
     #mycustom-appsec-rule.yaml: |
     #  name: crowdsecurity/example-rule
@@ -625,23 +743,31 @@ appsec:
     #    label: "A good description of the rule"
     #    classification:
     #      - cve.CVE-xxxx-xxxxx
-    #      - attack.Txxxx 
+    #      - attack.Txxxx
 
   # -- priorityClassName for appsec pods
+  ## @param appsec.priorityClassName [string] Priority class name for AppSec pods
   priorityClassName: ""
   # -- Annotations to be added to appsec deployment
+  ## @param appsec.deployAnnotations [object] Annotations added to the AppSec Deployment
   deployAnnotations: {}
   # -- podAnnotations for appsec pods
+  ## @param appsec.podAnnotations [object] Annotations added to AppSec pods
   podAnnotations: {}
   # -- podLabels for appsec pods
+  ## @param appsec.podLabels [object] Labels added to AppSec pods
   podLabels: {}
   # -- extraInitContainers for appsec pods
+  ## @param appsec.extraInitContainers [array] Extra init containers for AppSec pods
   extraInitContainers: []
   # -- Extra volumes to be added to appsec pods
+  ## @param appsec.extraVolumes [array] Extra volumes for AppSec pods
   extraVolumes: []
   # -- Extra volumeMounts to be added to appsec pods
+  ## @param appsec.extraVolumeMounts [array] Extra volume mounts for AppSec pods
   extraVolumeMounts: []
   # -- resources for appsec pods
+  ## @param appsec.resources [object] Resource requests and limits for AppSec pods
   resources:
     limits:
       memory: 250Mi
@@ -651,6 +777,7 @@ appsec:
       memory: 250Mi
 
   # -- environment variables
+  ## @param appsec.env [array] Environment variables for the AppSec container (collections/configs/rules toggles, etc.)
   env: []
     # -- COLLECTIONS to install, separated by space (value: "crowdsecurity/appsec-virtual-patching crowdsecurity/appsec-crs")
     #- name: COLLECTIONS
@@ -669,14 +796,18 @@ appsec:
     #  value: ""
 
   # -- nodeSelector for appsec
+  ## @param appsec.nodeSelector [object] Node selector for scheduling AppSec pods
   nodeSelector: {}
 
   # -- tolerations for appsec
+  ## @param appsec.tolerations [array] Tolerations for scheduling AppSec pods
   tolerations: []
   # -- affinity for appsec
+  ## @param appsec.affinity [object] Affinity rules for scheduling AppSec pods
   affinity: {}
-  
+
   # -- livenessProbe for appsec
+  ## @param appsec.livenessProbe [object] Liveness probe configuration for AppSec pods
   livenessProbe:
     httpGet:
       path: /metrics
@@ -687,6 +818,7 @@ appsec:
     timeoutSeconds: 5
     failureThreshold: 3
   # -- readinessProbe for appsec
+  ## @param appsec.readinessProbe [object] Readiness probe configuration for AppSec pods
   readinessProbe:
     httpGet:
       path: /metrics
@@ -697,6 +829,7 @@ appsec:
     timeoutSeconds: 5
     failureThreshold: 3
   # -- startupProbe for appsec
+  ## @param appsec.startupProbe [object] Startup probe configuration for AppSec pods
   startupProbe:
     httpGet:
       path: /metrics
@@ -707,39 +840,54 @@ appsec:
     timeoutSeconds: 5
     failureThreshold: 30
 
-  # -- Enable service monitoring (exposes "metrics" port "6060" for Prometheus and "7422" for AppSec) 
+  # -- Enable service monitoring (exposes "metrics" port "6060" for Prometheus and "7422" for AppSec)
   metrics:
+    ## @param appsec.metrics.enabled Enable service monitoring (exposes metrics on 6060; AppSec listener typically 7422)
     enabled: true
     # -- Creates a ServiceMonitor so Prometheus will monitor this service
     # -- Prometheus needs to be configured to watch on all namespaces for ServiceMonitors
     # -- See the documentation: https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack#prometheusioscrape
     # -- See also: https://github.com/prometheus-community/helm-charts/issues/106#issuecomment-700847774
     serviceMonitor:
+      ## @param appsec.metrics.serviceMonitor.enabled Create a ServiceMonitor for Prometheus scraping
       enabled: false
+      ## @param appsec.metrics.serviceMonitor.additionalLabels [object] Extra labels for the ServiceMonitor
       additionalLabels: {}
     # -- Creates a PodMonitor so Prometheus will monitor all AppSec PODs
     # -- Prometheus needs to be configured to watch on all namespaces for PodMonitors
     # -- See the documentation: https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack#prometheusioscrape
     # -- See also: https://github.com/prometheus-community/helm-charts/issues/106#issuecomment-700847774
     podMonitor:
+      ## @param appsec.metrics.podMonitor.enabled Create a PodMonitor for Prometheus scraping
       enabled: false
+      ## @param appsec.metrics.podMonitor.additionalLabels [object] Extra labels for the PodMonitor
       additionalLabels: {}
 
   service:
+    ## @param appsec.service.type [string] Kubernetes Service type for AppSec
     type: ClusterIP
+    ## @param appsec.service.labels [object] Additional labels for the AppSec Service
     labels: {}
+    ## @param appsec.service.annotations [object] Annotations to apply to the LAPI ingress object
     annotations: {}
+    ## @param appsec.service.externalIPs [array] External IPs for the AppSec Service
     externalIPs: []
+    ## @param appsec.service.loadBalancerIP [string,nullable] Fixed LoadBalancer IP for the AppSec Service
     loadBalancerIP: null
+    ## @param appsec.service.loadBalancerClass [string,nullable] LoadBalancer class for the AppSec Service
     loadBalancerClass: null
+    ## @param appsec.service.externalTrafficPolicy [string] External traffic policy for the AppSec Service
     externalTrafficPolicy: Cluster
 
   # -- wait-for-lapi init container
   wait_for_lapi:
     image:
       # -- docker image repository name
+      ## @param appsec.wait_for_lapi.image.repository [string] Repository for the wait-for-lapi init con
       repository: busybox
       # -- pullPolicy
+      ## @param appsec.wait_for_lapi.image.pullPolicy [string] Image pull policy for the wait-for-lapi init container
       pullPolicy: IfNotPresent
       # -- docker image tag
+      ## @param appsec.wait_for_lapi.image.tag Image tag for the wait-for-lapi init container
       tag: "1.28"
