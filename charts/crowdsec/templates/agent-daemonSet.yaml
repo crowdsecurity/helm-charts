@@ -183,6 +183,9 @@ spec:
           {{- $crowdsecConfig = "/etc/crowdsec_data" }}
           - name: crowdsec-agent-config
             mountPath: {{ $crowdsecConfig }}
+            {{- if .Values.agent.persistentVolume.config.subPath }}
+            subPath: {{ .Values.agent.persistentVolume.config.subPath }}
+            {{- end }}
           {{- end }}
           {{ if index .Values.config "simulation.yaml" }}
           - name: crowdsec-simulation-volume
@@ -261,11 +264,11 @@ spec:
       {{- if .Values.agent.persistentVolume.config.enabled }}
       - name: crowdsec-agent-config
         persistentVolumeClaim:
-          {{ if .Values.agent.persistentVolume.config.existingClaim }}
+          {{- if .Values.agent.persistentVolume.config.existingClaim }}
           claimName: {{ .Values.agent.persistentVolume.config.existingClaim }}
-          {{ else }}
+          {{- else }}
           claimName: {{ .Release.Name }}-agent-config-pvc
-          {{ end }}
+          {{- end }}
       {{- end }}
       {{ if (include "parsersIsNotEmpty" .) }}
       {{- range $stage, $stageConfig := .Values.config.parsers -}}
