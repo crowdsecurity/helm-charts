@@ -449,11 +449,13 @@ controller:
 | `lapi.persistentVolume.data.accessModes`        | Access modes for the data PVC                                                          | `["ReadWriteOnce"]` |
 | `lapi.persistentVolume.data.storageClassName`   | StorageClass name for the data PVC                                                     | `""`                |
 | `lapi.persistentVolume.data.existingClaim`      | Existing PersistentVolumeClaim to use for the data PVC                                 | `""`                |
+| `lapi.persistentVolume.data.subPath`            | subPath to use within the volume                                                       | `""`                |
 | `lapi.persistentVolume.data.size`               | Requested size for the data PVC                                                        | `""`                |
 | `lapi.persistentVolume.config.enabled`          | Enable persistent volume for the config folder (stores API credentials)                | `true`              |
 | `lapi.persistentVolume.config.accessModes`      | Access modes for the config PVC                                                        | `["ReadWriteOnce"]` |
 | `lapi.persistentVolume.config.storageClassName` | StorageClass name for the config PVC                                                   | `""`                |
 | `lapi.persistentVolume.config.existingClaim`    | Existing PersistentVolumeClaim to use for the config PVC                               | `""`                |
+| `lapi.persistentVolume.config.subPath`          | subPath to use within the volume                                                       | `""`                |
 | `lapi.persistentVolume.config.size`             | Requested size for the config PVC                                                      | `""`                |
 | `lapi.service`                                  | Configuration of kubernetes lapi service                                               | `{}`                |
 | `lapi.service.type`                             | Kubernetes service type for LAPI                                                       | `""`                |
@@ -507,6 +509,7 @@ controller:
 | `agent.persistentVolume.config.accessModes`      | Access modes for the config PVC                                                            | `[]`    |
 | `agent.persistentVolume.config.storageClassName` | StorageClass name for the config PVC                                                       | `""`    |
 | `agent.persistentVolume.config.existingClaim`    | Existing PVC name to use for config                                                        | `""`    |
+| `agent.persistentVolume.config.subPath`          | subPath to use within the volume                                                           | `""`    |
 | `agent.persistentVolume.config.size`             | Requested size for the config PVC                                                          | `""`    |
 | `agent.hostVarLog`                               | [object] Mount hostPath `/var/log` into the agent pod                                      | `true`  |
 | `agent.env`                                      | Environment variables passed to the crowdsecurity/crowdsec container                       | `[]`    |
