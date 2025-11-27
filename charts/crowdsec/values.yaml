@@ -297,6 +297,12 @@ lapi:
   # -- Extra volumeMounts to be added to lapi pods
   ## @param lapi.extraVolumeMounts Additional volumeMounts for LAPI pods
   extraVolumeMounts: []
+
+  # -- Container securityContext
+  securityContext:
+    allowPrivilegeEscalation: false
+    privileged: false
+
   # -- resources for lapi
   ## @param lapi.resources [object] Resource requests and limits for the LAPI pods
   resources:
@@ -306,6 +312,48 @@ lapi:
     requests:
       cpu: 500m
       memory: 500Mi
+
+  dashboard:
+    # -- Enable Metabase Dashboard (by default disabled)
+    enabled: false
+    # -- environment variables from metabase/metabase docker image
+    # -- see https://www.metabase.com/docs/latest/configuring-metabase/environment-variables
+    env: []
+    image:
+      # -- docker image repository name
+      repository: metabase/metabase
+      # -- pullPolicy
+      pullPolicy: IfNotPresent
+      # -- docker image tag
+      tag: "v0.46.6.1"
+    # -- Metabase SQLite static DB containing Dashboards
+    assetURL: https://crowdsec-statics-assets.s3-eu-west-1.amazonaws.com/metabase_sqlite.zip
+
+    ## Ref: http://kubernetes.io/docs/user-guide/compute-resources/
+    # -- resources for metabase dashboard
+    resources: {}
+      # limits:
+      #   memory: 1Gi
+      #   cpu: 500m
+      # requests:
+      #   cpu: 500m
+      #   memory: 1Gi
+
+    # -- Container securityContext
+    securityContext:
+      allowPrivilegeEscalation: false
+      privileged: false
+
+    # -- Enable ingress object
+    ingress:
+      enabled: false
+      annotations:
+        # metabase only supports http so we need this annotation
+        nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+      # labels: {}
+      ingressClassName: "" # nginx
+      host: "" # metabase.example.com
+      # tls: {}
 
   # -- Enable persistent volumes
   persistentVolume:
@@ -509,6 +557,12 @@ agent:
   ## @param agent.extraVolumeMounts [array] Extra volume mounts for agent pods
   extraVolumeMounts: []
 
+  # -- Container securityContext
+  ## @param agent.securityContext [object] Security context for agent pods
+  securityContext:
+    allowPrivilegeEscalation: false
+    privileged: false
+
   ## @param agent.resources [object] Resource requests and limits for agent pods
   resources:
     limits:
@@ -675,6 +729,10 @@ agent:
       # -- docker image tag
       ## @param agent.wait_for_lapi.image.tag [string] Image tag for the wait-for-lapi init container
       tag: "1.28"
+    # -- Container securityContext
+    securityContext:
+      allowPrivilegeEscalation: false
+      privileged: false
 
 # -- Enable AppSec (https://docs.crowdsec.net/docs/next/appsec/intro)
 appsec:
@@ -766,6 +824,10 @@ appsec:
   # -- Extra volumeMounts to be added to appsec pods
   ## @param appsec.extraVolumeMounts [array] Extra volume mounts for AppSec pods
   extraVolumeMounts: []
+  # -- Container securityContext
+  securityContext:
+    allowPrivilegeEscalation: false
+    privileged: false
   # -- resources for appsec pods
   ## @param appsec.resources [object] Resource requests and limits for AppSec pods
   resources:
@@ -891,3 +953,7 @@ appsec:
       # -- docker image tag
       ## @param appsec.wait_for_lapi.image.tag Image tag for the wait-for-lapi init container
       tag: "1.28"
+    # -- Container securityContext
+    securityContext:
+      allowPrivilegeEscalation: false
+      privileged: false
