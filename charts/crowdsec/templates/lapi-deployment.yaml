@@ -187,6 +187,11 @@ spec:
             subPath: online_api_credentials.yaml
           {{- end }}
           {{- end }}
+          {{- if eq (include "StoreLAPICscliCredentialsInSecret" .) "true" }}
+          - name: {{ .Release.Name }}-lapi-cscli-credentials-volume
+            mountPath: /staging/etc/crowdsec/local_api_credentials.yaml
+            subPath: lapi_cscli_credentials.yaml
+          {{- end }}
         {{- if or (.Values.tls.enabled) (.Values.lapi.persistentVolume.data.enabled) (.Values.lapi.persistentVolume.config.enabled) (include "lapiCustomConfigIsNotEmpty" .) (.Values.lapi.extraVolumeMounts) }}
           {{- if .Values.tls.enabled }}
           - name: crowdsec-lapi-tls
@@ -256,6 +261,11 @@ spec:
         secret:
           secretName: {{ .Release.Name }}-capi-credentials
       {{- end }}
+      {{- end }}
+      {{- if eq (include "StoreLAPICscliCredentialsInSecret" .) "true" }}
+      - name: {{ .Release.Name }}-lapi-cscli-credentials-volume
+        secret:
+          secretName: {{ .Release.Name }}-lapi-cscli-credentials
       {{- end }}
       {{- if or (.Values.tls.enabled) (.Values.lapi.persistentVolume.data.enabled) (.Values.lapi.persistentVolume.config.enabled) (include "lapiCustomConfigIsNotEmpty" .) (.Values.lapi.extraVolumes) }}
       {{- if .Values.lapi.persistentVolume.data.enabled }}

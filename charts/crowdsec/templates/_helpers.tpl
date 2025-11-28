@@ -140,3 +140,17 @@ csLapiSecret
 registrationToken
 {{- end -}}
 {{- end -}}
+
+{{/*
+  Provide a default value for StoreLAPICscliCredentialsInSecret. 
+  If StoreLAPICscliCredentialsInSecret is not set in the values, and there's no persistency for the LAPI config, defaults to true
+*/}}
+{{ define "StoreLAPICscliCredentialsInSecret" }}
+{{- if .Values.lapi.storeLAPICscliCredentialsInSecret -}}
+true
+{{- else if (and (not .Values.lapi.storeLAPICscliCredentialsInSecret) (not .Values.lapi.persistentVolume.config.enabled)) -}}
+true
+{{- else -}}
+false
+{{- end -}}
+{{- end -}}
