@@ -55,7 +55,36 @@ spec:
       - name: wait-for-lapi-and-register
         image: "{{ .Values.image.repository | default "crowdsecurity/crowdsec" }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
-        command: ['sh', '-c', 'until nc "$LAPI_HOST" "$LAPI_PORT" -z; do echo waiting for lapi to start; sleep 5; done; ln -s /staging/etc/crowdsec /etc/crowdsec && cscli lapi register --machine "$USERNAME" -u "$LAPI_URL" --token "$REGISTRATION_TOKEN" && cp /etc/crowdsec/local_api_credentials.yaml /tmp_config/local_api_credentials.yaml']
+        command:
+          - sh
+          - "-c"
+          - |
+            until nc "$LAPI_HOST" "$LAPI_PORT" -z; do
+              echo waiting for lapi to start
+              sleep 5
+            done
+
+            ln -s /staging/etc/crowdsec /etc/crowdsec
+
+            if test -f /tmp_config/local_api_credentials.yaml
+            then
+              cp /tmp_config/local_api_credentials.yaml /etc/crowdsec/local_api_credentials.yaml
+
+              cscli lapi status &>/dev/null
+              val=$?
+
+              if test $val -eq 0
+              then
+                echo "Credentials found and valid"
+                exit 0
+              else
+                echo "Credentials found but not valid, trying re-register"
+              fi
+            fi
+
+            set -e
+            cscli lapi register --machine "$USERNAME" -u "$LAPI_URL" --token "$REGISTRATION_TOKEN"
+            cp /etc/crowdsec/local_api_credentials.yaml /tmp_config/local_api_credentials.yaml
       {{- else }}
       - name: wait-for-lapi
         image: "{{ .Values.appsec.wait_for_lapi.image.repository }}:{{ .Values.appsec.wait_for_lapi.image.tag }}"
