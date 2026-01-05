@@ -5,7 +5,7 @@
 # Declare variables to be passed into your templates.
 
 ## @section Global
-## @param container_runtime [default: docker] [string] for raw logs format: json or cri (docker|containerd)
+## @param container_runtime [default: docker] [string] for raw logs format: json or cri (docker or containerd)
 container_runtime: docker
 
 ## @section Image
@@ -430,7 +430,7 @@ agent:
   ## @param agent.isDeployment [default: false] [object] Deploy agent as a Deployment instead of a DaemonSet
   isDeployment: false
   # -- serviceAccountName for the deployment
-  ## @param agent.serviceAccountName [string] Service account name for the agent pods 
+  ## @param agent.serviceAccountName [string] Service account name for the agent pods
   serviceAccountName: ""
   # -- lapiURL for agent to connect to (default is the lapi service URL)
   ## @param agent.lapiURL [string] URL of the LAPI for the agent to connect to (defaults to internal service URL)
