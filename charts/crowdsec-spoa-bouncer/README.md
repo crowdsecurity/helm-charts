@@ -158,40 +158,114 @@ The service exposes port 9000 (SPOA) and port 6060 (metrics) by default.
 
 ## HAProxy Integration
 
-After deploying the bouncer, configure HAProxy to use it.
+After deploying the bouncer, configure HAProxy to use it. See the [official documentation](https://docs.crowdsec.net/u/bouncers/haproxy_spoa/) for complete details.
 
-### HAProxy Configuration Example
+### HAProxy Global Configuration
+
+Add the Lua script and template paths to your HAProxy global section:
+
+```haproxy
+global
+    [...]
+    lua-prepend-path /usr/lib/crowdsec-haproxy-spoa-bouncer/lua/?.lua
+    lua-load /usr/lib/crowdsec-haproxy-spoa-bouncer/lua/crowdsec.lua
+    setenv CROWDSEC_BAN_TEMPLATE_PATH /var/lib/crowdsec-haproxy-spoa-bouncer/html/ban.html
+    setenv CROWDSEC_CAPTCHA_TEMPLATE_PATH /var/lib/crowdsec-haproxy-spoa-bouncer/html/captcha.html
+```
+
+For AppSec (WAF) integration, also add:
+
+```haproxy
+global
+    tune.bufsize 65536
+
+defaults
+    option http-buffer-request
+```
+
+### HAProxy Frontend Configuration
 
 ```haproxy
 frontend http-in
     bind *:80
-    filter spoe engine crowdsec config /etc/haproxy/crowdsec-spoe.conf
-    http-request deny if { var(txn.crowdsec.action) -m str ban }
-```
+    filter spoe engine crowdsec config /etc/haproxy/crowdsec.cfg
 
-### SPOE Configuration (crowdsec-spoe.conf)
+    # Select which SPOE group to send (with/without body)
+    acl body_within_limit req.body_size -m int le 51200  # 50KB - stay safely under SPOE frame limit
+    http-request send-spoe-group crowdsec crowdsec-http-body if body_within_limit || !{ req.body_size -m found }
+    http-request send-spoe-group crowdsec crowdsec-http-no-body if !body_within_limit { req.body_size -m found }
 
-```
-[crowdsec]
-spoe-agent crowdsec-agent
-    messages check-request
-    option var-prefix crowdsec
-    timeout hello      2s
-    timeout idle       2m
-    timeout processing 10ms
-    use-backend crowdsec-spoa
+    http-request set-header X-Crowdsec-Remediation %[var(txn.crowdsec.remediation)]
 
-spoe-message check-request
-    args src=src dst=dst method=method path=path query=query
-    event on-frontend-http-request
-```
+    ## Handle 302 redirect for successful captcha validation (redirect to current request URL)
+    http-request redirect code 302 location %[url] if { var(txn.crowdsec.remediation) -m str "allow" } { var(txn.crowdsec.redirect) -m found }
 
-### HAProxy Backend for SPOA
+    ## Call lua script only for ban and captcha remediations (performance optimization)
+    http-request lua.crowdsec_handle if { var(txn.crowdsec.remediation) -m str "captcha" }
+    http-request lua.crowdsec_handle if { var(txn.crowdsec.remediation) -m str "ban" }
 
-```haproxy
+    ## Handle captcha cookie management via HAProxy
+    ## Set captcha cookie when SPOA provides captcha_status (pending or valid)
+    http-after-response set-header Set-Cookie %[var(txn.crowdsec.captcha_cookie)] if { var(txn.crowdsec.captcha_status) -m found } { var(txn.crowdsec.captcha_cookie) -m found }
+    ## Clear captcha cookie when cookie exists but no captcha_status (Allow decision)
+    http-after-response set-header Set-Cookie %[var(txn.crowdsec.captcha_cookie)] if { var(txn.crowdsec.captcha_cookie) -m found } !{ var(txn.crowdsec.captcha_status) -m found }
+
+    use_backend your-backend
+
 backend crowdsec-spoa
     mode tcp
     server spoa spoa-bouncer.default.svc.cluster.local:9000 check
+```
+
+### SPOE Configuration (crowdsec.cfg)
+
+Create `/etc/haproxy/crowdsec.cfg` with the SPOE agent and message definitions. See the [official SPOE configuration](https://docs.crowdsec.net/u/bouncers/haproxy_spoa/) for the complete file.
+
+### Mounting Lua Scripts and Templates in HAProxy
+
+The Lua scripts and HTML templates must be available to HAProxy. Download them from the [cs-haproxy-spoa-bouncer GitHub repository](https://github.com/crowdsecurity/cs-haproxy-spoa-bouncer) and create ConfigMaps:
+
+```bash
+# Clone or download the files from the repository
+git clone https://github.com/crowdsecurity/cs-haproxy-spoa-bouncer.git
+cd cs-haproxy-spoa-bouncer
+
+# Create ConfigMap for Lua scripts (includes all required .lua files)
+kubectl create configmap crowdsec-lua --from-file=lua/
+
+# Create ConfigMap for HTML templates
+kubectl create configmap crowdsec-templates --from-file=html/
+```
+
+Then mount these in your HAProxy deployment:
+
+```yaml
+spec:
+  containers:
+    - name: haproxy
+      volumeMounts:
+        - name: crowdsec-lua
+          mountPath: /usr/lib/crowdsec-haproxy-spoa-bouncer/lua
+        - name: crowdsec-templates
+          mountPath: /var/lib/crowdsec-haproxy-spoa-bouncer/html
+  volumes:
+    - name: crowdsec-lua
+      configMap:
+        name: crowdsec-lua
+    - name: crowdsec-templates
+      configMap:
+        name: crowdsec-templates
+```
+
+### Real Client IP Behind CDN/Proxy
+
+If HAProxy is behind a CDN or reverse proxy, extract the real client IP before the SPOE groups:
+
+```haproxy
+    # Extract real IP from header (adjust header name as needed)
+    http-request set-src hdr(X-Real-IP) if { hdr(X-Real-IP) -m found }
+    # Or for Cloudflare:
+    # http-request set-src hdr(CF-Connecting-IP) if { hdr(CF-Connecting-IP) -m found }
 ```
 
 ## Troubleshooting
