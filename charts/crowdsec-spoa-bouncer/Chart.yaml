@@ -1,0 +1,20 @@
+apiVersion: v2
+name: crowdsec-spoa-bouncer
+description: A Helm chart for deploying the CrowdSec HAProxy SPOA Bouncer
+type: application
+version: 0.1.0
+appVersion: "0.3.0"
+home: https://www.crowdsec.net/
+icon: https://crowdsec.net/wp-content/uploads/2024/03/crowdsec-no-bg.png
+sources:
+  - https://github.com/crowdsecurity/cs-haproxy-spoa-bouncer
+maintainers:
+  - name: CrowdSec
+    url: https://github.com/crowdsecurity
+keywords:
+  - crowdsec
+  - haproxy
+  - spoa
+  - bouncer
+  - security
+  - waf

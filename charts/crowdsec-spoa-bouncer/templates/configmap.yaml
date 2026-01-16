@@ -1,0 +1,16 @@
+{{- if (include "crowdsec-spoa-bouncer.hasLocalConfig" .) }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "crowdsec-spoa-bouncer.fullname" . }}-config
+  labels:
+    {{- include "crowdsec-spoa-bouncer.labels" . | nindent 4 }}
+data:
+  crowdsec-spoa-bouncer.yaml.local: |
+    {{- if .Values.config.hostsDir.enabled }}
+    hosts_dir: {{ .Values.config.hostsDir.path }}
+    {{- end }}
+    {{- with .Values.config.localConfig }}
+    {{ . | nindent 4 }}
+    {{- end }}
+{{- end }}
