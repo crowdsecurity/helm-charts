@@ -420,6 +420,10 @@ lapi:
   # -- If set to true, the Central API credentials will be stored in a secret (to use when lapi replicas > 1)
   ## @param lapi.storeCAPICredentialsInSecret [default: false] [object] Store Central API credentials in a Secret (required if LAPI replicas > 1)
   storeCAPICredentialsInSecret: false
+  # -- storeLAPICscliCredentialsInSecret
+  # -- If set to true, the credentials used by cscli in the LAPI pod will be stored in a secret. Useful when lapi replicas > 1, as they will be reused in the replicas, and will limit the number of "fake" LPs in the console.
+  ## @param lapi.storeLAPICscliCredentialsInSecret [default: false] [object] Store LAPI cscli credentials in a Secret. Useful if LAPI replicas > 1 or to setup LAPI with a persistent volume.
+  storeLAPICscliCredentialsInSecret: false
 # agent will deploy pod on every node as daemonSet to read wanted pods logs
 ## @section agent
 agent:
