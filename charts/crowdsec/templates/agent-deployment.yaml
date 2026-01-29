@@ -75,7 +75,9 @@ spec:
         volumeMounts:
           - name: crowdsec-config
             mountPath: /tmp_config
+        {{- end }}
         env:
+          {{- if or (not .Values.tls.enabled) (not .Values.tls.agent.tlsClientAuth) }}
           - name: REGISTRATION_TOKEN
             valueFrom:
               secretKeyRef:
@@ -87,11 +89,11 @@ spec:
                 fieldPath: metadata.name
           - name: LAPI_URL
             value: "{{ .Values.agent.lapiURL | default (printf "http://%s-service.%s:8080" .Release.Name .Release.Namespace) }}"
+          {{- end }}
           - name: LAPI_HOST
             value: "{{ .Values.agent.lapiHost | default (printf "%s-service.%s" .Release.Name .Release.Namespace) }}"
           - name: LAPI_PORT
             value: "{{ .Values.agent.lapiPort | default "8080" }}"
-        {{- end }}
       {{- if .Values.agent.extraInitContainers }}
       {{- toYaml .Values.agent.extraInitContainers | nindent 6 }}
       {{- end }}
