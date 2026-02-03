@@ -9,6 +9,13 @@ data:
     {{- $container_runtime := .Values.container_runtime }}
     {{- range .Values.agent.acquisition }}
     ---
+    {{- if .Values.agent.acquisition.useNativeAcquisition  }}
+    kubernetespodlog:
+      namespace: {{ .namespace }}
+      selector: {{ .selector }}
+    labels:
+      type: {{ .type }}
+    {{- else }}
     filenames:
       - /var/log/containers/{{ .podName }}_{{ .namespace }}_*.log
     force_inotify: true
@@ -16,6 +23,7 @@ data:
     labels:
       type: {{ $container_runtime }}
       program: {{ .program }}
+    {{- end }}
     {{- end }}
     {{- range .Values.agent.additionalAcquisition }}
     ---

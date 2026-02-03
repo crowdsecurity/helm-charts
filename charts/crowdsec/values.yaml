@@ -471,6 +471,9 @@ agent:
     #   listen_port: 4242
     #   labels:
     #     type: syslog
+  ## @param agent.useNativeAcquisition CrowdSec will use directly the kubernetes api to gather logs
+  ## Expermimental
+  useNativeAcquisition: false
   # -- Specify each pod you want to process it logs (namespace, podName and program)
   ## @param agent.acquisition [array] Pod log acquisition definitions (namespace, podName, program, etc.)
   acquisition: []
