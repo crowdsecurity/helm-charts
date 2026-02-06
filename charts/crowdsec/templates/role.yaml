@@ -24,12 +24,13 @@ rules:
       verbs: ["create"]
 {{- end }}
 {{- end }}
+--- 
 {{- end }}
-{{- if .Values.agent.acquisition.useNativeAcquisition }}
+{{- if .Values.agent.useNativeAcquisition }}
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: {{ include "crowdsec-agent.fullname" . }}-logs
+  name: {{ .Release.Name }}-logs
 rules:
   - apiGroups: [""]
     resources:

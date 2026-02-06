@@ -47,17 +47,11 @@
                     "type": "string"
                 }
             },
-            "required": [
-                "repository",
-                "pullPolicy"
-            ]
+            "required": ["repository", "pullPolicy"]
         },
         "containerRuntime": {
             "type": "string",
-            "enum": [
-                "docker",
-                "containerd"
-            ]
+            "enum": ["docker", "containerd"]
         },
         "Lapi": {
             "type": "object",
@@ -72,6 +66,10 @@
             "properties": {
                 "enabled": {
                     "type": "boolean"
+                },
+                "useNativeAcquisition": {
+                    "type": "boolean",
+                    "description": "If false, the agent will use the crowdsec fileacuisition to acquire logs."
                 },
                 "serviceAccountName": {
                     "type": "string",
@@ -131,34 +129,62 @@
                 }
             },
             "title": "Agent",
-            "required": [
-                "acquisition"
-            ]
+            "required": ["acquisition"]
         },
         "Acquisition": {
             "type": "object",
             "additionalProperties": false,
+            "title": "Acquisition",
             "properties": {
                 "namespace": {
-                    "type": "string"
+                    "type": "string",
+                    "minLength": 1
                 },
+
                 "podName": {
-                    "type": "string"
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Target a single pod by name (mutually exclusive with selector)."
                 },
+
+                "selector": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Label selector (Kubernetes list options syntax), e.g. \"app=nginx,component=controller\" (mutually exclusive with podName)."
+                },
+
                 "program": {
-                    "type": "string"
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Parser hint / program name used for matching."
                 },
+
+                "labels": {
+                    "type": "object",
+                    "description": "Additional labels to attach (CrowdSec acquisition style).",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+
                 "poll_without_inotify": {
                     "type": "boolean",
                     "default": false
                 }
             },
-            "required": [
-                "namespace",
-                "podName",
-                "program"
-            ],
-            "title": "Acquisition"
+
+            "required": ["namespace"],
+
+            "oneOf": [
+                {
+                    "required": ["podName", "program"],
+                    "not": { "required": ["selector"] }
+                },
+                {
+                    "required": ["selector"],
+                    "not": { "required": ["podName", "program"] }
+                }
+            ]
         },
         "Config": {
             "type": "object",
@@ -284,19 +310,13 @@
             },
             "oneOf": [
                 {
-                    "required": [
-                        "filename"
-                    ]
+                    "required": ["filename"]
                 },
                 {
-                    "required": [
-                        "filenames"
-                    ]
+                    "required": ["filenames"]
                 }
             ],
-            "required": [
-                "source"
-            ]
+            "required": ["source"]
         },
         "JournaldSource": {
             "type": "object",
@@ -317,10 +337,7 @@
                     }
                 }
             },
-            "required": [
-                "source",
-                "journalctl_filter"
-            ]
+            "required": ["source", "journalctl_filter"]
         },
         "CloudwatchSource": {
             "type": "object",
@@ -372,18 +389,10 @@
             },
             "anyOf": [
                 {
-                    "required": [
-                        "source",
-                        "group_name",
-                        "stream_regexp"
-                    ]
+                    "required": ["source", "group_name", "stream_regexp"]
                 },
                 {
-                    "required": [
-                        "source",
-                        "group_name",
-                        "stream_name"
-                    ]
+                    "required": ["source", "group_name", "stream_name"]
                 }
             ]
         },
@@ -457,28 +466,16 @@
             },
             "anyOf": [
                 {
-                    "required": [
-                        "source",
-                        "container_name"
-                    ]
+                    "required": ["source", "container_name"]
                 },
                 {
-                    "required": [
-                        "source",
-                        "container_id"
-                    ]
+                    "required": ["source", "container_id"]
                 },
                 {
-                    "required": [
-                        "source",
-                        "container_name_regexp"
-                    ]
+                    "required": ["source", "container_name_regexp"]
                 },
                 {
-                    "required": [
-                        "source",
-                        "container_id_regexp"
-                    ]
+                    "required": ["source", "container_id_regexp"]
                 }
             ]
         },
@@ -496,9 +493,7 @@
                         }
                     },
                     "then": {
-                        "required": [
-                            "stream_name"
-                        ]
+                        "required": ["stream_name"]
                     }
                 },
                 {
@@ -510,9 +505,7 @@
                         }
                     },
                     "then": {
-                        "required": [
-                            "stream_name"
-                        ]
+                        "required": ["stream_name"]
                     }
                 },
                 {
@@ -524,10 +517,7 @@
                         }
                     },
                     "then": {
-                        "required": [
-                            "consumer_name",
-                            "stream_arn"
-                        ]
+                        "required": ["consumer_name", "stream_arn"]
                     }
                 }
             ],
@@ -574,9 +564,7 @@
                     "description": "Optional, the data source will automatically the standard AWS env vars if present."
                 }
             },
-            "required": [
-                "source"
-            ]
+            "required": ["source"]
         },
         "S3Source": {
             "type": "object",
@@ -592,9 +580,7 @@
                         }
                     },
                     "then": {
-                        "required": [
-                            "sqs_name"
-                        ]
+                        "required": ["sqs_name"]
                     }
                 },
                 {
@@ -606,9 +592,7 @@
                         }
                     },
                     "then": {
-                        "required": [
-                            "bucket_name"
-                        ]
+                        "required": ["bucket_name"]
                     }
                 },
                 {
@@ -620,10 +604,7 @@
                         }
                     },
                     "then": {
-                        "required": [
-                            "sqs",
-                            "list"
-                        ]
+                        "required": ["sqs", "list"]
                     }
                 },
                 {
@@ -635,12 +616,9 @@
                         }
                     },
                     "then": {
-                        "required": [
-                            "eventbridge",
-                            "s3notification"
-                        ]
+                        "required": ["eventbridge", "s3notification"]
                     }
-                }                
+                }
             ],
             "properties": {
                 "source": {
@@ -686,9 +664,7 @@
                     "description": "Optional, Endpoint for AWS API."
                 }
             },
-            "required": [
-                "source"
-            ]
+            "required": ["source"]
         },
         "SyslogSource": {
             "type": "object",
@@ -717,9 +693,7 @@
                     "description": "Maximum length of a syslog message (including priority and facility)."
                 }
             },
-            "required": [
-                "source"
-            ]
+            "required": ["source"]
         },
         "HttpSource": {
             "type": "object",
@@ -742,11 +716,7 @@
                 },
                 "auth_type": {
                     "type": "string",
-                    "enum": [
-                        "basic_auth",
-                        "headers",
-                        "mtls"
-                    ],
+                    "enum": ["basic_auth", "headers", "mtls"],
                     "description": "The authentication type to use."
                 },
                 "basic_auth": {
@@ -761,10 +731,7 @@
                             "description": "The password to use for basic authentication."
                         }
                     },
-                    "required": [
-                        "username",
-                        "password"
-                    ]
+                    "required": ["username", "password"]
                 },
                 "headers": {
                     "type": "object",
@@ -786,10 +753,7 @@
                             "description": "The CA certificate path."
                         }
                     },
-                    "required": [
-                        "server_cert",
-                        "server_key"
-                    ]
+                    "required": ["server_cert", "server_key"]
                 },
                 "custom_status_code": {
                     "type": "number",
@@ -808,11 +772,7 @@
                     "description": "The timeout to wait for a request."
                 }
             },
-            "required": [
-                "source",
-                "listen_addr",
-                "auth_type"
-            ]
+            "required": ["source", "listen_addr", "auth_type"]
         },
         "KafkaSource": {
             "type": "object",
@@ -866,10 +826,7 @@
                     }
                 }
             },
-            "required": [
-                "source",
-                "brokers"
-            ]
+            "required": ["source", "brokers"]
         },
         "WinEventLogSource": {
             "type": "object",
@@ -887,9 +844,7 @@
                         }
                     },
                     "then": {
-                        "required": [
-                            "event_channel"
-                        ]
+                        "required": ["event_channel"]
                     }
                 },
                 {
@@ -901,10 +856,7 @@
                         }
                     },
                     "then": {
-                        "required": [
-                            "event_level",
-                            "event_ids"
-                        ]
+                        "required": ["event_level", "event_ids"]
                     }
                 },
                 {
@@ -918,9 +870,7 @@
                         }
                     },
                     "then": {
-                        "required": [
-                            "xpath_query"
-                        ]
+                        "required": ["xpath_query"]
                     }
                 }
             ],
@@ -958,9 +908,7 @@
                     "description": "Pretty name to use for the datasource in the metrics (cscli metrics). This parameter is optional, but strongly recommanded, as by default the full xpath query will be displayed in the metrics, which can be hard to read."
                 }
             },
-            "required": [
-                "source"
-            ]
+            "required": ["source"]
         },
         "LokiSource": {
             "type": "object",
@@ -1049,12 +997,7 @@
                     "description": "The path on which the datasource will accept requests from kubernetes."
                 }
             },
-            "required": [
-                "source",
-                "listen_addr",
-                "listen_port",
-                "webhook_path"
-            ]
+            "required": ["source", "listen_addr", "listen_port", "webhook_path"]
         },
         "VictoriaLogsSource": {
             "type": "object",
@@ -1107,10 +1050,7 @@
                             "description": "Password for authentication with VictoriaLogs"
                         }
                     },
-                    "required": [
-                        "username",
-                        "password"
-                    ],
+                    "required": ["username", "password"],
                     "description": "Authentication credentials for VictoriaLogs"
                 },
                 "max_failure_duration": {
@@ -1121,11 +1061,7 @@
                     "$ref": "#/definitions/Labels"
                 }
             },
-            "required": [
-                "source",
-                "url",
-                "query"
-            ]
+            "required": ["source", "url", "query"]
         }
     }
 }

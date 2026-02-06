@@ -7,14 +7,15 @@ metadata:
 data:
   acquis.yaml: |-
     {{- $container_runtime := .Values.container_runtime }}
+    {{- $useNativeAcquisition := .Values.agent.useNativeAcquisition }}
     {{- range .Values.agent.acquisition }}
     ---
-    {{- if .Values.agent.acquisition.useNativeAcquisition  }}
-    kubernetespodlog:
-      namespace: {{ .namespace }}
-      selector: {{ .selector }}
+    {{- if $useNativeAcquisition  }}
+    source: kubernetespodlogs
+    namespace: {{ .namespace }}
+    selector: {{ .selector }}
     labels:
-      type: {{ .type }}
+      type: {{ .labels.type }}
     {{- else }}
     filenames:
       - /var/log/containers/{{ .podName }}_{{ .namespace }}_*.log
