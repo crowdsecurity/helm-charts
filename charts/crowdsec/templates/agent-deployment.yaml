@@ -39,8 +39,8 @@ spec:
 {{ toYaml .Values.agent.podLabels | trim | indent 8 }}
         {{- end }}
     spec:
-      {{- if .Values.agent.serviceAccountName }}
-      serviceAccountName: {{ .Values.agent.serviceAccountName }}
+      {{- if or .Values.agent.serviceAccountName .Values.agent.useNativeAcquisition }}
+      serviceAccountName: {{ default (printf "%s-agent"  .Release.Name) 
       {{- end }}
       {{- with .Values.agent.tolerations }}
       tolerations:
