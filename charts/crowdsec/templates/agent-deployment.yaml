@@ -40,7 +40,7 @@ spec:
         {{- end }}
     spec:
       {{- if or .Values.agent.serviceAccountName .Values.agent.useNativeAcquisition }}
-      serviceAccountName: {{ default (printf "%s-agent"  .Release.Name) 
+      serviceAccountName: {{ default (printf "%s-agent"  .Release.Name) }}
       {{- end }}
       {{- with .Values.agent.tolerations }}
       tolerations:
