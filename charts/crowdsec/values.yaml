@@ -522,8 +522,12 @@ agent:
   ## @param agent.extraVolumeMounts [array] Extra volume mounts for agent pods
   extraVolumeMounts: []
 
+  # -- Pod securityContext
+  ## @param agent.podSecurityContext [object] Security context for agent pods
+  podSecurityContext: {}
+
   # -- Container securityContext
-  ## @param agent.securityContext [object] Security context for agent pods
+  ## @param agent.securityContext [object] Security context for agent containers
   securityContext:
     allowPrivilegeEscalation: false
     privileged: false
@@ -789,6 +793,8 @@ appsec:
   # -- Extra volumeMounts to be added to appsec pods
   ## @param appsec.extraVolumeMounts [array] Extra volume mounts for AppSec pods
   extraVolumeMounts: []
+  # -- Pod securityContext
+  podSecurityContext: {}
   # -- Container securityContext
   securityContext:
     allowPrivilegeEscalation: false
