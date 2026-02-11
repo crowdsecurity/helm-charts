@@ -140,3 +140,16 @@ csLapiSecret
 registrationToken
 {{- end -}}
 {{- end -}}
+
+{{/*
+  Provide a default value for StoreLAPICscliCredentialsInSecret.
+  If TLS is enabled return false (user/password auth is mutually exclusive with TLS auth).
+  Else if storeLAPICscliCredentialsInSecret is not set in the values, and there's no persistence for the LAPI config, default to true
+*/}}
+{{ define "StoreLAPICscliCredentialsInSecret" }}
+{{- if .Values.tls.enabled -}}
+false
+{{- else -}}
+{{ dig "storeLAPICscliCredentialsInSecret" (not .Values.lapi.persistentVolume.config.enabled) .Values.lapi }}
+{{- end -}}
+{{- end -}}

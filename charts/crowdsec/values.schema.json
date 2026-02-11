@@ -73,6 +73,10 @@
                 "enabled": {
                     "type": "boolean"
                 },
+                "serviceAccountName": {
+                    "type": "string",
+                    "description": "Optional, the serviceAccountName used in the deployment."
+                },
                 "acquisition": {
                     "type": "array",
                     "items": {
@@ -256,6 +260,26 @@
                 "filename": {
                     "type": "string",
                     "description": "A single path to a file to tail. Globbing is supported. Required if filenames is not provided."
+                },
+                "exclude_regexps": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "description": "List of regular expressions to exclude files from being tailed."
+                },
+                "max_buffer_size": {
+                    "type": "integer",
+                    "description": "Maximum buffer size for file reading."
+                },
+                "discovery_poll_enable": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Enable periodic discovery polling for new files."
+                },
+                "discovery_poll_interval": {
+                    "type": "string",
+                    "description": "Interval for discovery polling (e.g., '30s', '1m')."
                 }
             },
             "oneOf": [
@@ -812,6 +836,10 @@
                     "type": "string",
                     "description": "The topic name you want to read logs from."
                 },
+                "group_id": {
+                    "type": "string",
+                    "description": "Group id to use with the kafka consumer group."
+                },
                 "timeout": {
                     "type": "number"
                 },
@@ -853,7 +881,7 @@
                         "not": {
                             "properties": {
                                 "xpath_query": {
-                                    "type": "#/definitions/nonEmptyString"
+                                    "$ref": "#/definitions/nonEmptyString"
                                 }
                             }
                         }
@@ -868,7 +896,7 @@
                     "if": {
                         "properties": {
                             "event_channel": {
-                                "type": "#/definitions/nonEmptyString"
+                                "$ref": "#/definitions/nonEmptyString"
                             }
                         }
                     },
@@ -884,7 +912,7 @@
                         "not": {
                             "properties": {
                                 "event_channel": {
-                                    "type": "#/definitions/nonEmptyString"
+                                    "$ref": "#/definitions/nonEmptyString"
                                 }
                             }
                         }

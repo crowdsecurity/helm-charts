@@ -2,31 +2,44 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
+## @param replicaCount Number of replicas for the Deployment
 replicaCount: 1
 
 image:
+  ## @param image.repository [string] Image repository
   repository: hashicorp/http-echo
+  ## @param image.pullPolicy [string] Image pull policy
   pullPolicy: IfNotPresent
+  ## @param image.tag [string] Image tag
   tag: "0.2.3"
 
+## @param imagePullSecrets [array] Secrets for pulling images from private registries
 imagePullSecrets: []
+## @param nameOverride [string] String to partially override fullname template (name)
 nameOverride: ""
+## @param fullnameOverride [string] String to fully override fullname template
 fullnameOverride: ""
 
 serviceAccount:
   # Specifies whether a service account should be created
+  ## @param serviceAccount.create  Whether a ServiceAccount should be created
   create: true
   # Annotations to add to the service account
+  ## @param serviceAccount.annotations [object] Annotations to add to the ServiceAccount
   annotations: {}
   # The name of the service account to use.
   # If not set and create is true, a name is generated using the fullname template
+  ## @param serviceAccount.name [string] Name of the ServiceAccount to use
   name: "helloworld"
 
+## @param podAnnotations [object] Annotations to add to the Pod
 podAnnotations: {}
 
+## @param podSecurityContext [object] Pod-level security contex
 podSecurityContext: {}
   # fsGroup: 2000
 
+## @param securityContext [object] Container-level security context
 securityContext: {}
   # capabilities:
   #   drop:
@@ -36,24 +49,33 @@ securityContext: {}
   # runAsUser: 1000
 
 service:
+  ## @param service.name [string] Service name
   name: helloworld
+  ## @param service.type [string] Kubernetes Service type
   type: ClusterIP
+  ## @param service.port Service port
   port: 5678
 
 ingress:
+  ## @param ingress.enabled  Enable Ingress
   enabled: false
+  ## @param ingress.class [string] IngressClass name to use
   class: "nginx"
+  ## @param ingress.annotations [object] Annotations to apply to the Ingress
   annotations: {}
     # kubernetes.io/tls-acme: "true"
+  ## @skip ingress.hosts Default hosts/paths example (array with objects); customize as needed
   hosts:
     - host: helloworld.local
       paths:
         - path: /
+  ## @param ingress.tls [array] Ingress TLS configuration
   tls: []
   #  - secretName: chart-example-tls
   #    hosts:
   #      - chart-example.local
 
+## @param resources [object] Resource requests and limits for the Pods
 resources: #{}
   # We usually recommend not to specify default resources and to leave this as a conscious
   # choice for the user. This also increases chances charts run on environments with little
@@ -66,6 +88,7 @@ resources: #{}
     cpu: 100m
     memory: 128Mi
 
+## @param autoscaling [object] autoscaling object
 autoscaling:
   enabled: false
   minReplicas: 1
@@ -73,8 +96,11 @@ autoscaling:
   targetCPUUtilizationPercentage: 80
   # targetMemoryUtilizationPercentage: 80
 
+## @param nodeSelector [object] Node labels for pod assignment
 nodeSelector: {}
 
+## @param tolerations [array] Tolerations for pod assignment
 tolerations: []
 
+## @param affinity [object] Affinity rules for pod assignment
 affinity: {}
