@@ -316,48 +316,6 @@ lapi:
       cpu: 500m
       memory: 500Mi
 
-  dashboard:
-    # -- Enable Metabase Dashboard (by default disabled)
-    enabled: false
-    # -- environment variables from metabase/metabase docker image
-    # -- see https://www.metabase.com/docs/latest/configuring-metabase/environment-variables
-    env: []
-    image:
-      # -- docker image repository name
-      repository: metabase/metabase
-      # -- pullPolicy
-      pullPolicy: IfNotPresent
-      # -- docker image tag
-      tag: "v0.46.6.1"
-    # -- Metabase SQLite static DB containing Dashboards
-    assetURL: https://crowdsec-statics-assets.s3-eu-west-1.amazonaws.com/metabase_sqlite.zip
-
-    ## Ref: http://kubernetes.io/docs/user-guide/compute-resources/
-    # -- resources for metabase dashboard
-    resources: {}
-      # limits:
-      #   memory: 1Gi
-      #   cpu: 500m
-      # requests:
-      #   cpu: 500m
-      #   memory: 1Gi
-
-    # -- Container securityContext
-    securityContext:
-      allowPrivilegeEscalation: false
-      privileged: false
-
-    # -- Enable ingress object
-    ingress:
-      enabled: false
-      annotations:
-        # metabase only supports http so we need this annotation
-        nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
-      # labels: {}
-      ingressClassName: "" # nginx
-      host: "" # metabase.example.com
-      # tls: {}
-
   # -- Enable persistent volumes
   persistentVolume:
     # -- Persistent volume for data folder. Stores e.g. registered bouncer api keys
