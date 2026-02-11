@@ -299,9 +299,11 @@ lapi:
   extraVolumeMounts: []
 
   # -- Pod securityContext
+  ## @param lapi.podSecurityContext [object] Security context for LAPI pods
   podSecurityContext: {}
 
   # -- Container securityContext
+  ## @param lapi.securityContext [object] Security context for the LAPI contaienr
   securityContext:
     allowPrivilegeEscalation: false
     privileged: false
@@ -699,6 +701,7 @@ agent:
       ## @param agent.wait_for_lapi.image.tag [string] Image tag for the wait-for-lapi init container
       tag: "1.28"
     # -- Container securityContext
+    ## @param agent.wait_for_lapi.securityContext [object] Security context for the wait-for-lapi init container
     securityContext:
       allowPrivilegeEscalation: false
       privileged: false
@@ -794,8 +797,10 @@ appsec:
   ## @param appsec.extraVolumeMounts [array] Extra volume mounts for AppSec pods
   extraVolumeMounts: []
   # -- Pod securityContext
+  ## @param appsec.podSecurityContext [object] Security context for AppSec pods
   podSecurityContext: {}
   # -- Container securityContext
+  ## @param appsec.securityContext [object] Security context for the appsec container
   securityContext:
     allowPrivilegeEscalation: false
     privileged: false
@@ -925,6 +930,7 @@ appsec:
       ## @param appsec.wait_for_lapi.image.tag Image tag for the wait-for-lapi init container
       tag: "1.28"
     # -- Container securityContext
+    ## @param appsec.wait_for_lapi.securityContext [object] Security context for the wait-for-lapi init container
     securityContext:
       allowPrivilegeEscalation: false
       privileged: false
