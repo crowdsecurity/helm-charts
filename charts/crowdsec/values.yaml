@@ -298,6 +298,9 @@ lapi:
   ## @param lapi.extraVolumeMounts Additional volumeMounts for LAPI pods
   extraVolumeMounts: []
 
+  # -- Pod securityContext
+  podSecurityContext: {}
+
   # -- Container securityContext
   securityContext:
     allowPrivilegeEscalation: false
