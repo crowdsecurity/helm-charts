@@ -69,7 +69,7 @@ spec:
             cpu: 1m
             memory: 10Mi
         securityContext:
-          {{- toYaml .Values.appsec.wai_for_lapi.securityContext | nindent 10 }}
+          {{- toYaml .Values.appsec.wait_for_lapi.securityContext | nindent 10 }}
         {{- if or (not .Values.tls.enabled) (not .Values.tls.appsec.tlsClientAuth) }}
         volumeMounts:
           - name: crowdsec-config
