@@ -48,8 +48,16 @@ appsec:
       outofband_rules:
         - crowdsecurity/crs
       inband_rules:
-        - crowdsecurity/base-config 
+        - crowdsecurity/base-config
         - crowdsecurity/vpatch-*
   env:
     - name: COLLECTIONS
       value: "crowdsecurity/appsec-virtual-patching crowdsecurity/appsec-crs"
+
+extraManifests:
+  - apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: extra-configmap
+    data:
+      key: value
