@@ -157,8 +157,7 @@ spec:
             {{- end }}
 
         securityContext:
-          allowPrivilegeEscalation: false
-          privileged: false
+          {{- toYaml .Values.lapi.securityContext | nindent 10 }}
 
         ports:
           - name: lapi
@@ -250,6 +249,7 @@ spec:
           {{ toYaml .Values.lapi.extraVolumeMounts | nindent 10 }}
           {{- end }}
           {{- end }}
+
       terminationGracePeriodSeconds: 30
       volumes:
       - name: crowdsec-docker-start-script
@@ -351,4 +351,8 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       priorityClassName: {{ .Values.lapi.priorityClassName }}
+      {{- with .Values.lapi.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
 {{- end }}

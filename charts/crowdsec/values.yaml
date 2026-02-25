@@ -297,6 +297,17 @@ lapi:
   # -- Extra volumeMounts to be added to lapi pods
   ## @param lapi.extraVolumeMounts Additional volumeMounts for LAPI pods
   extraVolumeMounts: []
+
+  # -- Pod securityContext
+  ## @param lapi.podSecurityContext [object] Security context for LAPI pods
+  podSecurityContext: {}
+
+  # -- Container securityContext
+  ## @param lapi.securityContext [object] Security context for the LAPI contaienr
+  securityContext:
+    allowPrivilegeEscalation: false
+    privileged: false
+
   # -- resources for lapi
   ## @param lapi.resources [object] Resource requests and limits for the LAPI pods
   resources:
@@ -513,6 +524,16 @@ agent:
   ## @param agent.extraVolumeMounts [array] Extra volume mounts for agent pods
   extraVolumeMounts: []
 
+  # -- Pod securityContext
+  ## @param agent.podSecurityContext [object] Security context for agent pods
+  podSecurityContext: {}
+
+  # -- Container securityContext
+  ## @param agent.securityContext [object] Security context for agent containers
+  securityContext:
+    allowPrivilegeEscalation: false
+    privileged: false
+
   ## @param agent.resources [object] Resource requests and limits for agent pods
   resources:
     limits:
@@ -679,6 +700,11 @@ agent:
       # -- docker image tag
       ## @param agent.wait_for_lapi.image.tag [string] Image tag for the wait-for-lapi init container
       tag: "1.28"
+    # -- Container securityContext
+    ## @param agent.wait_for_lapi.securityContext [object] Security context for the wait-for-lapi init container
+    securityContext:
+      allowPrivilegeEscalation: false
+      privileged: false
 
 # -- Enable AppSec (https://docs.crowdsec.net/docs/next/appsec/intro)
 appsec:
@@ -770,6 +796,14 @@ appsec:
   # -- Extra volumeMounts to be added to appsec pods
   ## @param appsec.extraVolumeMounts [array] Extra volume mounts for AppSec pods
   extraVolumeMounts: []
+  # -- Pod securityContext
+  ## @param appsec.podSecurityContext [object] Security context for AppSec pods
+  podSecurityContext: {}
+  # -- Container securityContext
+  ## @param appsec.securityContext [object] Security context for the appsec container
+  securityContext:
+    allowPrivilegeEscalation: false
+    privileged: false
   # -- resources for appsec pods
   ## @param appsec.resources [object] Resource requests and limits for AppSec pods
   resources:
@@ -895,3 +929,8 @@ appsec:
       # -- docker image tag
       ## @param appsec.wait_for_lapi.image.tag Image tag for the wait-for-lapi init container
       tag: "1.28"
+    # -- Container securityContext
+    ## @param appsec.wait_for_lapi.securityContext [object] Security context for the wait-for-lapi init container
+    securityContext:
+      allowPrivilegeEscalation: false
+      privileged: false

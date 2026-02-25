@@ -67,8 +67,7 @@ spec:
             cpu: 1m
             memory: 10Mi
         securityContext:
-          allowPrivilegeEscalation: false
-          privileged: false
+          {{- toYaml .Values.agent.wait_for_lapi.securityContext | nindent 10 }}
         {{- if or (not .Values.tls.enabled) (not .Values.tls.agent.tlsClientAuth) }}
         volumeMounts:
           - name: crowdsec-config
@@ -173,8 +172,7 @@ spec:
         {{ end }}
 
         securityContext:
-          allowPrivilegeEscalation: false
-          privileged: false
+          {{- toYaml .Values.agent.securityContext | nindent 10 }}
 
         volumeMounts:
           {{- if or (not .Values.tls.enabled) (not .Values.tls.agent.tlsClientAuth) }}
@@ -344,6 +342,10 @@ spec:
       {{- end }}
       {{- if .Values.agent.priorityClassName }}
       priorityClassName: {{ .Values.agent.priorityClassName }}
+      {{- end }}
+      {{- with .Values.agent.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
       {{- end }}
 
 {{- end -}}
