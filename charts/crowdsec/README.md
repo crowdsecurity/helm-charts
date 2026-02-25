@@ -237,6 +237,7 @@ Below a basic configuration for AppSec (WAF)
 
 <details> 
   <summary>Basic WAF configuration</summary>
+  
 ```yaml
 # your-values.yaml (option 1)
 appsec:
