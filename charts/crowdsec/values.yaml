@@ -23,6 +23,14 @@ image:
   ## @param image.tag [string] docker image tag (empty defaults to chart AppVersion)
   tag: ""
 
+  ## @param image.kubectl.repository [default: alpine/kubectl] [string] kubectl image repository used by registration jobs initContainers
+  ## @param image.kubectl.tag [default: latest] [string] kubectl image tag (override to match your cluster version if you encounter issues with registration jobs)
+  ## @param image.kubectl.pullPolicy [default: IfNotPresent] [string] kubectl image pull policy (Always, IfNotPresent, Never)
+  kubectl:
+    repository: alpine/kubectl
+    tag: latest
+    pullPolicy: IfNotPresent
+
 ## @param podAnnotations [object] podAnnotations to be added to pods (string:string map)
 podAnnotations: {}
   # Uncomment the following lines if you use Prometheus Helm Chart rather than Prometheus Operator.
