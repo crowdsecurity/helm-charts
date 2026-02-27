@@ -45,6 +45,24 @@
                 },
                 "pullPolicy": {
                     "type": "string"
+                },
+                "kubectl": {
+                    "type": "object",
+                    "properties": {
+                        "repository": {
+                            "type": "string"
+                        },
+                        "tag": {
+                            "type": "string"
+                        },
+                        "pullPolicy": {
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "repository",
+                        "pullPolicy"
+                    ]
                 }
             },
             "required": [

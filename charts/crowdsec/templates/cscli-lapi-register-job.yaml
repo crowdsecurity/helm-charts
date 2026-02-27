@@ -36,18 +36,34 @@ spec:
       tolerations:
 {{ toYaml .Values.lapi.tolerations | indent 8 }}
       {{- end }}
+      initContainers:
+        - name: install-kubectl
+          image: {{ include "registerJobKubectlImage" . | quote }}
+          imagePullPolicy: {{ .Values.image.kubectl.pullPolicy | default .Values.image.pullPolicy }}
+          command:
+            - "/bin/sh"
+            - "-c"
+            - |
+                cp "$(command -v kubectl)" /kubectl-bin/kubectl
+                chmod 0755 /kubectl-bin/kubectl
+          volumeMounts:
+            - name: kubectl-bin
+              mountPath: /kubectl-bin
       containers:
         - name: lapi-cscli-register
           image: "{{ .Values.image.repository | default "crowdsecurity/crowdsec" }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          volumeMounts:
+            - name: kubectl-bin
+              mountPath: /kubectl-bin
           command:
             - "/bin/bash"
             - "-c"
             - |
-                apk update && apk add kubectl
                 set -ex
+                KUBECTL=/kubectl-bin/kubectl
                 echo "Checking if the secret {{ .Release.Name }}-lapi-cscli-credentials already exists..."
-                if kubectl -n {{ .Release.Namespace }} get secret {{ .Release.Name }}-lapi-cscli-credentials >/dev/null 2>&1; then
+                if $KUBECTL -n {{ .Release.Namespace }} get secret {{ .Release.Name }}-lapi-cscli-credentials >/dev/null 2>&1; then
                   echo "Secret already exists. Skipping registration."
                   exit 0
                 fi
@@ -60,8 +76,11 @@ spec:
                 
                 echo "Creating secret {{ .Release.Name }}-lapi-cscli-credentials..."
                 
-                kubectl create secret generic {{ .Release.Name }}-lapi-cscli-credentials \
+                $KUBECTL create secret generic {{ .Release.Name }}-lapi-cscli-credentials \
                   -n {{ .Release.Namespace }} \
                   --from-file=lapi_cscli_credentials.yaml=/tmp/lapi-cscli-credentials.yaml
+      volumes:
+        - name: kubectl-bin
+          emptyDir: {}
     {{- end }}
 {{- end }}

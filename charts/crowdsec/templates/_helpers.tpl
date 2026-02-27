@@ -95,6 +95,16 @@ true
 {{- end }}
 
 {{/*
+  Return the kubectl helper image used by registration jobs.
+  If image.kubectl.tag is empty, default to latest.
+*/}}
+{{ define "registerJobKubectlImage" }}
+{{- $repository := .Values.image.kubectl.repository | default "alpine/kubectl" -}}
+{{- $tag := .Values.image.kubectl.tag | default "latest" -}}
+{{- printf "%s:%s" $repository $tag -}}
+{{- end -}}
+
+{{/*
   Provide a default value for StoreCAPICredentialsInSecret. 
   If StoreCAPICredentialsInSecret is not set in the values, and there's no persistency for the LAPI config, defaults to true
 */}}
