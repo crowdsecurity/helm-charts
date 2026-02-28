@@ -1,0 +1,124 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "crowdsec-spoa-bouncer.fullname" . }}
+  labels:
+    {{- include "crowdsec-spoa-bouncer.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "crowdsec-spoa-bouncer.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "crowdsec-spoa-bouncer.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "crowdsec-spoa-bouncer.serviceAccountName" . }}
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.priorityClassName }}
+      priorityClassName: {{ . }}
+      {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          {{- with .Values.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default (printf "v%s" .Chart.AppVersion) }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            {{- if .Values.config.existingSecret }}
+            - name: CROWDSEC_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.config.existingSecret }}
+                  key: {{ .Values.config.existingSecretKey }}
+            {{- else }}
+            - name: CROWDSEC_KEY
+              value: {{ required "bouncer.crowdsec_key is required when config.existingSecret is not set" .Values.bouncer.crowdsec_key | quote }}
+            {{- end }}
+            - name: CROWDSEC_URL
+              value: {{ .Values.bouncer.crowdsec_url | quote }}
+            - name: LOG_LEVEL
+              value: {{ .Values.bouncer.log_level | quote }}
+            - name: INSECURE_SKIP_VERIFY
+              value: {{ .Values.bouncer.insecure_skip_verify | quote }}
+            - name: PROMETHEUS_ENABLED
+              value: {{ .Values.bouncer.prometheus_enabled | quote }}
+            {{- with .Values.bouncer.env }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          ports:
+            - name: spoa
+              containerPort: 9000
+              protocol: TCP
+            {{- if .Values.bouncer.prometheus_enabled }}
+            - name: metrics
+              containerPort: 6060
+              protocol: TCP
+            {{- end }}
+          livenessProbe:
+            tcpSocket:
+              port: spoa
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          readinessProbe:
+            tcpSocket:
+              port: spoa
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          {{- with .Values.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- if or (include "crowdsec-spoa-bouncer.hasLocalConfig" .) (include "crowdsec-spoa-bouncer.hasHostsDir" .) }}
+          volumeMounts:
+            {{- if (include "crowdsec-spoa-bouncer.hasLocalConfig" .) }}
+            - name: config
+              mountPath: /etc/crowdsec/bouncers/crowdsec-spoa-bouncer.yaml.local
+              subPath: crowdsec-spoa-bouncer.yaml.local
+              readOnly: true
+            {{- end }}
+            {{- if (include "crowdsec-spoa-bouncer.hasHostsDir" .) }}
+            - name: hosts
+              mountPath: {{ .Values.config.hostsDir.path }}
+              readOnly: true
+            {{- end }}
+          {{- end }}
+      {{- if or (include "crowdsec-spoa-bouncer.hasLocalConfig" .) (include "crowdsec-spoa-bouncer.hasHostsDir" .) }}
+      volumes:
+        {{- if (include "crowdsec-spoa-bouncer.hasLocalConfig" .) }}
+        - name: config
+          configMap:
+            name: {{ include "crowdsec-spoa-bouncer.fullname" . }}-config
+        {{- end }}
+        {{- if (include "crowdsec-spoa-bouncer.hasHostsDir" .) }}
+        - name: hosts
+          secret:
+            secretName: {{ .Values.config.hostsDir.existingSecret }}
+        {{- end }}
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

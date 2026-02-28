@@ -1,0 +1,109 @@
+# Default values for crowdsec-spoa-bouncer.
+
+replicaCount: 1
+
+image:
+  repository: crowdsecurity/spoa-bouncer
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: ""
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+# -- Bouncer configuration
+bouncer:
+  # -- CrowdSec LAPI API key (required)
+  crowdsec_key: ""
+  # -- CrowdSec LAPI URL
+  crowdsec_url: "http://crowdsec-service.crowdsec.svc.cluster.local:8080/"
+  # -- Log level: trace, debug, info, warn, error
+  log_level: "info"
+  # -- Skip TLS verification for LAPI connection (use for self-signed certs)
+  insecure_skip_verify: false
+  # -- Enable Prometheus metrics
+  prometheus_enabled: true
+  # -- Additional environment variables to pass to the bouncer
+  env: []
+
+# -- Custom configuration options
+config:
+  # -- Provide a .local configuration file for overrides
+  # This will be mounted to /etc/crowdsec/bouncers/crowdsec-spoa-bouncer.yaml.local
+  # Use for advanced configuration like mTLS authentication
+  # Example:
+  # localConfig: |
+  #   ca_cert_path: /etc/crowdsec/certs/ca.crt
+  #   cert_path: /etc/crowdsec/certs/client.crt
+  #   key_path: /etc/crowdsec/certs/client.key
+  localConfig: ""
+
+  # -- Use an existing secret for the API key
+  # The secret must contain a key named 'CROWDSEC_KEY'
+  existingSecret: ""
+  # -- Key in the existing secret containing the API key
+  existingSecretKey: "CROWDSEC_KEY"
+
+  # -- Hosts directory configuration for per-host remediation settings
+  # Use this to configure captcha, ban pages, and appsec settings per host
+  # Host configs contain sensitive data (captcha keys, signing keys) so they
+  # should be stored in a Kubernetes Secret rather than values.yaml
+  hostsDir:
+    # -- Enable hosts directory mounting
+    enabled: false
+    # -- Path where host configs will be mounted
+    # This path will be set as hosts_dir in the bouncer config
+    path: "/etc/crowdsec/bouncers/spoa-host.d"
+    # -- Name of existing secret containing host YAML files
+    # Each key in the secret becomes a file in the hosts directory
+    # Example: kubectl create secret generic spoa-hosts \
+    #   --from-file=default.yaml=./hosts/default.yaml \
+    #   --from-file=myapp.yaml=./hosts/myapp.yaml
+    existingSecret: ""
+
+serviceAccount:
+  # -- Specifies whether a service account should be created
+  create: true
+  # -- Annotations to add to the service account
+  annotations: {}
+  # -- The name of the service account to use.
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext: {}
+
+securityContext: {}
+
+service:
+  # -- Service type
+  type: ClusterIP
+  # -- Annotations for the service
+  annotations: {}
+
+# -- Prometheus ServiceMonitor configuration
+metrics:
+  enabled: false
+  serviceMonitor:
+    # -- Create a ServiceMonitor resource
+    enabled: false
+    # -- Additional labels for the ServiceMonitor
+    additionalLabels: {}
+    # -- Namespace for the ServiceMonitor (defaults to release namespace)
+    namespace: ""
+    # -- Scrape interval
+    interval: 30s
+    # -- Scrape timeout
+    scrapeTimeout: 10s
+
+resources: {}
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+# -- Priority class name for the pod
+priorityClassName: ""
