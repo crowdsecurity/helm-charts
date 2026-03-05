@@ -467,9 +467,13 @@ agent:
   # -- replicas for agent if isDeployment is set to true
   ## @param agent.replicas Number of replicas when deploying as a Deployment
   replicas: 1
-  # -- strategy for agent deployment or daemonset updates
-  ## @param agent.strategy [object] Update strategy for the agent (applies to both DaemonSet and Deployment)
-  strategy:
+  # -- strategy for agent deployment updates
+  ## @param agent.deploymentStrategy [object] Update strategy for the agent Deployment
+  deploymentStrategy:
+    type: Recreate
+  # -- strategy for agent daemonset updates
+  ## @param agent.daemonsetStrategy [object] Update strategy for the agent DaemonSet
+  daemonsetStrategy:
     type: RollingUpdate
     rollingUpdate:
       maxUnavailable: 25%

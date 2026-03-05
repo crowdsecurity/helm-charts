@@ -12,8 +12,8 @@ metadata:
 {{ toYaml .Values.agent.deploymentAnnotations | trim | indent 4 }}
   {{- end }}
 spec:
-  {{- if .Values.agent.strategy }}
-  strategy: {{- toYaml .Values.agent.strategy | nindent 4 }}
+  {{- if .Values.agent.deploymentStrategy }}
+  strategy: {{- toYaml .Values.agent.deploymentStrategy | nindent 4 }}
   {{- end }}
   replicas: {{ .Values.agent.replicas }}
   selector:
