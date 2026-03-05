@@ -467,7 +467,7 @@ agent:
   # -- replicas for agent if isDeployment is set to true
   ## @param agent.replicas Number of replicas when deploying as a Deployment
   replicas: 1
-  # -- strategy for agent deployment updates
+  # -- strategy for agent deployment updates if isDeployment is set to true
   ## @param agent.deploymentStrategy [object] Update strategy for the agent Deployment
   deploymentStrategy:
     type: Recreate
