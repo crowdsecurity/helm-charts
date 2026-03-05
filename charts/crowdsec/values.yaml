@@ -467,10 +467,12 @@ agent:
   # -- replicas for agent if isDeployment is set to true
   ## @param agent.replicas Number of replicas when deploying as a Deployment
   replicas: 1
-  # -- strategy for agent if isDeployment is set to true
-  ## @param agent.strategy [object] Deployment strategy when `isDeployment` is true
+  # -- strategy for agent deployment or daemonset updates
+  ## @param agent.strategy [object] Update strategy for the agent (applies to both DaemonSet and Deployment)
   strategy:
-    type: Recreate
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 25%
 
   # -- add your custom ports here, by default we expose port 6060 for metrics if metrics is enabled
   ## @param agent.ports [array] Custom container ports to expose (default: metrics port 6060 if enabled)
