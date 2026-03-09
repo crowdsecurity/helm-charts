@@ -236,6 +236,11 @@ spec:
             mountPath: {{ $crowdsecConfig }}/config.yaml.local
             subPath: config.yaml.local
           {{ end }}
+          {{ if index .Values.config "feature.yaml" }}
+          - name: crowdsec-feature-volume
+            mountPath: {{ $crowdsecConfig }}/feature.yaml
+            subPath: feature.yaml
+          {{ end }}
           {{- if (include "notificationsIsNotEmpty" .) -}}
           {{ range $fileName, $content := .Values.config.notifications -}}
           {{- if $content }}
@@ -305,6 +310,11 @@ spec:
       - name: crowdsec-config-local-volume
         configMap:
           name: crowdsec-config-local
+      {{- end }}
+      {{ if index .Values.config "feature.yaml" }}
+      - name: crowdsec-feature-volume
+        configMap:
+          name: crowdsec-feature
       {{- end }}
       {{- if (include "notificationsIsNotEmpty" .) -}}
       {{ range $fileName, $content := .Values.config.notifications -}}

@@ -168,6 +168,14 @@ config:
   ## @param config.appsec_config.yaml.local This configuration file is merged with appsec pod main configuration file
   appsec_config.yaml.local: ""
 
+  # -- Feature flags configuration (https://docs.crowdsec.net/docs/configuration/feature_flags)
+  # This file is mounted in both lapi and agent pods
+  ## @param config.feature.yaml Feature flags to enable or disable experimental CrowdSec features
+  feature.yaml: ""
+  #   |
+  # - cscli_setup
+  # - re2_grok_support
+
 # @section tls
 tls:
   ## @param tls.enabled  Is tls enabled ?

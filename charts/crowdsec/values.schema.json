@@ -224,6 +224,9 @@
                 },
                 "appsec_config.yaml.local": {
                     "type": "string"
+                },
+                "feature.yaml": {
+                    "type": "string"
                 }
             },
             "title": "Config"

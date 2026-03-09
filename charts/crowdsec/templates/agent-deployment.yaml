@@ -251,6 +251,11 @@ spec:
             mountPath: {{ $crowdsecConfig }}/config.yaml.local
             subPath: config.yaml.local
           {{- end }}
+          {{- if index .Values.config "feature.yaml" }}
+          - name: crowdsec-feature-volume
+            mountPath: {{ $crowdsecConfig }}/feature.yaml
+            subPath: feature.yaml
+          {{- end }}
 
       terminationGracePeriodSeconds: 30
       volumes:
@@ -332,6 +337,11 @@ spec:
       - name: crowdsec-agent-config-local-volume
         configMap:
           name: crowdsec-agent-config-local
+      {{- end }}
+      {{- if index .Values.config "feature.yaml" }}
+      - name: crowdsec-feature-volume
+        configMap:
+          name: crowdsec-feature
       {{- end }}
       {{- if .Values.agent.extraVolumes }}
       {{ toYaml .Values.agent.extraVolumes | nindent 6 }}

@@ -67,7 +67,7 @@ true
   lapi custom config check
 */}}
 {{ define "lapiCustomConfigIsNotEmpty" }}
-{{- if or (index .Values.config "profiles.yaml") (index .Values.config "config.yaml.local") ((include "notificationsIsNotEmpty" .)) }}
+{{- if or (index .Values.config "profiles.yaml") (index .Values.config "config.yaml.local") ((include "notificationsIsNotEmpty" .)) (index .Values.config "feature.yaml") }}
 true
 {{- end -}}
 {{- end -}}
