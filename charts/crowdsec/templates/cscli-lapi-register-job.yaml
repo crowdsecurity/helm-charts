@@ -51,7 +51,7 @@ spec:
               mountPath: /kubectl-bin
       containers:
         - name: lapi-cscli-register
-          image: "{{ .Values.image.repository | default "crowdsecurity/crowdsec" }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          image: "{{ .Values.image.repository | default "crowdsecurity/crowdsec" }}:{{ .Values.image.tag | default .Chart.AppVersion }}{{ .Values.image.tagSuffix }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           volumeMounts:
             - name: kubectl-bin

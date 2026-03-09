@@ -43,6 +43,9 @@
                 "tag": {
                     "type": "string"
                 },
+                "tagSuffix": {
+                    "type": "string"
+                },
                 "pullPolicy": {
                     "type": "string"
                 },

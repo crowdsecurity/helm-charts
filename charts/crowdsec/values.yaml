@@ -23,6 +23,9 @@ image:
   ## @param image.tag [string] docker image tag (empty defaults to chart AppVersion)
   tag: ""
 
+  ## @param image.tagSuffix [string] Suffix appended to the image tag. E.g. set to "-debian" to use crowdsec:v1.6.0-debian
+  tagSuffix: ""
+
   ## @param image.kubectl.repository [default: alpine/kubectl] [string] kubectl image repository used by registration jobs initContainers
   ## @param image.kubectl.tag [default: latest] [string] kubectl image tag (override to match your cluster version if you encounter issues with registration jobs)
   ## @param image.kubectl.pullPolicy [default: IfNotPresent] [string] kubectl image pull policy (Always, IfNotPresent, Never)
