@@ -520,12 +520,14 @@ agent:
     #   listen_port: 4242
     #   labels:
     #     type: syslog
-  # -- Specify each pod you want to process it logs (namespace, podName and program)
-  ## @param agent.acquisition [array] Pod log acquisition definitions (namespace, podName, program, etc.)
+  # -- Specify each pod you want to process it logs (namespace, podName, optional containerName, and program)
+  ## @param agent.acquisition [array] Pod log acquisition definitions (namespace, podName, optional containerName, program, etc.)
   acquisition: []
     #- namespace: "" #ingress-nginx
     # -- to select pod logs to process
     #  podName: "" #ingress-nginx-controller-*
+    # -- optional container name to restrict acquisition to a single container within matching pods
+    #  containerName: "" #controller
     # -- program name related to specific parser you will use (see https://hub.crowdsec.net/author/crowdsecurity/configurations/docker-logs)
     #  program: "" #nginx
     # -- If set to true, will poll the files using os.Stat instead of using inotify

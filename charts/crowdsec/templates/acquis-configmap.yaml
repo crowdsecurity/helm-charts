@@ -10,7 +10,11 @@ data:
     {{- range .Values.agent.acquisition }}
     ---
     filenames:
+    {{- if .containerName }}
+      - /var/log/containers/{{ .podName }}_{{ .namespace }}_{{ .containerName }}-*.log
+    {{- else }}
       - /var/log/containers/{{ .podName }}_{{ .namespace }}_*.log
+    {{- end }}
     force_inotify: true
     poll_without_inotify: {{ .poll_without_inotify | default "false"}}
     labels:
