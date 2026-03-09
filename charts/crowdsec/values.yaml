@@ -450,6 +450,15 @@ lapi:
   # -- If set to true, the credentials used by cscli in the LAPI pod will be stored in a secret. Useful when lapi replicas > 1, as they will be reused in the replicas, and will limit the number of "fake" LPs in the console.
   ## @param lapi.storeLAPICscliCredentialsInSecret [default: false] [object] Store LAPI cscli credentials in a Secret. Useful if LAPI replicas > 1 or to setup LAPI with a persistent volume.
   storeLAPICscliCredentialsInSecret: false
+
+  ## @param lapi.podDisruptionBudget.enabled Enable PodDisruptionBudget for LAPI pods
+  ## @param lapi.podDisruptionBudget.minAvailable [nullable] Minimum number of available LAPI pods during voluntary disruptions. Use either minAvailable or maxUnavailable, not both.
+  ## @param lapi.podDisruptionBudget.maxUnavailable [nullable] Maximum number of unavailable LAPI pods during voluntary disruptions. Use either minAvailable or maxUnavailable, not both.
+  podDisruptionBudget:
+    enabled: false
+    minAvailable: 1
+    # maxUnavailable: 1
+
 # agent will deploy pod on every node as daemonSet to read wanted pods logs
 ## @section agent
 agent:
@@ -478,6 +487,12 @@ agent:
   ## @param agent.strategy [object] Deployment strategy when `isDeployment` is true
   strategy:
     type: Recreate
+
+  ## @param agent.updateStrategy [object] Update strategy for the agent DaemonSet (when isDeployment is false)
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
 
   # -- add your custom ports here, by default we expose port 6060 for metrics if metrics is enabled
   ## @param agent.ports [array] Custom container ports to expose (default: metrics port 6060 if enabled)

@@ -16,6 +16,7 @@ spec:
     matchLabels:
       k8s-app: {{ .Release.Name }}
       type: agent
+  updateStrategy: {{- toYaml .Values.agent.updateStrategy | nindent 4 }}
   template:
     metadata:
       annotations:
