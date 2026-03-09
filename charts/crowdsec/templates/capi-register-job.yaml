@@ -52,7 +52,7 @@ spec:
               mountPath: /kubectl-bin
       containers:
         - name: capi-register
-          image: "{{ .Values.image.repository | default "crowdsecurity/crowdsec" }}:{{ .Values.image.tag | default .Chart.AppVersion }}{{ .Values.image.tagSuffix }}"
+          image: "{{ .Values.image.repository | default "crowdsecurity/crowdsec" }}:{{ .Values.image.tag | default .Chart.AppVersion }}{{ include "jobsImageTagSuffix" . }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           volumeMounts:
             - name: kubectl-bin

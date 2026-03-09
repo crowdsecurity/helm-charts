@@ -66,6 +66,14 @@
                         "repository",
                         "pullPolicy"
                     ]
+                },
+                "jobs": {
+                    "type": "object",
+                    "properties": {
+                        "tagSuffix": {
+                            "type": ["string", "null"]
+                        }
+                    }
                 }
             },
             "required": [

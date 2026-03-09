@@ -95,6 +95,18 @@ true
 {{- end }}
 
 {{/*
+  Return the tag suffix to use for registration jobs images.
+  Falls back to image.tagSuffix when image.jobs.tagSuffix is null.
+*/}}
+{{- define "jobsImageTagSuffix" -}}
+{{- if kindIs "invalid" .Values.image.jobs.tagSuffix -}}
+{{- .Values.image.tagSuffix -}}
+{{- else -}}
+{{- .Values.image.jobs.tagSuffix -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
   Return the kubectl helper image used by registration jobs.
   If image.kubectl.tag is empty, default to latest.
 */}}

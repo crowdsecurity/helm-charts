@@ -34,6 +34,10 @@ image:
     tag: latest
     pullPolicy: IfNotPresent
 
+  ## @param image.jobs.tagSuffix [string,nullable] Suffix appended to the image tag for registration jobs. When null (default), inherits from image.tagSuffix. Set to "" to use the Alpine-based image when image.tagSuffix is "-debian" (jobs use apk and are incompatible with the Debian image).
+  jobs:
+    tagSuffix: ~
+
 ## @param podAnnotations [object] podAnnotations to be added to pods (string:string map)
 podAnnotations: {}
   # Uncomment the following lines if you use Prometheus Helm Chart rather than Prometheus Operator.
