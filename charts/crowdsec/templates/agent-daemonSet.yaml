@@ -12,8 +12,8 @@ metadata:
 {{ toYaml .Values.agent.daemonsetAnnotations | trim | indent 4 }}
   {{- end }}
 spec:
-  {{- if .Values.agent.daemonsetStrategy }}
-  updateStrategy: {{- toYaml .Values.agent.daemonsetStrategy | nindent 4 }}
+  {{- if .Values.agent.strategy }}
+  updateStrategy: {{- toYaml .Values.agent.strategy | nindent 4 }}
   {{- end }}
   selector:
     matchLabels:
