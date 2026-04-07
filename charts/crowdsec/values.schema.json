@@ -217,20 +217,50 @@
             },
             "title": "Config"
         },
-        "Notifications": {
+        "StringFileMap": {
             "type": "object",
+            "patternProperties": {
+                "^.*\\.(yaml|yml)$": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
+        },
+        "Notifications": {
+            "$ref": "#/definitions/StringFileMap",
             "title": "Notifications"
         },
         "Parsers": {
             "type": "object",
+            "properties": {
+                "s00-raw": {
+                    "$ref": "#/definitions/StringFileMap"
+                },
+                "s01-parse": {
+                    "$ref": "#/definitions/StringFileMap"
+                },
+                "s02-enrich": {
+                    "$ref": "#/definitions/StringFileMap"
+                }
+            },
+            "additionalProperties": false,
             "title": "Parsers"
         },
         "Postoverflows": {
             "type": "object",
+            "properties": {
+                "s00-enrich": {
+                    "$ref": "#/definitions/StringFileMap"
+                },
+                "s01-whitelist": {
+                    "$ref": "#/definitions/StringFileMap"
+                }
+            },
+            "additionalProperties": false,
             "title": "Postoverflows"
         },
         "Scenarios": {
-            "type": "object",
+            "$ref": "#/definitions/StringFileMap",
             "title": "Scenarios"
         },
         "Labels": {

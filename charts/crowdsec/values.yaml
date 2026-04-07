@@ -44,6 +44,8 @@ podLabels: {}
 # Each config needs to be a multi-line using '|' in YAML specs
 # for the agent those configs will be loaded : parsers, scenarios, postoverflows, simulation.yaml
 # for the lapi those configs will be loaded : profiles.yaml, notifications, console.yaml
+# These entries can be split across multiple values files, or injected with `--set-file`
+# when using the chart from a remote repository.
 ## @section Configuration
 config:
   # -- To better understand stages in parsers, you can take a look at https://docs.crowdsec.net/docs/next/parsers/intro/
@@ -57,6 +59,7 @@ config:
       #   filter: "evt.Line.Labels.type == 'myProgram'"
       #   onsuccess: next_stage
       #   ....
+      # `--set-file config.parsers.s01-parse.example-parser\.yaml=./example-parser.yaml` is also supported.
     ## @param config.parsers.s02-enrich Third step custom parsers definitions, usually to enrich events
     s02-enrich: {}
   # -- to better understand how to write a scenario, you can take a look at https://docs.crowdsec.net/docs/next/scenarios/intro
@@ -69,6 +72,7 @@ config:
     #    description: "Detect bruteforce on myService"
     #    filter: "evt.Meta.log_type == 'auth_bf_log'"
     #    ...
+    # `--set-file config.scenarios.myScenario\.yaml=./myScenario.yaml` is also supported.
   # -- to better understand how to write a postoverflow, you can take a look at (https://docs.crowdsec.net/docs/next/log_processor/parsers/intro#postoverflows)
   # Those files are only mounted in the agent pods
   postoverflows:
@@ -80,6 +84,7 @@ config:
     s01-whitelist: {}
       # myRdnsWhitelist.yaml: |
       #   ...
+      # `--set-file config.postoverflows.s01-whitelist.myRdnsWhitelist\.yaml=./myRdnsWhitelist.yaml` is also supported.
   # -- Simulation configuration (https://docs.crowdsec.net/docs/next/scenarios/simulation/)
   # This file is only mounted in the agent pods
   ## @param config.simulation.yaml This file is usually handled by the agent.

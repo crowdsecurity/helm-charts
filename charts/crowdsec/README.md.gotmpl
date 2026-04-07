@@ -7,6 +7,7 @@
 
 - [Chart Repository](#chart-repository)
 - [Installing the Chart](#installing-the-chart)
+- [Supplying Custom Parser, Scenario, and Postoverflow Files](#supplying-custom-parser-scenario-and-postoverflow-files)
 - [Uninstalling the Chart](#uninstalling-the-chart)
 - [Authentication](#authentication)
   - [Auto registration token](#auto-registration-token)
@@ -41,6 +42,73 @@ kubectl create ns crowdsec
 # Install helm chart with proper values.yaml config
 helm install crowdsec crowdsec/crowdsec -f crowdsec-values.yaml -n crowdsec
 ```
+
+## Supplying Custom Parser, Scenario, and Postoverflow Files
+
+The chart already supports passing custom parsers, scenarios, and postoverflows as raw file content through values. This works with both local and remote charts.
+
+Helm templates cannot read arbitrary files from the client machine during rendering. In practice, that means a remote chart cannot use `.Files` or `.Files.Glob` to read files that only exist on the user's workstation. The supported workflow is to inject the file contents into values and let the chart write them into ConfigMaps unchanged.
+
+You can split your configuration across multiple values files:
+
+```sh
+helm upgrade --install crowdsec crowdsec/crowdsec \
+  -n crowdsec \
+  -f crowdsec-values.yaml \
+  -f parsers.yaml \
+  -f scenarios.yaml \
+  -f postoverflows.yaml
+```
+
+Example values files:
+
+```yaml
+# parsers.yaml
+config:
+  parsers:
+    s01-parse:
+      my-parser.yaml: |
+        name: my/parser
+        filter: "evt.Meta.log_type == 'my-type'"
+        onsuccess: next_stage
+```
+
+```yaml
+# scenarios.yaml
+config:
+  scenarios:
+    my-scenario.yaml: |
+      type: trigger
+      name: my/scenario
+      filter: "evt.Meta.log_type == 'my-type'"
+      groupby: evt.Meta.source_ip
+```
+
+```yaml
+# postoverflows.yaml
+config:
+  postoverflows:
+    s01-whitelist:
+      my-whitelist.yaml: |
+        name: my/whitelist
+        whitelist:
+          reason: "trusted source"
+          expression:
+            - evt.Parsed.remote_addr == '127.0.0.1'
+```
+
+If you prefer to keep each object in its own local file, use `--set-file`. Helm will read the local file and assign its content to the matching value key as a string:
+
+```sh
+helm upgrade --install crowdsec crowdsec/crowdsec \
+  -n crowdsec \
+  -f crowdsec-values.yaml \
+  --set-file config.parsers.s01-parse.my-parser\.yaml=./my-parser.yaml \
+  --set-file config.scenarios.my-scenario\.yaml=./my-scenario.yaml \
+  --set-file config.postoverflows.s01-whitelist.my-whitelist\.yaml=./my-whitelist.yaml
+```
+
+This content is emitted into the generated ConfigMaps as-is, so the YAML files stay untouched by the chart logic.
 
 ## Uninstalling the Chart
 
