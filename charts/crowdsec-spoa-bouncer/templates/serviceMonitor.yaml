@@ -1,0 +1,17 @@
+{{- if and .Values.bouncer.metrics.enabled .Values.bouncer.metrics.serviceMonitor.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "crowdsec-spoa-bouncer.fullname" . }}
+  labels:
+    {{- include "crowdsec-spoa-bouncer.labels" . | nindent 4 }}
+    {{- with .Values.bouncer.metrics.serviceMonitor.additionalLabels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "crowdsec-spoa-bouncer.selectorLabels" . | nindent 6 }}
+  endpoints:
+    - port: metrics
+{{- end }}

@@ -1,0 +1,6 @@
+apiVersion: v2
+name: crowdsec-spoa-bouncer
+description: CrowdSec SPOA bouncer for HAProxy — queries CrowdSec LAPI for decisions and exposes an SPOA socket
+type: application
+version: 0.1.0
+appVersion: "latest"

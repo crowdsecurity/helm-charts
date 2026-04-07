@@ -1,0 +1,134 @@
+## @section Image
+
+## @param image.repository Docker image repository
+## @param image.pullPolicy Image pull policy
+## @param image.tag Image tag (defaults to appVersion)
+## @param image.pullSecrets [array] Image pull secrets
+image:
+  repository: crowdsecurity/spoa-bouncer
+  pullPolicy: IfNotPresent
+  tag: ""
+  pullSecrets: []
+
+## @section Bouncer
+
+bouncer:
+  # -- GENERIC: LAPI connection & API key (same structure across all bouncer charts)
+
+  ## @param bouncer.bouncerName Name used to register the bouncer in CrowdSec (becomes BOUNCER_KEY_<name> in LAPI)
+  bouncerName: "spoa"
+  ## @param bouncer.apiKey Bouncer API key for LAPI authentication. If empty, a random key is generated and persisted across upgrades.
+  apiKey: ""
+  ## @param bouncer.existingSecretName Use an existing Secret for the API key instead of creating one
+  existingSecretName: ""
+  ## @param bouncer.existingSecretKey Key within the existing Secret that holds the API key
+  existingSecretKey: "apiKey"
+  ## @param bouncer.lapiUrl Full URL of CrowdSec LAPI. If empty, defaults to http://<release>-service:8080 (subchart mode).
+  lapiUrl: ""
+
+  # -- GENERIC: Pod scheduling & settings (same structure across all bouncer charts)
+
+  ## @param bouncer.replicaCount Number of bouncer replicas
+  replicaCount: 1
+  ## @param bouncer.resources [object] Resource requests and limits
+  resources: {}
+  ## @param bouncer.podAnnotations [object] Additional pod annotations
+  podAnnotations: {}
+  ## @param bouncer.podLabels [object] Additional pod labels
+  podLabels: {}
+  ## @param bouncer.podSecurityContext [object] Pod-level security context
+  podSecurityContext: {}
+  ## @param bouncer.securityContext [object] Container-level security context
+  securityContext:
+    allowPrivilegeEscalation: false
+    privileged: false
+  ## @param bouncer.nodeSelector [object] Node selector for pod scheduling
+  nodeSelector: {}
+  ## @param bouncer.tolerations [array] Tolerations for pod scheduling
+  tolerations: []
+  ## @param bouncer.affinity [object] Affinity rules for pod scheduling
+  affinity: {}
+  ## @param bouncer.priorityClassName Priority class name
+  priorityClassName: ""
+  ## @param bouncer.strategy [object] Deployment strategy
+  strategy:
+    type: RollingUpdate
+  ## @param bouncer.env [array] Additional environment variables
+  env: []
+  ## @param bouncer.envFrom [array] Additional envFrom sources
+  envFrom: []
+
+  # -- GENERIC: Wait for LAPI init container (same structure across all bouncer charts)
+  # Waits for LAPI to be ready and for the API key to be valid before starting the bouncer.
+
+  ## @param bouncer.waitForLapi.image.repository Init container image repository
+  ## @param bouncer.waitForLapi.image.pullPolicy Init container image pull policy
+  ## @param bouncer.waitForLapi.image.tag Init container image tag
+  ## @param bouncer.waitForLapi.securityContext [object] Init container security context
+  waitForLapi:
+    image:
+      repository: curlimages/curl
+      pullPolicy: IfNotPresent
+      tag: "latest"
+    securityContext:
+      allowPrivilegeEscalation: false
+      privileged: false
+
+  # -- GENERIC: Service (same structure across all bouncer charts)
+
+  ## @param bouncer.service.type Service type
+  ## @param bouncer.service.labels [object] Extra labels for the Service
+  ## @param bouncer.service.annotations [object] Extra annotations for the Service
+  service:
+    type: ClusterIP
+    labels: {}
+    annotations: {}
+
+  # -- GENERIC: Metrics (same structure across all bouncer charts)
+
+  ## @param bouncer.metrics.enabled Enable Prometheus metrics
+  ## @param bouncer.metrics.serviceMonitor.enabled Create ServiceMonitor for Prometheus Operator
+  ## @param bouncer.metrics.serviceMonitor.additionalLabels [object] Extra labels for the ServiceMonitor
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: false
+      additionalLabels: {}
+
+  # -- BOUNCER-SPECIFIC: SPOA settings
+
+  ## @param bouncer.spoa.port SPOA listener port
+  ## @param bouncer.spoa.metricsPort Prometheus metrics port
+  spoa:
+    port: 9000
+    metricsPort: 6060
+
+  # -- BOUNCER-SPECIFIC: Extra volumes (user-managed)
+  # Mount user-provided volumes (e.g. GeoIP databases). The chart does NOT create these.
+
+  ## @param bouncer.extraVolumes [array] Additional volumes to mount (user-managed, e.g. GeoIP databases)
+  extraVolumes: []
+    # - name: geoip
+    #   persistentVolumeClaim:
+    #     claimName: my-geoip-pvc
+
+  ## @param bouncer.extraVolumeMounts [array] Additional volume mounts
+  extraVolumeMounts: []
+    # - name: geoip
+    #   mountPath: /var/lib/crowdsec/data
+    #   readOnly: true
+
+  # -- BOUNCER-SPECIFIC: Configuration file
+  # Content rendered as crowdsec-spoa-bouncer.yaml.local and merged with main config at startup.
+  # Use this for settings not available as env vars (listen_unix, GeoIP DBs, pprof, log rotation).
+
+  ## @param bouncer.config [object] Custom bouncer configuration (rendered as crowdsec-spoa-bouncer.yaml.local)
+  config: {}
+    # Example:
+    # listen_unix: /run/crowdsec-spoa/spoa.sock
+    # asn_database_path: /var/lib/crowdsec/data/GeoLite2-ASN.mmdb
+    # city_database_path: /var/lib/crowdsec/data/GeoLite2-City.mmdb
+    # pprof:
+    #   enabled: false
+    #   listen_addr: 127.0.0.1
+    #   listen_port: 6061

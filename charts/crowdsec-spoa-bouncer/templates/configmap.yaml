@@ -1,0 +1,11 @@
+{{- if include "crowdsec-spoa-bouncer.hasConfig" . }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "crowdsec-spoa-bouncer.fullname" . }}-config
+  labels:
+    {{- include "crowdsec-spoa-bouncer.labels" . | nindent 4 }}
+data:
+  crowdsec-spoa-bouncer.yaml.local: |
+    {{- .Values.bouncer.config | toYaml | nindent 4 }}
+{{- end }}

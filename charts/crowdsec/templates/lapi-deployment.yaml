@@ -113,6 +113,16 @@ spec:
         {{- with .Values.lapi.env }}
           {{- toYaml . | nindent 10 }}
         {{- end }}
+        {{- range .Values.lapi.bouncerSubcharts }}
+        {{- $sc := index $.Values . }}
+        {{- if $sc.enabled }}
+          - name: BOUNCER_KEY_{{ $sc.bouncer.bouncerName }}
+            valueFrom:
+              secretKeyRef:
+                name: {{ $.Release.Name }}-{{ . }}-apikey
+                key: apiKey
+        {{- end }}
+        {{- end }}
         resources:
           {{- toYaml .Values.lapi.resources | nindent 10 }}
 

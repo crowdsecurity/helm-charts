@@ -1,0 +1,3 @@
+bouncer:
+  apiKey: "ci-test-key"
+  lapiUrl: "http://crowdsec-service:8080"

@@ -1,0 +1,53 @@
+CrowdSec SPOA Bouncer has been deployed.
+
+Service: {{ include "crowdsec-spoa-bouncer.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.bouncer.spoa.port }}
+LAPI URL: {{ include "crowdsec-spoa-bouncer.lapiURL" . }}
+
+== HAProxy Configuration ==
+
+Add the following to your HAProxy configuration to use the SPOA bouncer:
+
+  frontend my_frontend
+    filter spoe engine crowdsec config /etc/haproxy/crowdsec-spoe.conf
+    ...
+
+  # In crowdsec-spoe.conf:
+  [crowdsec]
+  spoe-agent crowdsec-agent
+    messages    check-request
+    option      var-prefix crowdsec
+    timeout     hello       2s
+    timeout     idle        2m
+    timeout     processing  500ms
+    use-backend crowdsec-spoa
+    log         global
+
+  spoe-message check-request
+    args src=src dst=dst method=method path=path query=query version=req.ver headers=req.hdrs body=req.body
+    event on-frontend-http-request
+
+  backend crowdsec-spoa
+    mode tcp
+    server crowdsec-spoa {{ include "crowdsec-spoa-bouncer.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.bouncer.spoa.port }}
+
+{{- if not .Values.bouncer.lapiUrl }}
+
+== Subchart Mode ==
+
+The LAPI URL defaults to http://{{ .Release.Name }}-service:8080.
+Make sure to add the bouncer secret to your CrowdSec LAPI:
+
+  lapi:
+    bouncerSecrets:
+      - name: spoa
+{{- end }}
+
+{{- if .Values.bouncer.metrics.enabled }}
+
+== Metrics ==
+
+Prometheus metrics are available at port {{ .Values.bouncer.spoa.metricsPort }}.
+{{- if .Values.bouncer.metrics.serviceMonitor.enabled }}
+A ServiceMonitor has been created for Prometheus Operator.
+{{- end }}
+{{- end }}

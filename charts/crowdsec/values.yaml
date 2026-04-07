@@ -265,6 +265,12 @@ lapi:
     #     name: env-secret
     # - configMapRef:
     #     name: config-map
+  # -- Bouncer subchart aliases whose API keys should be auto-injected as BOUNCER_KEY_* env vars.
+  # Each alias must match a dependency alias in Chart.yaml. The bouncer name and secret are
+  # read from the subchart values (bouncer.bouncerName, secret naming convention).
+  ## @param lapi.bouncerSubcharts [array] List of bouncer subchart aliases to auto-wire API keys from
+  bouncerSubcharts:
+    - spoa-bouncer
   # -- Enable ingress lapi object
   ingress:
     ## @param lapi.ingress.enabled [default: false] Enable ingress for the LAPI service
@@ -942,3 +948,11 @@ appsec:
     securityContext:
       allowPrivilegeEscalation: false
       privileged: false
+
+## @section Bouncers (subcharts)
+
+# -- SPOA bouncer for HAProxy (subchart: crowdsec-spoa-bouncer)
+# See charts/crowdsec-spoa-bouncer/values.yaml for all available options.
+spoa-bouncer:
+  ## @param spoa-bouncer.enabled Enable the SPOA bouncer subchart
+  enabled: false
