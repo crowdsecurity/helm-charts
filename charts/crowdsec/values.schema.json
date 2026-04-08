@@ -220,7 +220,7 @@
         "StringFileMap": {
             "type": "object",
             "patternProperties": {
-                "^.*\\.(yaml|yml)$": {
+                "^.*$": {
                     "type": "string"
                 }
             },

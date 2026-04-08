@@ -115,6 +115,7 @@ helm upgrade --install crowdsec crowdsec/crowdsec \
 ```
 
 This content is emitted into the generated ConfigMaps as-is, so the YAML files stay untouched by the chart logic.
+Filenames without a `.yaml` or `.yml` suffix are also accepted. If the key contains dots, escape them in `--set`/`--set-file`.
 
 ## Uninstalling the Chart
 
