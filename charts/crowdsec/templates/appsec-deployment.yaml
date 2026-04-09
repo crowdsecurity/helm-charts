@@ -190,16 +190,34 @@ spec:
             subPath: acquis.yaml
           {{- if .Values.appsec.configs -}}
           {{- range $fileName, $content := .Values.appsec.configs }}
-          - name: {{ printf "crowdsec-appsec-configs-%s" (trimSuffix ".yaml" $fileName) }}
+          - name: {{ include "crowdsec.volumeName" (printf "crowdsec-appsec-configs-%s" $fileName) }}
             mountPath: {{ printf "/etc/crowdsec/appsec-configs/%s" $fileName }}
             subPath: {{ $fileName }}
           {{- end }}
           {{- end }}
           {{- if .Values.appsec.rules -}}
           {{- range $fileName, $content := .Values.appsec.rules }}
-          - name: {{ printf "crowdsec-appsec-rules-%s" (trimSuffix ".yaml" $fileName) }}
+          - name: {{ include "crowdsec.volumeName" (printf "crowdsec-appsec-rules-%s" $fileName) }}
             mountPath: {{ printf "/etc/crowdsec/appsec-rules/%s" $fileName }}
             subPath: {{ $fileName }}
+          {{- end }}
+          {{- end }}
+          {{- if .Values.appsec.scenarios -}}
+          {{- range $fileName, $content := .Values.appsec.scenarios }}
+          - name: {{ include "crowdsec.volumeName" (printf "crowdsec-appsec-scenarios-%s" $fileName) }}
+            mountPath: {{ printf "/etc/crowdsec/scenarios/%s" $fileName }}
+            subPath: {{ $fileName }}
+          {{- end }}
+          {{- end }}
+          {{- if (include "appsecPostoverflowsIsNotEmpty" .) }}
+          {{- range $stage, $stageConfig := .Values.appsec.postoverflows -}}
+          {{- if $stageConfig -}}
+          {{- range $fileName, $content := $stageConfig }}
+          - name: {{ include "crowdsec.volumeName" (printf "crowdsec-appsec-postoverflows-%s-%s" $stage $fileName) }}
+            mountPath: {{ printf "/etc/crowdsec/postoverflows/%s/%s" $stage $fileName }}
+            subPath: {{ $fileName }}
+          {{- end }}
+          {{- end }}
           {{- end }}
           {{- end }}
           {{- if .Values.tls.enabled }}
@@ -227,7 +245,7 @@ spec:
         emptyDir: {}
       {{- if .Values.appsec.configs -}}
       {{- range $fileName, $content := .Values.appsec.configs }}
-      - name: {{ printf "crowdsec-appsec-configs-%s" (trimSuffix ".yaml" $fileName) }}
+      - name: {{ include "crowdsec.volumeName" (printf "crowdsec-appsec-configs-%s" $fileName) }}
         configMap:
           name: "crowdsec-appsec-configs"
           items:
@@ -237,12 +255,36 @@ spec:
       {{- end }}
       {{- if .Values.appsec.rules -}}
       {{- range $fileName, $content := .Values.appsec.rules }}
-      - name: {{ printf "crowdsec-appsec-rules-%s" (trimSuffix ".yaml" $fileName) }}
+      - name: {{ include "crowdsec.volumeName" (printf "crowdsec-appsec-rules-%s" $fileName) }}
         configMap:
           name: "crowdsec-appsec-rules"
           items:
           - key: {{ $fileName }}
             path: {{ $fileName }}
+      {{- end }}
+      {{- end }}
+      {{- if .Values.appsec.scenarios -}}
+      {{- range $fileName, $content := .Values.appsec.scenarios }}
+      - name: {{ include "crowdsec.volumeName" (printf "crowdsec-appsec-scenarios-%s" $fileName) }}
+        configMap:
+          name: "crowdsec-appsec-scenarios"
+          items:
+          - key: {{ $fileName }}
+            path: {{ $fileName }}
+      {{- end }}
+      {{- end }}
+      {{- if (include "appsecPostoverflowsIsNotEmpty" .) }}
+      {{- range $stage, $stageConfig := .Values.appsec.postoverflows -}}
+      {{- if $stageConfig -}}
+      {{- range $fileName, $content := $stageConfig }}
+      - name: {{ include "crowdsec.volumeName" (printf "crowdsec-appsec-postoverflows-%s-%s" $stage $fileName) }}
+        configMap:
+          name: {{ printf "crowdsec-appsec-postoverflows-%s" $stage }}
+          items:
+          - key: {{ $fileName }}
+            path: {{ $fileName }}
+      {{- end }}
+      {{- end }}
       {{- end }}
       {{- end }}
       {{ if index .Values.config "appsec_config.yaml.local" }}

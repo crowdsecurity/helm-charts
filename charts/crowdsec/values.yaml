@@ -752,6 +752,27 @@ appsec:
     #  appsec_config: crowdsecurity/virtual-patching
     #  labels:
     #    type: appsec
+  # -- Custom scenarios for the appsec pod. See https://docs.crowdsec.net/docs/next/scenarios/intro
+  # Those files are only mounted in the appsec pods
+  ## @param appsec.scenarios [object] Custom scenario files for the appsec pod (key = filename, value = file content)
+  scenarios: {}
+    # my-scenario.yaml: |
+    #   type: trigger
+    #   name: my/scenario
+    #   ...
+    # `--set-file appsec.scenarios.my-scenario\.yaml=./my-scenario.yaml` is also supported.
+  # -- Custom postoverflows for the appsec pod. See https://docs.crowdsec.net/docs/next/log_processor/parsers/intro#postoverflows
+  # Those files are only mounted in the appsec pods
+  postoverflows:
+    ## @param appsec.postoverflows.s00-enrich Custom postoverflow enrichment files for the appsec pod
+    s00-enrich: {}
+      # my-enricher.yaml: |
+      #   ...
+    ## @param appsec.postoverflows.s01-whitelist Custom postoverflow whitelist files for the appsec pod
+    s01-whitelist: {}
+      # my-whitelist.yaml: |
+      #   ...
+      # `--set-file appsec.postoverflows.s01-whitelist.my-whitelist\.yaml=./my-whitelist.yaml` is also supported.
   # -- appsec_configs (https://docs.crowdsec.net/docs/next/appsec/configuration): key is the filename, value is the config content
   ## @param appsec.configs [object] AppSec configs (key = filename, value = file content)
   configs: {}

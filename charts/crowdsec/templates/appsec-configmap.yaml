@@ -12,6 +12,37 @@ data:
     {{- end }}
 
 ---
+{{- if .Values.appsec.scenarios }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "crowdsec-appsec-scenarios"
+data:
+{{ range $fileName, $content := .Values.appsec.scenarios -}}
+  {{ printf "%s: |" $fileName | indent 2 }}
+{{ $content | indent 4 }}
+{{ end }}
+{{- end }}
+
+---
+{{ if (include "appsecPostoverflowsIsNotEmpty" .) }}
+{{- range $stage, $stageConfig := .Values.appsec.postoverflows -}}
+{{- if $stageConfig -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ printf "crowdsec-appsec-postoverflows-%s" $stage }}
+data:
+{{ range $fileName, $content := $stageConfig -}}
+  {{ printf "%s: |" $fileName | indent 2 }}
+{{ $content | indent 4 }}
+{{ end }}
+---
+{{- end }}
+{{ end }}
+{{ end -}}
+
+---
 {{- if .Values.appsec.configs }}
 apiVersion: v1
 kind: ConfigMap

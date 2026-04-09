@@ -8,6 +8,7 @@ Crowdsec helm chart is an open-source, lightweight agent to detect and respond t
   - [Chart Repository](#chart-repository)
   - [Installing the Chart](#installing-the-chart)
   - [Supplying Custom Parser, Scenario, and Postoverflow Files](#supplying-custom-parser-scenario-and-postoverflow-files)
+  - [Supplying Custom AppSec Config and Rule Files](#supplying-custom-appsec-config-and-rule-files)
   - [Uninstalling the Chart](#uninstalling-the-chart)
   - [Authentication](#authentication)
     - [Auto registration token](#auto-registration-token)
@@ -116,6 +117,71 @@ helm upgrade --install crowdsec crowdsec/crowdsec \
 
 This content is emitted into the generated ConfigMaps as-is, so the YAML files stay untouched by the chart logic.
 Filenames without a `.yaml` or `.yml` suffix are also accepted. If the key contains dots, escape them in `--set`/`--set-file`.
+
+## Supplying Custom AppSec Config and Rule Files
+
+The chart supports passing custom AppSec configuration and rule files as raw file content through values. This works with both local and remote charts, using the same approach as custom parsers, scenarios, and postoverflows.
+
+AppSec configs are mounted at `/etc/crowdsec/appsec-configs/` and rules at `/etc/crowdsec/appsec-rules/` inside the AppSec pod.
+
+You can split your AppSec configuration across multiple values files:
+
+```sh
+helm upgrade --install crowdsec crowdsec/crowdsec \
+  -n crowdsec \
+  -f crowdsec-values.yaml \
+  -f appsec-configs.yaml \
+  -f appsec-rules.yaml
+```
+
+Example values files:
+
+```yaml
+# appsec-configs.yaml
+appsec:
+  configs:
+    my-appsec-config.yaml: |
+      name: my/appsec-config
+      default_remediation: ban
+      inband_rules:
+        - crowdsecurity/base-config
+        - crowdsecurity/vpatch-*
+```
+
+```yaml
+# appsec-rules.yaml
+appsec:
+  rules:
+    my-appsec-rule.yaml: |
+      name: my/appsec-rule
+      description: "Detect example pattern"
+      rules:
+        - zones:
+            - URI
+          transform:
+            - lowercase
+          match:
+            type: contains
+            value: this-is-a-test
+      labels:
+        type: exploit
+        service: http
+        behavior: "http:exploit"
+        confidence: 3
+        spoofable: 0
+```
+
+If you prefer to keep each file on disk and inject it, use `--set-file`. Helm reads the local file and assigns its content to the matching value key:
+
+```sh
+helm upgrade --install crowdsec crowdsec/crowdsec \
+  -n crowdsec \
+  -f crowdsec-values.yaml \
+  --set-file appsec.configs.my-appsec-config\.yaml=./my-appsec-config.yaml \
+  --set-file appsec.rules.my-appsec-rule\.yaml=./my-appsec-rule.yaml
+```
+
+This content is emitted into the generated ConfigMaps as-is. Filenames without a `.yaml` or `.yml` suffix are also accepted. If the key contains dots, escape them in `--set`/`--set-file`.
 
 ## Uninstalling the Chart
 
