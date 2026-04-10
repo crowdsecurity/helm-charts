@@ -112,6 +112,10 @@ helm upgrade --install crowdsec crowdsec/crowdsec \
 This content is emitted into the generated ConfigMaps as-is, so the YAML files stay untouched by the chart logic.
 Filenames without a `.yaml` or `.yml` suffix are also accepted. If the key contains dots, escape them in `--set`/`--set-file`.
 
+Be aware that the in the preceding command the file extension has to be escaped.
+Without escaping helm would understand this dot as a new level in the
+configuration.
+
 ## Supplying Custom AppSec Config and Rule Files
 
 The chart supports passing custom AppSec configuration and rule files as raw file content through values. This works with both local and remote charts, using the same approach as custom parsers, scenarios, and postoverflows.
