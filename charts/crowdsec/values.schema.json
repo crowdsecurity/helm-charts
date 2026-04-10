@@ -227,7 +227,7 @@
             "additionalProperties": false
         },
         "Notifications": {
-            "$ref": "#/definitions/StringFileMap",
+            "type": "object",
             "title": "Notifications"
         },
         "Parsers": {
