@@ -124,6 +124,9 @@
                                 "$ref": "#/definitions/KubernetesSource"
                             },
                             {
+                                "$ref": "#/definitions/KubernetesPodSource"
+                            },
+                            {
                                 "$ref": "#/definitions/VictoriaLogsSource"
                             }
                         ]
@@ -1021,6 +1024,34 @@
                 }
             },
             "required": ["source", "url", "query"]
+        },
+        "KubernetesPodSource": {
+            "type": "object",
+            "description": "https://docs.crowdsec.net/docs/next/log_processor/data_sources/kubernetes/",
+            "additionalProperties": false,
+            "properties": {
+                "source": {
+                    "const": "kubernetes"
+                },
+                "namespace": {
+                    "type": "string",
+                    "description": "The namespace where the pods are located."
+                },
+                "selector": {
+                    "type": "string",
+                    "description": "Label selector to filter pods (e.g. 'app=nginx,env=prod')."
+                },
+                "labels": {
+                    "$ref": "#/definitions/Labels"
+                },
+                "log_level": {
+                    "type": "string",
+                    "description": "Log level for this datasource."
+                }
+            },
+            "required": [
+                "source"
+            ]
         },
         "KubernetesSource": {
             "type": "object",
