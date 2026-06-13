@@ -148,6 +148,7 @@ spec:
           - name: INSECURE_SKIP_VERIFY
             value: {{ quote .Values.tls.insecureSkipVerify }}
           {{- end }}
+
         {{- with .Values.appsec.env }}
           {{- toYaml . | nindent 10 }}
         {{- end }}
@@ -161,8 +162,7 @@ spec:
             protocol: TCP
           {{- end }}
           {{- range .Values.appsec.acquisitions }}
-            {{- if and (hasKey . "listen_addr") (not startsWith "127.0.0.1" .listen_addr) }}
-          {{- $listen_addr := .listen_addr | default "" }}
+            {{- if and (hasKey . "listen_addr") (not (contains "127.0.0.1:" .listen_addr)) }}
           {{- $url := printf "http://%s/" .listen_addr | urlParse }}
           {{- $port := .listen_addr | replace (printf "%s:" $url.hostname) "" }}
           - name: appsec{{ if ne $port "7422" }}-{{ $port }}{{ end }}
@@ -185,8 +185,6 @@ spec:
         {{ if .Values.appsec.startupProbe }}
         startupProbe:
 {{ toYaml .Values.appsec.startupProbe | indent 10 }}
-        {{ end }}
-
         {{ end }}
 
         securityContext:

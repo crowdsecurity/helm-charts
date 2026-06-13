@@ -36,8 +36,7 @@ spec:
       name: metrics
     {{- end }}
     {{- range .Values.appsec.acquisitions }}
-      {{- if and (hasKey . "listen_addr") (not startsWith "127.0.0.1" .listen_addr) }}
-    {{- $listen_addr := .listen_addr | default "" }}
+      {{- if and (hasKey . "listen_addr") (not (contains "127.0.0.1:" .listen_addr)) }}
     {{- $url := printf "http://%s/" .listen_addr | urlParse }}
     {{- $port := .listen_addr | replace (printf "%s:" $url.hostname) "" }}
     - port: {{ $port }}
