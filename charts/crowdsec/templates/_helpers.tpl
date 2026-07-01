@@ -64,6 +64,24 @@ true
 {{- end -}}
 
 {{/*
+  Kubernetes-safe name for custom file-backed volumes.
+*/}}
+{{- define "crowdsec.volumeName" -}}
+{{- $trimmed := regexReplaceAll "\\.(yaml|yml)$" . "" -}}
+{{- $sanitized := regexReplaceAll "[^a-z0-9-]+" (lower $trimmed) "-" -}}
+{{- $sanitized | trimAll "-" | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+
+{{/*
+  appsec postoverflows parameters check
+*/}}
+{{ define "appsecPostoverflowsIsNotEmpty" }}
+{{- if or (index .Values.appsec.postoverflows "s00-enrich") (index .Values.appsec.postoverflows "s01-whitelist") }}
+true
+{{- end -}}
+{{- end -}}
+
+{{/*
   lapi custom config check
 */}}
 {{ define "lapiCustomConfigIsNotEmpty" }}
