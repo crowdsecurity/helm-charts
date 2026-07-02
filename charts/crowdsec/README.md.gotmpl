@@ -118,9 +118,11 @@ configuration.
 
 ## Supplying Custom AppSec Config and Rule Files
 
-The chart supports passing custom AppSec configuration and rule files as raw file content through values. This works with both local and remote charts, using the same approach as custom parsers, scenarios, and postoverflows.
+The chart supports passing custom AppSec configuration, rule, parser, scenario, context, and postoverflow files as raw file content through values. This works with both local and remote charts, using the same approach as custom parsers, scenarios, and postoverflows on the agent.
 
-AppSec configs are mounted at `/etc/crowdsec/appsec-configs/` and rules at `/etc/crowdsec/appsec-rules/` inside the AppSec pod.
+The AppSec pod is itself a full crowdsec engine instance that parses and evaluates its own out-of-band events locally before pushing alerts to the shared LAPI, so it needs its own copies of any custom parser/scenario/context/postoverflow used to process those events - the agent's `config.*` values are not shared with it.
+
+AppSec configs are mounted at `/etc/crowdsec/appsec-configs/`, rules at `/etc/crowdsec/appsec-rules/`, parsers at `/etc/crowdsec/parsers/<stage>/`, scenarios at `/etc/crowdsec/scenarios/`, contexts at `/etc/crowdsec/contexts/`, and postoverflows at `/etc/crowdsec/postoverflows/<stage>/` inside the AppSec pod.
 
 You can split your AppSec configuration across multiple values files:
 
@@ -129,7 +131,10 @@ helm upgrade --install crowdsec crowdsec/crowdsec \
   -n crowdsec \
   -f crowdsec-values.yaml \
   -f appsec-configs.yaml \
-  -f appsec-rules.yaml
+  -f appsec-rules.yaml \
+  -f appsec-parsers.yaml \
+  -f appsec-contexts.yaml \
+  -f appsec-postoverflows.yaml
 ```
 
 Example values files:
@@ -169,6 +174,40 @@ appsec:
         spoofable: 0
 ```
 
+```yaml
+# appsec-parsers.yaml
+appsec:
+  parsers:
+    s01-parse:
+      my-parser.yaml: |
+        name: my/parser
+        filter: "evt.Parsed.program == 'appsec' && evt.Parsed.source == 'my-source'"
+        onsuccess: next_stage
+```
+
+```yaml
+# appsec-contexts.yaml
+appsec:
+  contexts:
+    my-context.yaml: |
+      context:
+        my_field:
+          - evt.Meta.my_meta_key
+```
+
+```yaml
+# appsec-postoverflows.yaml
+appsec:
+  postoverflows:
+    s01-whitelist:
+      my-whitelist.yaml: |
+        name: my/whitelist
+        whitelist:
+          reason: "trusted source"
+          expression:
+            - evt.Parsed.remote_addr == '127.0.0.1'
+```
+
 If you prefer to keep each file on disk and inject it, use `--set-file`. Helm reads the local file and assigns its content to the matching value key:
 
 ```sh
@@ -176,7 +215,10 @@ helm upgrade --install crowdsec crowdsec/crowdsec \
   -n crowdsec \
   -f crowdsec-values.yaml \
   --set-file appsec.configs.my-appsec-config\.yaml=./my-appsec-config.yaml \
-  --set-file appsec.rules.my-appsec-rule\.yaml=./my-appsec-rule.yaml
+  --set-file appsec.rules.my-appsec-rule\.yaml=./my-appsec-rule.yaml \
+  --set-file appsec.parsers.s01-parse.my-parser\.yaml=./my-parser.yaml \
+  --set-file appsec.contexts.my-context\.yaml=./my-context.yaml \
+  --set-file appsec.postoverflows.s01-whitelist.my-whitelist\.yaml=./my-whitelist.yaml
 ```
 
 This content is emitted into the generated ConfigMaps as-is. Filenames without a `.yaml` or `.yml` suffix are also accepted. If the key contains dots, escape them in `--set`/`--set-file`.

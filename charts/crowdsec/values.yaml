@@ -752,6 +752,20 @@ appsec:
     #  appsec_config: crowdsecurity/virtual-patching
     #  labels:
     #    type: appsec
+  # -- Custom parsers for the appsec pod. See https://docs.crowdsec.net/docs/next/parsers/intro/
+  # Those files are only mounted in the appsec pods
+  parsers:
+    ## @param appsec.parsers.s00-raw First step custom parsers definitions for the appsec pod, usually used to label logs
+    s00-raw: {}
+    ## @param appsec.parsers.s01-parse Second step custom parsers definitions for the appsec pod, usually to normalize logs into events
+    s01-parse: {}
+      # my-parser.yaml: |
+      #   filter: "evt.Line.Labels.type == 'myProgram'"
+      #   onsuccess: next_stage
+      #   ....
+      # `--set-file appsec.parsers.s01-parse.my-parser\.yaml=./my-parser.yaml` is also supported.
+    ## @param appsec.parsers.s02-enrich Third step custom parsers definitions for the appsec pod, usually to enrich events
+    s02-enrich: {}
   # -- Custom scenarios for the appsec pod. See https://docs.crowdsec.net/docs/next/scenarios/intro
   # Those files are only mounted in the appsec pods
   ## @param appsec.scenarios [object] Custom scenario files for the appsec pod (key = filename, value = file content)
@@ -761,6 +775,15 @@ appsec:
     #   name: my/scenario
     #   ...
     # `--set-file appsec.scenarios.my-scenario\.yaml=./my-scenario.yaml` is also supported.
+  # -- Custom alert contexts for the appsec pod. See https://docs.crowdsec.net/docs/next/context/intro
+  # Those files are only mounted in the appsec pods
+  ## @param appsec.contexts [object] Custom alert context files for the appsec pod (key = filename, value = file content)
+  contexts: {}
+    # my-context.yaml: |
+    #   context:
+    #     my_field:
+    #       - evt.Meta.my_meta_key
+    # `--set-file appsec.contexts.my-context\.yaml=./my-context.yaml` is also supported.
   # -- Custom postoverflows for the appsec pod. See https://docs.crowdsec.net/docs/next/log_processor/parsers/intro#postoverflows
   # Those files are only mounted in the appsec pods
   postoverflows:
