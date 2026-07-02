@@ -202,10 +202,28 @@ spec:
             subPath: {{ $fileName }}
           {{- end }}
           {{- end }}
+          {{- if (include "appsecParsersIsNotEmpty" .) }}
+          {{- range $stage, $stageConfig := .Values.appsec.parsers -}}
+          {{- if $stageConfig -}}
+          {{- range $fileName, $content := $stageConfig }}
+          - name: {{ include "crowdsec.volumeName" (printf "crowdsec-appsec-parsers-%s-%s" $stage $fileName) }}
+            mountPath: {{ printf "/etc/crowdsec/parsers/%s/%s" $stage $fileName }}
+            subPath: {{ $fileName }}
+          {{- end }}
+          {{- end }}
+          {{- end }}
+          {{- end }}
           {{- if .Values.appsec.scenarios -}}
           {{- range $fileName, $content := .Values.appsec.scenarios }}
           - name: {{ include "crowdsec.volumeName" (printf "crowdsec-appsec-scenarios-%s" $fileName) }}
             mountPath: {{ printf "/etc/crowdsec/scenarios/%s" $fileName }}
+            subPath: {{ $fileName }}
+          {{- end }}
+          {{- end }}
+          {{- if .Values.appsec.contexts -}}
+          {{- range $fileName, $content := .Values.appsec.contexts }}
+          - name: {{ include "crowdsec.volumeName" (printf "crowdsec-appsec-contexts-%s" $fileName) }}
+            mountPath: {{ printf "/etc/crowdsec/contexts/%s" $fileName }}
             subPath: {{ $fileName }}
           {{- end }}
           {{- end }}
@@ -263,11 +281,35 @@ spec:
             path: {{ $fileName }}
       {{- end }}
       {{- end }}
+      {{- if (include "appsecParsersIsNotEmpty" .) }}
+      {{- range $stage, $stageConfig := .Values.appsec.parsers -}}
+      {{- if $stageConfig -}}
+      {{- range $fileName, $content := $stageConfig }}
+      - name: {{ include "crowdsec.volumeName" (printf "crowdsec-appsec-parsers-%s-%s" $stage $fileName) }}
+        configMap:
+          name: {{ printf "crowdsec-appsec-parsers-%s" $stage }}
+          items:
+          - key: {{ $fileName }}
+            path: {{ $fileName }}
+      {{- end }}
+      {{- end }}
+      {{- end }}
+      {{- end }}
       {{- if .Values.appsec.scenarios -}}
       {{- range $fileName, $content := .Values.appsec.scenarios }}
       - name: {{ include "crowdsec.volumeName" (printf "crowdsec-appsec-scenarios-%s" $fileName) }}
         configMap:
           name: "crowdsec-appsec-scenarios"
+          items:
+          - key: {{ $fileName }}
+            path: {{ $fileName }}
+      {{- end }}
+      {{- end }}
+      {{- if .Values.appsec.contexts -}}
+      {{- range $fileName, $content := .Values.appsec.contexts }}
+      - name: {{ include "crowdsec.volumeName" (printf "crowdsec-appsec-contexts-%s" $fileName) }}
+        configMap:
+          name: "crowdsec-appsec-contexts"
           items:
           - key: {{ $fileName }}
             path: {{ $fileName }}

@@ -82,6 +82,15 @@ true
 {{- end -}}
 
 {{/*
+  appsec parsers parameters check
+*/}}
+{{ define "appsecParsersIsNotEmpty" }}
+{{- if or (index .Values.appsec.parsers "s00-raw") (index .Values.appsec.parsers "s01-parse") (index .Values.appsec.parsers "s02-enrich") }}
+true
+{{- end -}}
+{{- end -}}
+
+{{/*
   lapi custom config check
 */}}
 {{ define "lapiCustomConfigIsNotEmpty" }}

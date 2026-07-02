@@ -120,9 +120,11 @@ Filenames without a `.yaml` or `.yml` suffix are also accepted. If the key conta
 
 ## Supplying Custom AppSec Config and Rule Files
 
-The chart supports passing custom AppSec configuration and rule files as raw file content through values. This works with both local and remote charts, using the same approach as custom parsers, scenarios, and postoverflows.
+The chart supports passing custom AppSec configuration, rule, parser, scenario, context, and postoverflow files as raw file content through values. This works with both local and remote charts, using the same approach as custom parsers, scenarios, and postoverflows on the agent.
 
-AppSec configs are mounted at `/etc/crowdsec/appsec-configs/` and rules at `/etc/crowdsec/appsec-rules/` inside the AppSec pod.
+The AppSec pod is itself a full crowdsec engine instance that parses and evaluates its own out-of-band events locally before pushing alerts to the shared LAPI, so it needs its own copies of any custom parser/scenario/context/postoverflow used to process those events - the agent's `config.*` values are not shared with it.
+
+AppSec configs are mounted at `/etc/crowdsec/appsec-configs/`, rules at `/etc/crowdsec/appsec-rules/`, parsers at `/etc/crowdsec/parsers/<stage>/`, scenarios at `/etc/crowdsec/scenarios/`, contexts at `/etc/crowdsec/contexts/`, and postoverflows at `/etc/crowdsec/postoverflows/<stage>/` inside the AppSec pod.
 
 You can split your AppSec configuration across multiple values files:
 
@@ -131,7 +133,10 @@ helm upgrade --install crowdsec crowdsec/crowdsec \
   -n crowdsec \
   -f crowdsec-values.yaml \
   -f appsec-configs.yaml \
-  -f appsec-rules.yaml
+  -f appsec-rules.yaml \
+  -f appsec-parsers.yaml \
+  -f appsec-contexts.yaml \
+  -f appsec-postoverflows.yaml
 ```
 
 Example values files:
@@ -171,6 +176,40 @@ appsec:
         spoofable: 0
 ```
 
+```yaml
+# appsec-parsers.yaml
+appsec:
+  parsers:
+    s01-parse:
+      my-parser.yaml: |
+        name: my/parser
+        filter: "evt.Parsed.program == 'appsec' && evt.Parsed.source == 'my-source'"
+        onsuccess: next_stage
+```
+
+```yaml
+# appsec-contexts.yaml
+appsec:
+  contexts:
+    my-context.yaml: |
+      context:
+        my_field:
+          - evt.Meta.my_meta_key
+```
+
+```yaml
+# appsec-postoverflows.yaml
+appsec:
+  postoverflows:
+    s01-whitelist:
+      my-whitelist.yaml: |
+        name: my/whitelist
+        whitelist:
+          reason: "trusted source"
+          expression:
+            - evt.Parsed.remote_addr == '127.0.0.1'
+```
+
 If you prefer to keep each file on disk and inject it, use `--set-file`. Helm reads the local file and assigns its content to the matching value key:
 
 ```sh
@@ -178,7 +217,10 @@ helm upgrade --install crowdsec crowdsec/crowdsec \
   -n crowdsec \
   -f crowdsec-values.yaml \
   --set-file appsec.configs.my-appsec-config\.yaml=./my-appsec-config.yaml \
-  --set-file appsec.rules.my-appsec-rule\.yaml=./my-appsec-rule.yaml
+  --set-file appsec.rules.my-appsec-rule\.yaml=./my-appsec-rule.yaml \
+  --set-file appsec.parsers.s01-parse.my-parser\.yaml=./my-parser.yaml \
+  --set-file appsec.contexts.my-context\.yaml=./my-context.yaml \
+  --set-file appsec.postoverflows.s01-whitelist.my-whitelist\.yaml=./my-whitelist.yaml
 ```
 
 This content is emitted into the generated ConfigMaps as-is. Filenames without a `.yaml` or `.yml` suffix are also accepted. If the key contains dots, escape them in `--set`/`--set-file`.
@@ -631,100 +673,107 @@ controller:
 
 ### agent
 
-| Name                                             | Description                                                                                | Value   |
-| ------------------------------------------------ | ------------------------------------------------------------------------------------------ | ------- |
-| `agent.enabled`                                  | [object] Enable CrowdSec agent (enabled by default)                                        | `true`  |
-| `agent.isDeployment`                             | [object] Deploy agent as a Deployment instead of a DaemonSet                               | `false` |
-| `agent.serviceAccountName`                       | Service account name for the agent pods                                                    | `""`    |
-| `agent.lapiURL`                                  | URL of the LAPI for the agent to connect to (defaults to internal service URL)             | `""`    |
-| `agent.lapiHost`                                 | Host of the LAPI for the agent to connect to                                               | `""`    |
-| `agent.lapiPort`                                 | Port of the LAPI for the agent to connect to                                               | `8080`  |
-| `agent.replicas`                                 | Number of replicas when deploying as a Deployment                                          | `1`     |
-| `agent.strategy`                                 | Deployment strategy when `isDeployment` is true                                            | `{}`    |
-| `agent.ports`                                    | Custom container ports to expose (default: metrics port 6060 if enabled)                   | `[]`    |
-| `agent.additionalAcquisition`                    | Extra log acquisition sources (see https://docs.crowdsec.net/docs/next/data_sources/intro) | `[]`    |
-| `agent.acquisition`                              | Pod log acquisition definitions (namespace, podName, program, etc.)                        | `[]`    |
-| `agent.priorityClassName`                        | Priority class name for agent pods                                                         | `""`    |
-| `agent.daemonsetAnnotations`                     | Annotations applied to the agent DaemonSet                                                 | `{}`    |
-| `agent.deploymentAnnotations`                    | Annotations applied to the agent Deployment                                                | `{}`    |
-| `agent.podAnnotations`                           | Annotations applied to agent pods                                                          | `{}`    |
-| `agent.podLabels`                                | Labels applied to agent pods                                                               | `{}`    |
-| `agent.extraInitContainers`                      | Extra init containers for agent pods                                                       | `[]`    |
-| `agent.extraVolumes`                             | Extra volumes for agent pods                                                               | `[]`    |
-| `agent.extraVolumeMounts`                        | Extra volume mounts for agent pods                                                         | `[]`    |
-| `agent.podSecurityContext`                       | Security context for agent pods                                                            | `{}`    |
-| `agent.securityContext`                          | Security context for agent containers                                                      | `{}`    |
-| `agent.resources`                                | Resource requests and limits for agent pods                                                | `{}`    |
-| `agent.persistentVolume.config.enabled`          | [object] Enable persistent volume for agent config                                         | `false` |
-| `agent.persistentVolume.config.accessModes`      | Access modes for the config PVC                                                            | `[]`    |
-| `agent.persistentVolume.config.storageClassName` | StorageClass name for the config PVC                                                       | `""`    |
-| `agent.persistentVolume.config.existingClaim`    | Existing PVC name to use for config                                                        | `""`    |
-| `agent.persistentVolume.config.subPath`          | subPath to use within the volume                                                           | `""`    |
-| `agent.persistentVolume.config.size`             | Requested size for the config PVC                                                          | `""`    |
-| `agent.hostVarLog`                               | [object] Mount hostPath `/var/log` into the agent pod                                      | `true`  |
-| `agent.env`                                      | Environment variables passed to the crowdsecurity/crowdsec container                       | `[]`    |
-| `agent.nodeSelector`                             | Node selector for agent pods                                                               | `{}`    |
-| `agent.tolerations`                              | Tolerations for scheduling agent pods                                                      | `[]`    |
-| `agent.affinity`                                 | Affinity rules for agent pods                                                              | `{}`    |
-| `agent.livenessProbe`                            | Liveness probe configuration for agent pods                                                | `{}`    |
-| `agent.readinessProbe`                           | Readiness probe configuration for agent pods                                               | `{}`    |
-| `agent.startupProbe`                             | Startup probe configuration for agent pods                                                 | `{}`    |
-| `agent.metrics.enabled`                          | Enable service monitoring for Prometheus (exposes port 6060)                               | `true`  |
-| `agent.metrics.serviceMonitor.enabled`           | Create a ServiceMonitor resource for Prometheus                                            | `false` |
-| `agent.metrics.serviceMonitor.additionalLabels`  | Extra labels for the ServiceMonitor                                                        | `{}`    |
-| `agent.metrics.podMonitor.enabled`               | Create a PodMonitor resource for Prometheus                                                | `false` |
-| `agent.metrics.podMonitor.additionalLabels`      | Extra labels for the PodMonitor                                                            | `{}`    |
-| `agent.service.type`                             | Kubernetes Service type for agent                                                          | `""`    |
-| `agent.service.labels`                           | Labels applied to the agent Service                                                        | `{}`    |
-| `agent.service.annotations`                      | Annotations applied to the agent Service                                                   | `{}`    |
-| `agent.service.externalIPs`                      | External IPs assigned to the agent Service                                                 | `[]`    |
-| `agent.service.loadBalancerIP`                   | Fixed LoadBalancer IP for the agent Service                                                | `nil`   |
-| `agent.service.loadBalancerClass`                | LoadBalancer class for the agent Service                                                   | `nil`   |
-| `agent.service.externalTrafficPolicy`            | External traffic policy for the agent Service                                              | `""`    |
-| `agent.service.ports`                            | Custom service ports (default: metrics port 6060 if enabled)                               | `[]`    |
-| `agent.wait_for_lapi.image.repository`           | Repository for the wait-for-lapi init container image                                      | `""`    |
-| `agent.wait_for_lapi.image.pullPolicy`           | Image pull policy for the wait-for-lapi init container                                     | `""`    |
-| `agent.wait_for_lapi.image.tag`                  | Image tag for the wait-for-lapi init container                                             | `""`    |
-| `agent.wait_for_lapi.securityContext`            | Security context for the wait-for-lapi init container                                      | `{}`    |
-| `appsec.enabled`                                 | [object] Enable AppSec component (disabled by default)                                     | `false` |
-| `appsec.lapiURL`                                 | URL the AppSec component uses to reach LAPI (defaults to internal service URL)             | `""`    |
-| `appsec.lapiHost`                                | Hostname the AppSec component uses to reach LAPI                                           | `""`    |
-| `appsec.lapiPort`                                | Port the AppSec component uses to reach LAPI                                               | `8080`  |
-| `appsec.replicas`                                | Number of replicas for the AppSec Deployment                                               | `1`     |
-| `appsec.strategy`                                | Deployment strategy for AppSec                                                             | `{}`    |
-| `appsec.acquisitions`                            | AppSec acquisitions (datasource listeners), e.g. appsec listener on 7422                   | `[]`    |
-| `appsec.configs`                                 | AppSec configs (key = filename, value = file content)                                      | `{}`    |
-| `appsec.rules`                                   | AppSec rule files (key = filename, value = file content)                                   | `{}`    |
-| `appsec.priorityClassName`                       | Priority class name for AppSec pods                                                        | `""`    |
-| `appsec.deployAnnotations`                       | Annotations added to the AppSec Deployment                                                 | `{}`    |
-| `appsec.podAnnotations`                          | Annotations added to AppSec pods                                                           | `{}`    |
-| `appsec.podLabels`                               | Labels added to AppSec pods                                                                | `{}`    |
-| `appsec.extraInitContainers`                     | Extra init containers for AppSec pods                                                      | `[]`    |
-| `appsec.extraVolumes`                            | Extra volumes for AppSec pods                                                              | `[]`    |
-| `appsec.extraVolumeMounts`                       | Extra volume mounts for AppSec pods                                                        | `[]`    |
-| `appsec.podSecurityContext`                      | Security context for AppSec pods                                                           | `{}`    |
-| `appsec.securityContext`                         | Security context for the appsec container                                                  | `{}`    |
-| `appsec.resources`                               | Resource requests and limits for AppSec pods                                               | `{}`    |
-| `appsec.env`                                     | Environment variables for the AppSec container (collections/configs/rules toggles, etc.)   | `[]`    |
-| `appsec.nodeSelector`                            | Node selector for scheduling AppSec pods                                                   | `{}`    |
-| `appsec.tolerations`                             | Tolerations for scheduling AppSec pods                                                     | `[]`    |
-| `appsec.affinity`                                | Affinity rules for scheduling AppSec pods                                                  | `{}`    |
-| `appsec.livenessProbe`                           | Liveness probe configuration for AppSec pods                                               | `{}`    |
-| `appsec.readinessProbe`                          | Readiness probe configuration for AppSec pods                                              | `{}`    |
-| `appsec.startupProbe`                            | Startup probe configuration for AppSec pods                                                | `{}`    |
-| `appsec.metrics.enabled`                         | Enable service monitoring (exposes metrics on 6060; AppSec listener typically 7422)        | `true`  |
-| `appsec.metrics.serviceMonitor.enabled`          | Create a ServiceMonitor for Prometheus scraping                                            | `false` |
-| `appsec.metrics.serviceMonitor.additionalLabels` | Extra labels for the ServiceMonitor                                                        | `{}`    |
-| `appsec.metrics.podMonitor.enabled`              | Create a PodMonitor for Prometheus scraping                                                | `false` |
-| `appsec.metrics.podMonitor.additionalLabels`     | Extra labels for the PodMonitor                                                            | `{}`    |
-| `appsec.service.type`                            | Kubernetes Service type for AppSec                                                         | `""`    |
-| `appsec.service.labels`                          | Additional labels for the AppSec Service                                                   | `{}`    |
-| `appsec.service.annotations`                     | Annotations to apply to the LAPI ingress object                                            | `{}`    |
-| `appsec.service.externalIPs`                     | External IPs for the AppSec Service                                                        | `[]`    |
-| `appsec.service.loadBalancerIP`                  | Fixed LoadBalancer IP for the AppSec Service                                               | `nil`   |
-| `appsec.service.loadBalancerClass`               | LoadBalancer class for the AppSec Service                                                  | `nil`   |
-| `appsec.service.externalTrafficPolicy`           | External traffic policy for the AppSec Service                                             | `""`    |
-| `appsec.wait_for_lapi.image.repository`          | Repository for the wait-for-lapi init con                                                  | `""`    |
-| `appsec.wait_for_lapi.image.pullPolicy`          | Image pull policy for the wait-for-lapi init container                                     | `""`    |
-| `appsec.wait_for_lapi.image.tag`                 | Image tag for the wait-for-lapi init container                                             | `1.28`  |
-| `appsec.wait_for_lapi.securityContext`           | Security context for the wait-for-lapi init container                                      | `{}`    |
+| Name                                             | Description                                                                                      | Value   |
+| ------------------------------------------------ | ------------------------------------------------------------------------------------------------ | ------- |
+| `agent.enabled`                                  | [object] Enable CrowdSec agent (enabled by default)                                              | `true`  |
+| `agent.isDeployment`                             | [object] Deploy agent as a Deployment instead of a DaemonSet                                     | `false` |
+| `agent.serviceAccountName`                       | Service account name for the agent pods                                                          | `""`    |
+| `agent.lapiURL`                                  | URL of the LAPI for the agent to connect to (defaults to internal service URL)                   | `""`    |
+| `agent.lapiHost`                                 | Host of the LAPI for the agent to connect to                                                     | `""`    |
+| `agent.lapiPort`                                 | Port of the LAPI for the agent to connect to                                                     | `8080`  |
+| `agent.replicas`                                 | Number of replicas when deploying as a Deployment                                                | `1`     |
+| `agent.strategy`                                 | Deployment strategy when `isDeployment` is true                                                  | `{}`    |
+| `agent.ports`                                    | Custom container ports to expose (default: metrics port 6060 if enabled)                         | `[]`    |
+| `agent.additionalAcquisition`                    | Extra log acquisition sources (see https://docs.crowdsec.net/docs/next/data_sources/intro)       | `[]`    |
+| `agent.acquisition`                              | Pod log acquisition definitions (namespace, podName, program, etc.)                              | `[]`    |
+| `agent.priorityClassName`                        | Priority class name for agent pods                                                               | `""`    |
+| `agent.daemonsetAnnotations`                     | Annotations applied to the agent DaemonSet                                                       | `{}`    |
+| `agent.deploymentAnnotations`                    | Annotations applied to the agent Deployment                                                      | `{}`    |
+| `agent.podAnnotations`                           | Annotations applied to agent pods                                                                | `{}`    |
+| `agent.podLabels`                                | Labels applied to agent pods                                                                     | `{}`    |
+| `agent.extraInitContainers`                      | Extra init containers for agent pods                                                             | `[]`    |
+| `agent.extraVolumes`                             | Extra volumes for agent pods                                                                     | `[]`    |
+| `agent.extraVolumeMounts`                        | Extra volume mounts for agent pods                                                               | `[]`    |
+| `agent.podSecurityContext`                       | Security context for agent pods                                                                  | `{}`    |
+| `agent.securityContext`                          | Security context for agent containers                                                            | `{}`    |
+| `agent.resources`                                | Resource requests and limits for agent pods                                                      | `{}`    |
+| `agent.persistentVolume.config.enabled`          | [object] Enable persistent volume for agent config                                               | `false` |
+| `agent.persistentVolume.config.accessModes`      | Access modes for the config PVC                                                                  | `[]`    |
+| `agent.persistentVolume.config.storageClassName` | StorageClass name for the config PVC                                                             | `""`    |
+| `agent.persistentVolume.config.existingClaim`    | Existing PVC name to use for config                                                              | `""`    |
+| `agent.persistentVolume.config.subPath`          | subPath to use within the volume                                                                 | `""`    |
+| `agent.persistentVolume.config.size`             | Requested size for the config PVC                                                                | `""`    |
+| `agent.hostVarLog`                               | [object] Mount hostPath `/var/log` into the agent pod                                            | `true`  |
+| `agent.env`                                      | Environment variables passed to the crowdsecurity/crowdsec container                             | `[]`    |
+| `agent.nodeSelector`                             | Node selector for agent pods                                                                     | `{}`    |
+| `agent.tolerations`                              | Tolerations for scheduling agent pods                                                            | `[]`    |
+| `agent.affinity`                                 | Affinity rules for agent pods                                                                    | `{}`    |
+| `agent.livenessProbe`                            | Liveness probe configuration for agent pods                                                      | `{}`    |
+| `agent.readinessProbe`                           | Readiness probe configuration for agent pods                                                     | `{}`    |
+| `agent.startupProbe`                             | Startup probe configuration for agent pods                                                       | `{}`    |
+| `agent.metrics.enabled`                          | Enable service monitoring for Prometheus (exposes port 6060)                                     | `true`  |
+| `agent.metrics.serviceMonitor.enabled`           | Create a ServiceMonitor resource for Prometheus                                                  | `false` |
+| `agent.metrics.serviceMonitor.additionalLabels`  | Extra labels for the ServiceMonitor                                                              | `{}`    |
+| `agent.metrics.podMonitor.enabled`               | Create a PodMonitor resource for Prometheus                                                      | `false` |
+| `agent.metrics.podMonitor.additionalLabels`      | Extra labels for the PodMonitor                                                                  | `{}`    |
+| `agent.service.type`                             | Kubernetes Service type for agent                                                                | `""`    |
+| `agent.service.labels`                           | Labels applied to the agent Service                                                              | `{}`    |
+| `agent.service.annotations`                      | Annotations applied to the agent Service                                                         | `{}`    |
+| `agent.service.externalIPs`                      | External IPs assigned to the agent Service                                                       | `[]`    |
+| `agent.service.loadBalancerIP`                   | Fixed LoadBalancer IP for the agent Service                                                      | `nil`   |
+| `agent.service.loadBalancerClass`                | LoadBalancer class for the agent Service                                                         | `nil`   |
+| `agent.service.externalTrafficPolicy`            | External traffic policy for the agent Service                                                    | `""`    |
+| `agent.service.ports`                            | Custom service ports (default: metrics port 6060 if enabled)                                     | `[]`    |
+| `agent.wait_for_lapi.image.repository`           | Repository for the wait-for-lapi init container image                                            | `""`    |
+| `agent.wait_for_lapi.image.pullPolicy`           | Image pull policy for the wait-for-lapi init container                                           | `""`    |
+| `agent.wait_for_lapi.image.tag`                  | Image tag for the wait-for-lapi init container                                                   | `""`    |
+| `agent.wait_for_lapi.securityContext`            | Security context for the wait-for-lapi init container                                            | `{}`    |
+| `appsec.enabled`                                 | [object] Enable AppSec component (disabled by default)                                           | `false` |
+| `appsec.lapiURL`                                 | URL the AppSec component uses to reach LAPI (defaults to internal service URL)                   | `""`    |
+| `appsec.lapiHost`                                | Hostname the AppSec component uses to reach LAPI                                                 | `""`    |
+| `appsec.lapiPort`                                | Port the AppSec component uses to reach LAPI                                                     | `8080`  |
+| `appsec.replicas`                                | Number of replicas for the AppSec Deployment                                                     | `1`     |
+| `appsec.strategy`                                | Deployment strategy for AppSec                                                                   | `{}`    |
+| `appsec.acquisitions`                            | AppSec acquisitions (datasource listeners), e.g. appsec listener on 7422                         | `[]`    |
+| `appsec.parsers.s00-raw`                         | First step custom parsers definitions for the appsec pod, usually used to label logs             | `{}`    |
+| `appsec.parsers.s01-parse`                       | Second step custom parsers definitions for the appsec pod, usually to normalize logs into events | `{}`    |
+| `appsec.parsers.s02-enrich`                      | Third step custom parsers definitions for the appsec pod, usually to enrich events               | `{}`    |
+| `appsec.scenarios`                               | Custom scenario files for the appsec pod (key = filename, value = file content)                  | `{}`    |
+| `appsec.contexts`                                | Custom alert context files for the appsec pod (key = filename, value = file content)             | `{}`    |
+| `appsec.postoverflows.s00-enrich`                | Custom postoverflow enrichment files for the appsec pod                                          | `{}`    |
+| `appsec.postoverflows.s01-whitelist`             | Custom postoverflow whitelist files for the appsec pod                                           | `{}`    |
+| `appsec.configs`                                 | AppSec configs (key = filename, value = file content)                                            | `{}`    |
+| `appsec.rules`                                   | AppSec rule files (key = filename, value = file content)                                         | `{}`    |
+| `appsec.priorityClassName`                       | Priority class name for AppSec pods                                                              | `""`    |
+| `appsec.deployAnnotations`                       | Annotations added to the AppSec Deployment                                                       | `{}`    |
+| `appsec.podAnnotations`                          | Annotations added to AppSec pods                                                                 | `{}`    |
+| `appsec.podLabels`                               | Labels added to AppSec pods                                                                      | `{}`    |
+| `appsec.extraInitContainers`                     | Extra init containers for AppSec pods                                                            | `[]`    |
+| `appsec.extraVolumes`                            | Extra volumes for AppSec pods                                                                    | `[]`    |
+| `appsec.extraVolumeMounts`                       | Extra volume mounts for AppSec pods                                                              | `[]`    |
+| `appsec.podSecurityContext`                      | Security context for AppSec pods                                                                 | `{}`    |
+| `appsec.securityContext`                         | Security context for the appsec container                                                        | `{}`    |
+| `appsec.resources`                               | Resource requests and limits for AppSec pods                                                     | `{}`    |
+| `appsec.env`                                     | Environment variables for the AppSec container (collections/configs/rules toggles, etc.)         | `[]`    |
+| `appsec.nodeSelector`                            | Node selector for scheduling AppSec pods                                                         | `{}`    |
+| `appsec.tolerations`                             | Tolerations for scheduling AppSec pods                                                           | `[]`    |
+| `appsec.affinity`                                | Affinity rules for scheduling AppSec pods                                                        | `{}`    |
+| `appsec.livenessProbe`                           | Liveness probe configuration for AppSec pods                                                     | `{}`    |
+| `appsec.readinessProbe`                          | Readiness probe configuration for AppSec pods                                                    | `{}`    |
+| `appsec.startupProbe`                            | Startup probe configuration for AppSec pods                                                      | `{}`    |
+| `appsec.metrics.enabled`                         | Enable service monitoring (exposes metrics on 6060; AppSec listener typically 7422)              | `true`  |
+| `appsec.metrics.serviceMonitor.enabled`          | Create a ServiceMonitor for Prometheus scraping                                                  | `false` |
+| `appsec.metrics.serviceMonitor.additionalLabels` | Extra labels for the ServiceMonitor                                                              | `{}`    |
+| `appsec.metrics.podMonitor.enabled`              | Create a PodMonitor for Prometheus scraping                                                      | `false` |
+| `appsec.metrics.podMonitor.additionalLabels`     | Extra labels for the PodMonitor                                                                  | `{}`    |
+| `appsec.service.type`                            | Kubernetes Service type for AppSec                                                               | `""`    |
+| `appsec.service.labels`                          | Additional labels for the AppSec Service                                                         | `{}`    |
+| `appsec.service.annotations`                     | Annotations to apply to the LAPI ingress object                                                  | `{}`    |
+| `appsec.service.externalIPs`                     | External IPs for the AppSec Service                                                              | `[]`    |
+| `appsec.service.loadBalancerIP`                  | Fixed LoadBalancer IP for the AppSec Service                                                     | `nil`   |
+| `appsec.service.loadBalancerClass`               | LoadBalancer class for the AppSec Service                                                        | `nil`   |
+| `appsec.service.externalTrafficPolicy`           | External traffic policy for the AppSec Service                                                   | `""`    |
+| `appsec.wait_for_lapi.image.repository`          | Repository for the wait-for-lapi init con                                                        | `""`    |
+| `appsec.wait_for_lapi.image.pullPolicy`          | Image pull policy for the wait-for-lapi init container                                           | `""`    |
+| `appsec.wait_for_lapi.image.tag`                 | Image tag for the wait-for-lapi init container                                                   | `1.28`  |
+| `appsec.wait_for_lapi.securityContext`           | Security context for the wait-for-lapi init container                                            | `{}`    |

@@ -12,6 +12,24 @@ data:
     {{- end }}
 
 ---
+{{ if (include "appsecParsersIsNotEmpty" .) }}
+{{- range $stage, $stageConfig := .Values.appsec.parsers -}}
+{{- if $stageConfig -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ printf "crowdsec-appsec-parsers-%s" $stage }}
+data:
+{{ range $fileName, $content := $stageConfig -}}
+  {{ printf "%s: |" $fileName | indent 2 }}
+{{ $content | indent 4 }}
+{{ end }}
+---
+{{- end }}
+{{ end }}
+{{ end -}}
+
+---
 {{- if .Values.appsec.scenarios }}
 apiVersion: v1
 kind: ConfigMap
@@ -19,6 +37,19 @@ metadata:
   name: "crowdsec-appsec-scenarios"
 data:
 {{ range $fileName, $content := .Values.appsec.scenarios -}}
+  {{ printf "%s: |" $fileName | indent 2 }}
+{{ $content | indent 4 }}
+{{ end }}
+{{- end }}
+
+---
+{{- if .Values.appsec.contexts }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "crowdsec-appsec-contexts"
+data:
+{{ range $fileName, $content := .Values.appsec.contexts -}}
   {{ printf "%s: |" $fileName | indent 2 }}
 {{ $content | indent 4 }}
 {{ end }}
