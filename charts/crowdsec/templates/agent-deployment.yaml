@@ -77,8 +77,7 @@ spec:
             cpu: 1m
             memory: 10Mi
         securityContext:
-          allowPrivilegeEscalation: false
-          privileged: false
+          {{- toYaml .Values.agent.wait_for_lapi.securityContext | nindent 10 }}
         {{- if or (not .Values.tls.enabled) (not .Values.tls.agent.tlsClientAuth) }}
         volumeMounts:
           - name: crowdsec-config
@@ -185,8 +184,7 @@ spec:
         {{ end }}
 
         securityContext:
-          allowPrivilegeEscalation: false
-          privileged: false
+          {{- toYaml .Values.agent.securityContext | nindent 10 }}
 
         volumeMounts:
           {{- if or (not .Values.tls.enabled) (not .Values.tls.agent.tlsClientAuth) }}
@@ -211,7 +209,7 @@ spec:
           {{- range $stage, $stageConfig := .Values.config.parsers -}}
           {{- if $stageConfig -}}
           {{ range $fileName, $content := $stageConfig -}}
-          - name: {{ printf "crowdsec-parsers-%s-%s" $stage (trimSuffix ".yaml" $fileName) }}
+          - name: {{ include "crowdsec.volumeName" (printf "crowdsec-parsers-%s-%s" $stage $fileName) }}
             mountPath: {{ printf "%s/parsers/%s/%s" $crowdsecConfig $stage $fileName }}
             subPath: {{ $fileName }}
           {{ end }}
@@ -220,7 +218,7 @@ spec:
           {{- end }}
           {{- if .Values.config.scenarios -}}
           {{ range $fileName, $content := .Values.config.scenarios -}}
-          - name: {{ printf "crowdsec-scenarios-%s" (trimSuffix ".yaml" $fileName) }}
+          - name: {{ include "crowdsec.volumeName" (printf "crowdsec-scenarios-%s" $fileName) }}
             mountPath: {{ printf "%s/scenarios/%s" $crowdsecConfig $fileName }}
             subPath: {{ $fileName }}
           {{ end }}
@@ -229,7 +227,7 @@ spec:
           {{- range $stage, $stageConfig := .Values.config.postoverflows -}}
           {{- if $stageConfig -}}
           {{ range $fileName, $content := $stageConfig -}}
-          - name: {{ printf "crowdsec-postoverflows-%s-%s" $stage (trimSuffix ".yaml" $fileName) }}
+          - name: {{ include "crowdsec.volumeName" (printf "crowdsec-postoverflows-%s-%s" $stage $fileName) }}
             mountPath: {{ printf "%s/postoverflows/%s/%s" $crowdsecConfig $stage $fileName }}
             subPath: {{ $fileName }}
           {{ end }}
@@ -289,7 +287,7 @@ spec:
       {{- range $stage, $stageConfig := .Values.config.parsers -}}
       {{- if $stageConfig -}}
       {{ range $fileName, $content := $stageConfig -}}
-      - name: {{ printf "crowdsec-parsers-%s-%s" $stage (trimSuffix ".yaml" $fileName) }}
+      - name: {{ include "crowdsec.volumeName" (printf "crowdsec-parsers-%s-%s" $stage $fileName) }}
         configMap:
           name: {{ printf "crowdsec-parsers-%s" $stage }}
           items:
@@ -301,7 +299,7 @@ spec:
       {{- end }}
       {{- if .Values.config.scenarios -}}
       {{ range $fileName, $content := .Values.config.scenarios -}}
-      - name: {{ printf "crowdsec-scenarios-%s" (trimSuffix ".yaml" $fileName) }}
+      - name: {{ include "crowdsec.volumeName" (printf "crowdsec-scenarios-%s" $fileName) }}
         configMap:
           name: "crowdsec-scenarios"
           items:
@@ -313,7 +311,7 @@ spec:
       {{- range $stage, $stageConfig := .Values.config.postoverflows -}}
       {{- if $stageConfig -}}
       {{ range $fileName, $content := $stageConfig -}}
-      - name: {{ printf "crowdsec-postoverflows-%s-%s" $stage (trimSuffix ".yaml" $fileName) }}
+      - name: {{ include "crowdsec.volumeName" (printf "crowdsec-postoverflows-%s-%s" $stage $fileName) }}
         configMap:
           name: {{ printf "crowdsec-postoverflows-%s" $stage }}
           items:
@@ -355,4 +353,8 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       priorityClassName: {{ .Values.agent.priorityClassName }}
+      {{- with .Values.agent.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
 {{- end }}

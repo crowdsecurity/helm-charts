@@ -64,6 +64,24 @@ true
 {{- end -}}
 
 {{/*
+  Kubernetes-safe name for custom file-backed volumes.
+*/}}
+{{- define "crowdsec.volumeName" -}}
+{{- $trimmed := regexReplaceAll "\\.(yaml|yml)$" . "" -}}
+{{- $sanitized := regexReplaceAll "[^a-z0-9-]+" (lower $trimmed) "-" -}}
+{{- $sanitized | trimAll "-" | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+
+{{/*
+  appsec postoverflows parameters check
+*/}}
+{{ define "appsecPostoverflowsIsNotEmpty" }}
+{{- if or (index .Values.appsec.postoverflows "s00-enrich") (index .Values.appsec.postoverflows "s01-whitelist") }}
+true
+{{- end -}}
+{{- end -}}
+
+{{/*
   lapi custom config check
 */}}
 {{ define "lapiCustomConfigIsNotEmpty" }}
@@ -93,6 +111,16 @@ true
 {{- end -}}
 {{- $IsCAPIDisabled }}
 {{- end }}
+
+{{/*
+  Return the kubectl helper image used by registration jobs.
+  If image.kubectl.tag is empty, default to latest.
+*/}}
+{{ define "registerJobKubectlImage" }}
+{{- $repository := .Values.image.kubectl.repository | default "alpine/kubectl" -}}
+{{- $tag := .Values.image.kubectl.tag | default "latest" -}}
+{{- printf "%s:%s" $repository $tag -}}
+{{- end -}}
 
 {{/*
   Provide a default value for StoreCAPICredentialsInSecret. 

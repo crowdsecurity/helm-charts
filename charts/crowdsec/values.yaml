@@ -23,6 +23,14 @@ image:
   ## @param image.tag [string] docker image tag (empty defaults to chart AppVersion)
   tag: ""
 
+  ## @param image.kubectl.repository [default: alpine/kubectl] [string] kubectl image repository used by registration jobs initContainers
+  ## @param image.kubectl.tag [default: latest] [string] kubectl image tag (override to match your cluster version if you encounter issues with registration jobs)
+  ## @param image.kubectl.pullPolicy [default: IfNotPresent] [string] kubectl image pull policy (Always, IfNotPresent, Never)
+  kubectl:
+    repository: alpine/kubectl
+    tag: latest
+    pullPolicy: IfNotPresent
+
 ## @param podAnnotations [object] podAnnotations to be added to pods (string:string map)
 podAnnotations: {}
   # Uncomment the following lines if you use Prometheus Helm Chart rather than Prometheus Operator.
@@ -36,6 +44,8 @@ podLabels: {}
 # Each config needs to be a multi-line using '|' in YAML specs
 # for the agent those configs will be loaded : parsers, scenarios, postoverflows, simulation.yaml
 # for the lapi those configs will be loaded : profiles.yaml, notifications, console.yaml
+# These entries can be split across multiple values files, or injected with `--set-file`
+# when using the chart from a remote repository.
 ## @section Configuration
 config:
   # -- To better understand stages in parsers, you can take a look at https://docs.crowdsec.net/docs/next/parsers/intro/
@@ -49,6 +59,8 @@ config:
       #   filter: "evt.Line.Labels.type == 'myProgram'"
       #   onsuccess: next_stage
       #   ....
+      # `--set-file config.parsers.s01-parse.example-parser\.yaml=./example-parser.yaml` is also supported.
+      # Filenames without a `.yaml`/`.yml` suffix are also accepted.
     ## @param config.parsers.s02-enrich Third step custom parsers definitions, usually to enrich events
     s02-enrich: {}
   # -- to better understand how to write a scenario, you can take a look at https://docs.crowdsec.net/docs/next/scenarios/intro
@@ -61,6 +73,8 @@ config:
     #    description: "Detect bruteforce on myService"
     #    filter: "evt.Meta.log_type == 'auth_bf_log'"
     #    ...
+    # `--set-file config.scenarios.myScenario\.yaml=./myScenario.yaml` is also supported.
+    # Filenames without a `.yaml`/`.yml` suffix are also accepted.
   # -- to better understand how to write a postoverflow, you can take a look at (https://docs.crowdsec.net/docs/next/log_processor/parsers/intro#postoverflows)
   # Those files are only mounted in the agent pods
   postoverflows:
@@ -72,6 +86,7 @@ config:
     s01-whitelist: {}
       # myRdnsWhitelist.yaml: |
       #   ...
+      # `--set-file config.postoverflows.s01-whitelist.myRdnsWhitelist\.yaml=./myRdnsWhitelist.yaml` is also supported.
   # -- Simulation configuration (https://docs.crowdsec.net/docs/next/scenarios/simulation/)
   # This file is only mounted in the agent pods
   ## @param config.simulation.yaml This file is usually handled by the agent.
@@ -297,6 +312,17 @@ lapi:
   # -- Extra volumeMounts to be added to lapi pods
   ## @param lapi.extraVolumeMounts Additional volumeMounts for LAPI pods
   extraVolumeMounts: []
+
+  # -- Pod securityContext
+  ## @param lapi.podSecurityContext [object] Security context for LAPI pods
+  podSecurityContext: {}
+
+  # -- Container securityContext
+  ## @param lapi.securityContext [object] Security context for the LAPI contaienr
+  securityContext:
+    allowPrivilegeEscalation: false
+    privileged: false
+
   # -- resources for lapi
   ## @param lapi.resources [object] Resource requests and limits for the LAPI pods
   resources:
@@ -513,6 +539,16 @@ agent:
   ## @param agent.extraVolumeMounts [array] Extra volume mounts for agent pods
   extraVolumeMounts: []
 
+  # -- Pod securityContext
+  ## @param agent.podSecurityContext [object] Security context for agent pods
+  podSecurityContext: {}
+
+  # -- Container securityContext
+  ## @param agent.securityContext [object] Security context for agent containers
+  securityContext:
+    allowPrivilegeEscalation: false
+    privileged: false
+
   ## @param agent.resources [object] Resource requests and limits for agent pods
   resources:
     limits:
@@ -679,6 +715,11 @@ agent:
       # -- docker image tag
       ## @param agent.wait_for_lapi.image.tag [string] Image tag for the wait-for-lapi init container
       tag: "1.28"
+    # -- Container securityContext
+    ## @param agent.wait_for_lapi.securityContext [object] Security context for the wait-for-lapi init container
+    securityContext:
+      allowPrivilegeEscalation: false
+      privileged: false
 
 # -- Enable AppSec (https://docs.crowdsec.net/docs/next/appsec/intro)
 appsec:
@@ -711,6 +752,27 @@ appsec:
     #  appsec_config: crowdsecurity/virtual-patching
     #  labels:
     #    type: appsec
+  # -- Custom scenarios for the appsec pod. See https://docs.crowdsec.net/docs/next/scenarios/intro
+  # Those files are only mounted in the appsec pods
+  ## @param appsec.scenarios [object] Custom scenario files for the appsec pod (key = filename, value = file content)
+  scenarios: {}
+    # my-scenario.yaml: |
+    #   type: trigger
+    #   name: my/scenario
+    #   ...
+    # `--set-file appsec.scenarios.my-scenario\.yaml=./my-scenario.yaml` is also supported.
+  # -- Custom postoverflows for the appsec pod. See https://docs.crowdsec.net/docs/next/log_processor/parsers/intro#postoverflows
+  # Those files are only mounted in the appsec pods
+  postoverflows:
+    ## @param appsec.postoverflows.s00-enrich Custom postoverflow enrichment files for the appsec pod
+    s00-enrich: {}
+      # my-enricher.yaml: |
+      #   ...
+    ## @param appsec.postoverflows.s01-whitelist Custom postoverflow whitelist files for the appsec pod
+    s01-whitelist: {}
+      # my-whitelist.yaml: |
+      #   ...
+      # `--set-file appsec.postoverflows.s01-whitelist.my-whitelist\.yaml=./my-whitelist.yaml` is also supported.
   # -- appsec_configs (https://docs.crowdsec.net/docs/next/appsec/configuration): key is the filename, value is the config content
   ## @param appsec.configs [object] AppSec configs (key = filename, value = file content)
   configs: {}
@@ -770,6 +832,14 @@ appsec:
   # -- Extra volumeMounts to be added to appsec pods
   ## @param appsec.extraVolumeMounts [array] Extra volume mounts for AppSec pods
   extraVolumeMounts: []
+  # -- Pod securityContext
+  ## @param appsec.podSecurityContext [object] Security context for AppSec pods
+  podSecurityContext: {}
+  # -- Container securityContext
+  ## @param appsec.securityContext [object] Security context for the appsec container
+  securityContext:
+    allowPrivilegeEscalation: false
+    privileged: false
   # -- resources for appsec pods
   ## @param appsec.resources [object] Resource requests and limits for AppSec pods
   resources:
@@ -895,3 +965,8 @@ appsec:
       # -- docker image tag
       ## @param appsec.wait_for_lapi.image.tag Image tag for the wait-for-lapi init container
       tag: "1.28"
+    # -- Container securityContext
+    ## @param appsec.wait_for_lapi.securityContext [object] Security context for the wait-for-lapi init container
+    securityContext:
+      allowPrivilegeEscalation: false
+      privileged: false

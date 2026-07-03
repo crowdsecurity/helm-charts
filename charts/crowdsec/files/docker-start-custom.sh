@@ -37,12 +37,12 @@ if istrue "$CI_TESTING"; then
     echo "githubciXXXXXXXXXXXXXXXXXXXXXXXX" >/etc/machine-id
 fi
 
-#- DEFAULTS -----------------------#
+# DEFAULTS
 
 export CONFIG_FILE="${CONFIG_FILE:=/etc/crowdsec/config.yaml}"
 export CUSTOM_HOSTNAME="${CUSTOM_HOSTNAME:=localhost}"
 
-#- HELPER FUNCTIONS ----------------#
+# HELPER FUNCTIONS
 
 # csv2yaml <string>
 # generate a yaml list from a comma-separated string of values
@@ -158,7 +158,7 @@ difference() {
   done
 }
 
-#-----------------------------------#
+################################
 
 if [ -n "$CERT_FILE" ] || [ -n "$KEY_FILE" ] ; then
     printf '%b' '\033[0;33m'
@@ -219,7 +219,7 @@ if ( isfalse "$USE_TLS" || [ "$CLIENT_CERT_FILE" = "" ] ); then
     fi
 fi
 
-# ----------------
+################################
 
 conf_set_if "$LOCAL_API_URL" '.url = strenv(LOCAL_API_URL)' "$lapi_credentials_path"
 
