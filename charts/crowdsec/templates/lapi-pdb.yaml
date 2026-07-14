@@ -1,0 +1,21 @@
+{{- if .Values.lapi.enabled }}
+{{- if .Values.lapi.podDisruptionBudget.enabled }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ .Release.Name }}-lapi-pdb
+  labels:
+    k8s-app: {{ .Release.Name }}
+    type: lapi
+spec:
+  selector:
+    matchLabels:
+      k8s-app: {{ .Release.Name }}
+      type: lapi
+  {{- if not (kindIs "invalid" .Values.lapi.podDisruptionBudget.minAvailable) }}
+  minAvailable: {{ .Values.lapi.podDisruptionBudget.minAvailable }}
+  {{- else if not (kindIs "invalid" .Values.lapi.podDisruptionBudget.maxUnavailable) }}
+  maxUnavailable: {{ .Values.lapi.podDisruptionBudget.maxUnavailable }}
+  {{- end }}
+{{- end }}
+{{- end }}

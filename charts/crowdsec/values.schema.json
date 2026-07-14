@@ -43,6 +43,9 @@
                 "tag": {
                     "type": "string"
                 },
+                "tagSuffix": {
+                    "type": "string"
+                },
                 "pullPolicy": {
                     "type": "string"
                 },
@@ -63,6 +66,14 @@
                         "repository",
                         "pullPolicy"
                     ]
+                },
+                "jobs": {
+                    "type": "object",
+                    "properties": {
+                        "tagSuffix": {
+                            "type": ["string", "null"]
+                        }
+                    }
                 }
             },
             "required": [
@@ -163,6 +174,9 @@
                 "podName": {
                     "type": "string"
                 },
+                "containerName": {
+                    "type": "string"
+                },
                 "program": {
                     "type": "string"
                 },
@@ -212,6 +226,9 @@
                     "type": "string"
                 },
                 "appsec_config.yaml.local": {
+                    "type": "string"
+                },
+                "feature.yaml": {
                     "type": "string"
                 }
             },

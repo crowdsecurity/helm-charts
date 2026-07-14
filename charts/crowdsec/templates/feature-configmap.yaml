@@ -1,0 +1,9 @@
+{{- if index .Values.config "feature.yaml" }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: crowdsec-feature
+data:
+  feature.yaml: |
+{{ printf "%+v" (index .Values.config "feature.yaml") | indent 4 }}
+{{- end }}

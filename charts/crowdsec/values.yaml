@@ -23,6 +23,9 @@ image:
   ## @param image.tag [string] docker image tag (empty defaults to chart AppVersion)
   tag: ""
 
+  ## @param image.tagSuffix [string] Suffix appended to the image tag. E.g. set to "-debian" to use crowdsec:v1.6.0-debian
+  tagSuffix: ""
+
   ## @param image.kubectl.repository [default: alpine/kubectl] [string] kubectl image repository used by registration jobs initContainers
   ## @param image.kubectl.tag [default: latest] [string] kubectl image tag (override to match your cluster version if you encounter issues with registration jobs)
   ## @param image.kubectl.pullPolicy [default: IfNotPresent] [string] kubectl image pull policy (Always, IfNotPresent, Never)
@@ -30,6 +33,10 @@ image:
     repository: alpine/kubectl
     tag: latest
     pullPolicy: IfNotPresent
+
+  ## @param image.jobs.tagSuffix [string,nullable] Suffix appended to the image tag for registration jobs. When null (default), inherits from image.tagSuffix. Set to "" to use the Alpine-based image when image.tagSuffix is "-debian" (jobs use apk and are incompatible with the Debian image).
+  jobs:
+    tagSuffix: ~
 
 ## @param podAnnotations [object] podAnnotations to be added to pods (string:string map)
 podAnnotations: {}
@@ -167,6 +174,14 @@ config:
   # This file is mounted in the appsec pod
   ## @param config.appsec_config.yaml.local This configuration file is merged with appsec pod main configuration file
   appsec_config.yaml.local: ""
+
+  # -- Feature flags configuration (https://docs.crowdsec.net/docs/configuration/feature_flags)
+  # This file is mounted in both lapi and agent pods
+  ## @param config.feature.yaml Feature flags to enable or disable experimental CrowdSec features
+  feature.yaml: ""
+  #   |
+  # - cscli_setup
+  # - re2_grok_support
 
 # @section tls
 tls:
@@ -450,6 +465,15 @@ lapi:
   # -- If set to true, the credentials used by cscli in the LAPI pod will be stored in a secret. Useful when lapi replicas > 1, as they will be reused in the replicas, and will limit the number of "fake" LPs in the console.
   ## @param lapi.storeLAPICscliCredentialsInSecret [default: false] [object] Store LAPI cscli credentials in a Secret. Useful if LAPI replicas > 1 or to setup LAPI with a persistent volume.
   storeLAPICscliCredentialsInSecret: false
+
+  ## @param lapi.podDisruptionBudget.enabled Enable PodDisruptionBudget for LAPI pods
+  ## @param lapi.podDisruptionBudget.minAvailable [nullable] Minimum number of available LAPI pods during voluntary disruptions. Use either minAvailable or maxUnavailable, not both.
+  ## @param lapi.podDisruptionBudget.maxUnavailable [nullable] Maximum number of unavailable LAPI pods during voluntary disruptions. Use either minAvailable or maxUnavailable, not both.
+  podDisruptionBudget:
+    enabled: false
+    minAvailable: 1
+    # maxUnavailable: 1
+
 # agent will deploy pod on every node as daemonSet to read wanted pods logs
 ## @section agent
 agent:
@@ -479,6 +503,12 @@ agent:
   strategy:
     type: Recreate
 
+  ## @param agent.updateStrategy [object] Update strategy for the agent DaemonSet (when isDeployment is false)
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+
   # -- add your custom ports here, by default we expose port 6060 for metrics if metrics is enabled
   ## @param agent.ports [array] Custom container ports to expose (default: metrics port 6060 if enabled)
   ports: []
@@ -497,12 +527,14 @@ agent:
     #   listen_port: 4242
     #   labels:
     #     type: syslog
-  # -- Specify each pod you want to process it logs (namespace, podName and program)
-  ## @param agent.acquisition [array] Pod log acquisition definitions (namespace, podName, program, etc.)
+  # -- Specify each pod you want to process it logs (namespace, podName, optional containerName, and program)
+  ## @param agent.acquisition [array] Pod log acquisition definitions (namespace, podName, optional containerName, program, etc.)
   acquisition: []
     #- namespace: "" #ingress-nginx
     # -- to select pod logs to process
     #  podName: "" #ingress-nginx-controller-*
+    # -- optional container name to restrict acquisition to a single container within matching pods
+    #  containerName: "" #controller
     # -- program name related to specific parser you will use (see https://hub.crowdsec.net/author/crowdsecurity/configurations/docker-logs)
     #  program: "" #nginx
     # -- If set to true, will poll the files using os.Stat instead of using inotify
