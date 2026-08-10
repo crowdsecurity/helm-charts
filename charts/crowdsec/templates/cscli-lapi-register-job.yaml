@@ -81,6 +81,7 @@ spec:
                   --from-file=lapi_cscli_credentials.yaml=/tmp/lapi-cscli-credentials.yaml
       volumes:
         - name: kubectl-bin
-          emptyDir: {}
+          emptyDir:
+            {{- toYaml .Values.lapi.kubectlBinEmptyDir | nindent 12 }}
     {{- end }}
 {{- end }}

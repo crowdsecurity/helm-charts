@@ -255,7 +255,8 @@ spec:
           name: acquis-configmap
       {{- if or (not .Values.tls.enabled) (not .Values.tls.agent.tlsClientAuth) }}
       - name: crowdsec-config
-        emptyDir: {}
+        emptyDir:
+          {{- toYaml .Values.agent.crowdsecConfigEmptyDir | nindent 10 }}
       {{- end }}
       {{- if .Values.agent.hostVarLog }}
       - name: varlog

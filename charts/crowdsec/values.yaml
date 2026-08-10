@@ -450,6 +450,11 @@ lapi:
   # -- If set to true, the credentials used by cscli in the LAPI pod will be stored in a secret. Useful when lapi replicas > 1, as they will be reused in the replicas, and will limit the number of "fake" LPs in the console.
   ## @param lapi.storeLAPICscliCredentialsInSecret [default: false] [object] Store LAPI cscli credentials in a Secret. Useful if LAPI replicas > 1 or to setup LAPI with a persistent volume.
   storeLAPICscliCredentialsInSecret: false
+
+  # -- Configure the kubectl-bin emptyDir volume of the lapi-cscli-register-job and capi-register-job Jobs
+  ## @param lapi.kubectlBinEmptyDir [object] Configure the kubectl-bin emptyDir volume of the lapi-cscli-register-job and capi-register-job Jobs
+  kubectlBinEmptyDir: {}
+
 # agent will deploy pod on every node as daemonSet to read wanted pods logs
 ## @section agent
 agent:
@@ -557,6 +562,11 @@ agent:
     requests:
       cpu: 500m
       memory: 250Mi
+
+  # -- Configure the crowdsec-config emptyDir volume
+  ## @param agent.crowdsecConfigEmptyDir [object] Configure the crowdsec-config emptyDir volume
+  crowdsecConfigEmptyDir: {}
+
   # -- Enable persistent volumes
   persistentVolume:
     # -- Persistent volume for config folder. Stores local config (parsers, scenarios etc.)
@@ -826,6 +836,9 @@ appsec:
   # -- extraInitContainers for appsec pods
   ## @param appsec.extraInitContainers [array] Extra init containers for AppSec pods
   extraInitContainers: []
+  # -- Configure the crowdsec-config emptyDir volume
+  ## @param appsec.crowdsecConfigEmptyDir [object] Configure the crowdsec-config emptyDir volume
+  crowdsecConfigEmptyDir: {}
   # -- Extra volumes to be added to appsec pods
   ## @param appsec.extraVolumes [array] Extra volumes for AppSec pods
   extraVolumes: []
