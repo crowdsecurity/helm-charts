@@ -82,7 +82,8 @@ spec:
                   --from-file=online_api_credentials.yaml=/tmp/online_api_credentials.yaml
       volumes:
         - name: kubectl-bin
-          emptyDir: {}
+          emptyDir:
+            {{- toYaml .Values.lapi.kubectlBinEmptyDir | nindent 12 }}
     {{- end }}
   {{- end }}
 {{- end }}

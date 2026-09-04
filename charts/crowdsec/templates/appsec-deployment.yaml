@@ -242,7 +242,8 @@ spec:
         configMap:
           name: appsec-acquis-config
       - name: crowdsec-config
-        emptyDir: {}
+        emptyDir:
+          {{- toYaml .Values.appsec.crowdsecConfigEmptyDir | nindent 10 }}
       {{- if .Values.appsec.configs -}}
       {{- range $fileName, $content := .Values.appsec.configs }}
       - name: {{ include "crowdsec.volumeName" (printf "crowdsec-appsec-configs-%s" $fileName) }}
