@@ -693,6 +693,9 @@ controller:
 | `appsec.replicas`                                | Number of replicas for the AppSec Deployment                                               | `1`     |
 | `appsec.strategy`                                | Deployment strategy for AppSec                                                             | `{}`    |
 | `appsec.acquisitions`                            | AppSec acquisitions (datasource listeners), e.g. appsec listener on 7422                   | `[]`    |
+| `appsec.scenarios`                               | Custom scenario files for the appsec pod (key = filename, value = file content)            | `{}`    |
+| `appsec.postoverflows.s00-enrich`                | Custom postoverflow enrichment files for the appsec pod                                    | `{}`    |
+| `appsec.postoverflows.s01-whitelist`             | Custom postoverflow whitelist files for the appsec pod                                     | `{}`    |
 | `appsec.configs`                                 | AppSec configs (key = filename, value = file content)                                      | `{}`    |
 | `appsec.rules`                                   | AppSec rule files (key = filename, value = file content)                                   | `{}`    |
 | `appsec.priorityClassName`                       | Priority class name for AppSec pods                                                        | `""`    |
