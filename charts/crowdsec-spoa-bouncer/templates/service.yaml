@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "crowdsec-spoa-bouncer.fullname" . }}
+  labels:
+    {{- include "crowdsec-spoa-bouncer.labels" . | nindent 4 }}
+  {{- with .Values.service.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: 9000
+      targetPort: spoa
+      protocol: TCP
+      name: spoa
+    {{- if .Values.bouncer.prometheus_enabled }}
+    - port: 6060
+      targetPort: metrics
+      protocol: TCP
+      name: metrics
+    {{- end }}
+  selector:
+    {{- include "crowdsec-spoa-bouncer.selectorLabels" . | nindent 4 }}

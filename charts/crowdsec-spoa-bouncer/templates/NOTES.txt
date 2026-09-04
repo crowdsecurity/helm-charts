@@ -1,0 +1,33 @@
+Thank you for installing {{ .Chart.Name }}!
+
+The CrowdSec HAProxy SPOA Bouncer has been deployed to your cluster.
+
+== Configuration ==
+
+The SPOA bouncer is listening on port {{ .Values.service.port }} (TCP).
+
+To connect HAProxy to this bouncer, configure your HAProxy SPOE agent to point to:
+  {{ include "crowdsec-spoa-bouncer.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.service.port }}
+
+{{- if .Values.bouncer.prometheus_enabled }}
+
+== Metrics ==
+
+Prometheus metrics are available on port {{ .Values.service.metricsPort }}.
+{{- if and .Values.metrics.enabled .Values.metrics.serviceMonitor.enabled }}
+A ServiceMonitor has been created for automatic Prometheus discovery.
+{{- end }}
+{{- end }}
+
+== Next Steps ==
+
+1. Ensure your CrowdSec LAPI is accessible at: {{ .Values.bouncer.crowdsec_url }}
+
+2. Register this bouncer with your CrowdSec LAPI if you haven't already:
+   cscli bouncers add spoa-bouncer
+
+3. Configure HAProxy to use this SPOA bouncer by adding the SPOE filter
+   and agent configuration to your HAProxy config.
+
+For more information, visit:
+  https://github.com/crowdsecurity/cs-haproxy-spoa-bouncer
