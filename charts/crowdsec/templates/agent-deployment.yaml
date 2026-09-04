@@ -1,4 +1,12 @@
 {{- if and (.Values.agent.enabled) (.Values.agent.isDeployment) }}
+{{- $hasKubernetes := false -}}
+{{- if .Values.agent.additionalAcquisition }}
+{{- range .Values.agent.additionalAcquisition }}
+{{- if eq .source "kubernetes" }}
+{{- $hasKubernetes = true -}}
+{{- end }}
+{{- end }}
+{{- end }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -39,8 +47,8 @@ spec:
 {{ toYaml .Values.agent.podLabels | trim | indent 8 }}
         {{- end }}
     spec:
-      {{- if .Values.agent.serviceAccountName }}
-      serviceAccountName: {{ .Values.agent.serviceAccountName }}
+      {{- if or .Values.agent.serviceAccountName $hasKubernetes }}
+      serviceAccountName: {{ default (printf "%s-agent"  .Release.Name) .Values.agent.serviceAccountName }}
       {{- end }}
       {{- with .Values.agent.tolerations }}
       tolerations:
