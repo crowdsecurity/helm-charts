@@ -12,8 +12,10 @@ metadata:
 {{ toYaml .Values.agent.deploymentAnnotations | trim | indent 4 }}
   {{- end }}
 spec:
-  replicas: {{ .Values.agent.replicas }}
+  {{- if .Values.agent.strategy }}
   strategy: {{- toYaml .Values.agent.strategy | nindent 4 }}
+  {{- end }}
+  replicas: {{ .Values.agent.replicas }}
   selector:
     matchLabels:
       k8s-app: {{ .Release.Name }}

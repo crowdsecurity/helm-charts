@@ -640,7 +640,7 @@ controller:
 | `agent.lapiHost`                                 | Host of the LAPI for the agent to connect to                                               | `""`    |
 | `agent.lapiPort`                                 | Port of the LAPI for the agent to connect to                                               | `8080`  |
 | `agent.replicas`                                 | Number of replicas when deploying as a Deployment                                          | `1`     |
-| `agent.strategy`                                 | Deployment strategy when `isDeployment` is true                                            | `{}`    |
+| `agent.strategy`                                 | Update strategy for the agent workload (applies to Deployment or DaemonSet)                | `{}`    |
 | `agent.ports`                                    | Custom container ports to expose (default: metrics port 6060 if enabled)                   | `[]`    |
 | `agent.additionalAcquisition`                    | Extra log acquisition sources (see https://docs.crowdsec.net/docs/next/data_sources/intro) | `[]`    |
 | `agent.acquisition`                              | Pod log acquisition definitions (namespace, podName, program, etc.)                        | `[]`    |
