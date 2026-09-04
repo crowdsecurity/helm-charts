@@ -27,15 +27,25 @@ spec:
   {{- if or (eq .Values.appsec.service.type "LoadBalancer") (eq .Values.appsec.service.type "NodePort") }}
   externalTrafficPolicy: {{ .Values.appsec.service.externalTrafficPolicy | quote }}
   {{- end }}
+  {{- if or (len .Values.appsec.acquisitions) (.Values.appsec.metrics.enabled) }}
   ports:
+    {{- if .Values.appsec.metrics.enabled }}
     - port: 6060
       targetPort: 6060
       protocol: TCP
       name: metrics
-    - port: 7422
-      targetPort: 7422
+    {{- end }}
+    {{- range .Values.appsec.acquisitions }}
+      {{- if and (hasKey . "listen_addr") (not (contains "127.0.0.1:" .listen_addr)) }}
+    {{- $url := printf "http://%s/" .listen_addr | urlParse }}
+    {{- $port := .listen_addr | replace (printf "%s:" $url.hostname) "" }}
+    - port: {{ $port }}
+      targetPort: {{ $port }}
       protocol: TCP
-      name: appsec
+      name: appsec{{ if ne $port "7422" }}-{{ $port }}{{ end }}
+      {{- end }}
+    {{- end }}
+  {{- end }}
   selector:
     k8s-app: {{ .Release.Name }}
     type: appsec
