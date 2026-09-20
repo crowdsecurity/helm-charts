@@ -170,6 +170,33 @@ registrationToken
 {{- end -}}
 
 {{/*
+  Register an Agent/AppSec machine, reusing Pod-scoped credentials only when
+  they belong to this Pod and still authenticate successfully.
+*/}}
+{{- define "crowdsec.lapiRegistrationScript" -}}
+set -eu
+until nc "$LAPI_HOST" "$LAPI_PORT" -z; do
+  echo waiting for lapi to start
+  sleep 5
+done
+ln -s /staging/etc/crowdsec /etc/crowdsec
+credentials=/tmp_config/local_api_credentials.yaml
+if [ -f "$credentials" ]; then
+  stored_username=$(awk '$1 == "login:" { print $2; exit }' "$credentials")
+  if [ "$stored_username" = "$USERNAME" ]; then
+    cp "$credentials" /etc/crowdsec/local_api_credentials.yaml
+    if cscli lapi status; then
+      echo "existing LAPI credentials for $USERNAME are valid; skipping registration"
+      exit 0
+    fi
+    rm -f /etc/crowdsec/local_api_credentials.yaml
+  fi
+fi
+cscli lapi register --machine "$USERNAME" -u "$LAPI_URL" --token "$REGISTRATION_TOKEN"
+cp /etc/crowdsec/local_api_credentials.yaml "$credentials"
+{{- end -}}
+
+{{/*
   Provide a default value for StoreLAPICscliCredentialsInSecret.
   If TLS is enabled return false (user/password auth is mutually exclusive with TLS auth).
   Else if storeLAPICscliCredentialsInSecret is not set in the values, and there's no persistence for the LAPI config, default to true

@@ -32,6 +32,9 @@ jobs:
       - name: Run chart-testing (lint)
         run: helm lint ./charts/crowdsec/ -f ./charts/crowdsec/ci/crowdsec-values.yaml
 
+      - name: Test LAPI registration idempotency
+        run: python3 ./charts/crowdsec/tests/test_lapi_registration_idempotency.py
+
       - name: Create kind cluster
         uses: helm/kind-action@v1.4.0
 
