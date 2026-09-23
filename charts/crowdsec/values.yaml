@@ -743,6 +743,12 @@ appsec:
   strategy:
     type: Recreate
 
+  # -- add your custom ports here, by default we expose port 6060 for metrics if metrics is enabled
+  ## @param appsec.ports [array] Custom container ports for the AppSec container (default: appsec listener on 7422, plus metrics port 6060 if enabled)
+  ports:
+    - name: appsec
+      containerPort: 7422
+      protocol: TCP
   # -- Additional acquisitions for AppSec
   ## @param appsec.acquisitions [array] AppSec acquisitions (datasource listeners), e.g. appsec listener on 7422
   acquisitions: []
@@ -952,6 +958,14 @@ appsec:
     loadBalancerClass: null
     ## @param appsec.service.externalTrafficPolicy [string] External traffic policy for the AppSec Service
     externalTrafficPolicy: Cluster
+    # -- ports for appsec service, if metrics is enabled, it will expose port 6060 by default
+    ## @param appsec.service.ports [array] Custom service ports for the AppSec Service (default: appsec on 7422, metrics on 6060 if enabled)
+    ports:
+      ## add your custom ports here, for exposing the AppSec component on different ports. See the documentation: https://docs.crowdsec.net/docs/next/appsec/configuration
+      - port: 7422
+        targetPort: 7422
+        protocol: TCP
+        name: appsec
 
   # -- wait-for-lapi init container
   wait_for_lapi:
