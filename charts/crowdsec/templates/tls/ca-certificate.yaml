@@ -8,9 +8,18 @@ spec:
   isCA: true
   commonName: {{ .Release.Name }}-ca
   secretName: {{ .Release.Name }}-root-secret
+  {{- with .Values.tls.certManager.ca.duration }}
+  duration: {{ . }}
+  {{- end }}
+  {{- with .Values.tls.certManager.ca.renewBefore }}
+  renewBefore: {{ . }}
+  {{- end }}
   privateKey:
     algorithm: ECDSA
     size: 256
+    {{- with .Values.tls.certManager.ca.rotationPolicy }}
+    rotationPolicy: {{ . }}
+    {{- end }}
   issuerRef:
     name: {{ .Release.Name }}-root-issuer
     kind: ClusterIssuer
