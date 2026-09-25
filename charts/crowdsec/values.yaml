@@ -197,6 +197,16 @@ tls:
     # -- renewBefore for Certificate resources
     ## @param tls.certManager.renewBefore [string] duration before a certificate’s expiry when cert-manager should start renewing it.
     renewBefore: 720h # 30d
+    # -- Self-signed CA generated when issuerRef is empty. Keep its key on renewal:
+    # rotating it makes LAPI reject certificates signed by the other CA.
+    ## @param tls.certManager.ca [object] Self-signed CA configuration (used only when tls.certManager.issuerRef is empty)
+    ca:
+      ## @param tls.certManager.ca.duration [string] validity duration of the CA certificate (golang duration string)
+      duration: 87600h # 10y
+      ## @param tls.certManager.ca.renewBefore [string] duration before the CA certificate's expiry when cert-manager should start renewing it.
+      renewBefore: 720h # 30d
+      ## @param tls.certManager.ca.rotationPolicy [string] CA private key rotation policy on renewal (Never or Always). Never keeps existing leaf certificates valid.
+      rotationPolicy: Never
   bouncer:
     ## @param tls.bouncer.secret [string] Name of the Kubernetes Secret containing TLS materials for the bouncer
     secret: "{{ .Release.Name }}-bouncer-tls"
