@@ -2,6 +2,7 @@
 
 #### This is based on the docker entrypoint script, but in k8s, this script is only used for LAPI pods.
 #### Therefore, all agent-related configuration has been removed and check if LAPI is disabled (as the pod will not be created in that case).
+#### The agent engine itself is still turned off explicitly with -no-cs (DISABLE_AGENT, see the end of this script).
 
 # shellcheck disable=SC2292      # allow [ test ] syntax
 # shellcheck disable=SC2310      # allow "if function..." syntax with -e
@@ -362,6 +363,14 @@ fi
 
 if istrue "$LEVEL_FATAL"; then
     ARGS="$ARGS -fatal"
+fi
+
+# The LAPI deployment sets DISABLE_AGENT=true. Without -no-cs the LAPI also
+# runs the full agent engine against the dummy acquisition and loads parsers
+# and scenarios whose data files are not on the data volume (#331). Same
+# handling as the docker image entrypoint; removed by mistake in #314.
+if istrue "$DISABLE_AGENT"; then
+    ARGS="$ARGS -no-cs"
 fi
 
 # shellcheck disable=SC2086
