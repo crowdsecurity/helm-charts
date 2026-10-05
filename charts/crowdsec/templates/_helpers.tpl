@@ -1,4 +1,38 @@
 {{/*
+Expand the name of the chart.
+*/}}
+{{- define "crowdsec.name" -}}
+{{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
+{{- end }}
+
+{{/*
+Create chart name and version as used by the chart label.
+*/}}
+{{- define "crowdsec.chart" -}}
+{{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
+{{- end }}
+
+{{/*
+Common labels
+*/}}
+{{- define "crowdsec.labels" -}}
+helm.sh/chart: {{ include "crowdsec.chart" . }}
+{{ include "crowdsec.selectorLabels" . }}
+{{- if .Chart.AppVersion }}
+app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+{{- end }}
+app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- end }}
+
+{{/*
+Selector labels
+*/}}
+{{- define "crowdsec.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "crowdsec.name" . }}
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}
+
+{{/*
 Generate CS_LAPI_SECRET if not specified in values
 */}}
 {{ define "lapi.csLapiSecret" }}
@@ -123,7 +157,7 @@ true
 {{- end -}}
 
 {{/*
-  Provide a default value for StoreCAPICredentialsInSecret. 
+  Provide a default value for StoreCAPICredentialsInSecret.
   If StoreCAPICredentialsInSecret is not set in the values, and there's no persistency for the LAPI config, defaults to true
 */}}
 {{ define "StoreCAPICredentialsInSecret" }}

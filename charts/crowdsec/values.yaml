@@ -8,6 +8,9 @@
 ## @param container_runtime [default: docker] [string] for raw logs format: docker or containerd
 container_runtime: docker
 
+## @param nameOverride This is to override the chart name.
+nameOverride: ""
+
 ## @section Image
 image:
   ## @param image.repository [default: crowdsecurity/crowdsec] [string] docker image repository name

@@ -7,6 +7,8 @@ metadata:
     k8s-app: {{ .Release.Name }}
     type: agent
     version: v1
+    {{- include "crowdsec.labels" . | nindent 4 }}
+    app.kubernetes.io/component: agent
   {{- if .Values.agent.daemonsetAnnotations }}
   annotations:
 {{ toYaml .Values.agent.daemonsetAnnotations | trim | indent 4 }}
@@ -31,6 +33,8 @@ spec:
         k8s-app: {{ .Release.Name }}
         type: agent
         version: v1
+        {{- include "crowdsec.labels" . | nindent 8 }}
+        app.kubernetes.io/component: agent
         {{- if .Values.podLabels }}
 {{ toYaml .Values.podLabels | trim | indent 8 }}
         {{- else if .Values.agent.podLabels }}

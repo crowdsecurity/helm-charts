@@ -12,6 +12,8 @@ metadata:
     k8s-app: {{ .Release.Name }}
     type: lapi
     version: v1
+    {{- include "crowdsec.labels" . | nindent 4 }}
+    app.kubernetes.io/component: lapi
   {{- if .Values.lapi.deployAnnotations }}
   annotations:
 {{ toYaml .Values.lapi.deployAnnotations | trim | indent 4 }}
@@ -38,6 +40,8 @@ spec:
         k8s-app: {{ .Release.Name }}
         type: lapi
         version: v1
+        app.kubernetes.io/component: lapi
+        {{- include "crowdsec.labels" . | nindent 8 }}
         {{- if .Values.podLabels }}
 {{ toYaml .Values.podLabels | trim | indent 8 }}
         {{- else if .Values.lapi.podLabels }}
