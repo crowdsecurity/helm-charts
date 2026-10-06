@@ -63,11 +63,7 @@ spec:
         command: ['sh', '-c', 'until nc "$LAPI_HOST" "$LAPI_PORT" -z; do echo waiting for lapi to start; sleep 5; done']
       {{- end }}
         resources:
-          limits:
-            memory: 50Mi
-          requests:
-            cpu: 1m
-            memory: 10Mi
+          {{- toYaml .Values.agent.wait_for_lapi.resources | nindent 10 }}
         securityContext:
           {{- toYaml .Values.agent.wait_for_lapi.securityContext | nindent 10 }}
         {{- if or (not .Values.tls.enabled) (not .Values.tls.agent.tlsClientAuth) }}

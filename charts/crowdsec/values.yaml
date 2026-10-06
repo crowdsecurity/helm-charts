@@ -720,6 +720,14 @@ agent:
     securityContext:
       allowPrivilegeEscalation: false
       privileged: false
+    # -- Init container resources. Unless tls.enabled and tls.agent.tlsClientAuth are both set, this init container runs `cscli lapi register` from the crowdsec image (cscli is a ~70MB binary), so the memory limit must fit it.
+    ## @param agent.wait_for_lapi.resources [object] Resource requests and limits for the wait-for-lapi init container
+    resources:
+      limits:
+        memory: 128Mi
+      requests:
+        cpu: 1m
+        memory: 10Mi
 
 # -- Enable AppSec (https://docs.crowdsec.net/docs/next/appsec/intro)
 appsec:
@@ -970,3 +978,11 @@ appsec:
     securityContext:
       allowPrivilegeEscalation: false
       privileged: false
+    # -- Init container resources. Unless tls.enabled and tls.appsec.tlsClientAuth are both set, this init container runs `cscli lapi register` from the crowdsec image (cscli is a ~70MB binary), so the memory limit must fit it.
+    ## @param appsec.wait_for_lapi.resources [object] Resource requests and limits for the wait-for-lapi init container
+    resources:
+      limits:
+        memory: 128Mi
+      requests:
+        cpu: 1m
+        memory: 10Mi
