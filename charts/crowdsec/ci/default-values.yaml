@@ -1,0 +1,15 @@
+# LAPI + agent DaemonSet reading pod logs. Requires hack/ci/postgres.yaml.
+lapi:
+  database:
+    host: postgres.crowdsec-ci-db.svc
+    existingSecret: crowdsec-db
+  onlineAPI:
+    enabled: false
+agent:
+  hub:
+    collections:
+      - crowdsecurity/nginx
+  podLogs:
+    - namespace: ingress-nginx
+      pod: ingress-nginx-controller-*
+      program: nginx

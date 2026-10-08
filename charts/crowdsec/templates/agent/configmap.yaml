@@ -1,0 +1,24 @@
+{{- if .Values.agent.enabled }}
+{{- $acquisition := list }}
+{{- range .Values.agent.podLogs }}
+{{- $acquisition = append $acquisition (dict
+  "source" "file"
+  "filenames" (list (printf "/var/log/containers/%s_%s_*.log" .pod .namespace))
+  "force_inotify" true
+  "poll_without_inotify" true
+  "labels" (dict "type" "containerd" "program" .program)
+) }}
+{{- end }}
+{{- $acquisition = concat $acquisition .Values.agent.acquisition }}
+{{- $configLocal := mustMergeOverwrite (include "crowdsec.logProcessor.configLocal" . | fromYaml) (deepCopy .Values.agent.config) }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "crowdsec.componentName" (list . "agent") }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "crowdsec.labels" (list . "agent") | nindent 4 }}
+  {{- include "crowdsec.annotations" (dict "ctx" .) | nindent 2 }}
+data:
+  {{- include "crowdsec.configMapData" (dict "configLocal" $configLocal "acquisition" $acquisition "files" .Values.agent.files) | nindent 2 }}
+{{- end }}

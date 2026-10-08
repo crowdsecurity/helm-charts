@@ -1,0 +1,72 @@
+{{- /* `helm test`: checks that every deployed component answers through its Service */ -}}
+{{- $checks := list }}
+{{- if .Values.lapi.enabled }}
+{{- $checks = append $checks (dict "component" "lapi" "url" (printf "%s/health" (include "crowdsec.lapiURL" .)) "tls" .Values.tls.enabled) }}
+{{- end }}
+{{- if .Values.agent.enabled }}
+{{- $checks = append $checks (dict "component" "agent" "url" (printf "http://%s:6060/metrics" (include "crowdsec.componentName" (list . "agent")))) }}
+{{- end }}
+{{- if .Values.appsec.enabled }}
+{{- $checks = append $checks (dict "component" "appsec" "url" (printf "http://%s:6060/metrics" (include "crowdsec.componentName" (list . "appsec")))) }}
+{{- end }}
+{{- range $checks }}
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: {{ include "crowdsec.componentName" (list $ (printf "test-%s" .component)) }}
+  namespace: {{ $.Release.Namespace }}
+  labels:
+    {{- toYaml (merge (dict) $.Values.podLabels (include "crowdsec.labels" (list $ "test") | fromYaml)) | nindent 4 }}
+  {{- include "crowdsec.annotations" (dict "ctx" $ "extra" (merge (dict "helm.sh/hook" "test" "helm.sh/hook-delete-policy" "before-hook-creation,hook-succeeded") $.Values.podAnnotations)) | nindent 2 }}
+spec:
+  restartPolicy: Never
+  automountServiceAccountToken: false
+  {{- with $.Values.imagePullSecrets }}
+  imagePullSecrets:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  containers:
+    - name: check
+      image: {{ include "crowdsec.image" $ }}
+      imagePullPolicy: {{ $.Values.image.pullPolicy }}
+      {{- /* `helm install --wait` does not wait for a single-node DaemonSet: retry for up to 3 minutes */}}
+      command:
+        - /bin/sh
+        - -c
+        - |
+          for _ in $(seq 36); do
+            if wget -q -O /dev/null -T 5 "${URL}"; then
+              echo "${URL} answers"
+              exit 0
+            fi
+            echo "Waiting for ${URL}"
+            sleep 5
+          done
+          echo "${URL} did not answer within 3 minutes"
+          exit 1
+      env:
+        - name: URL
+          value: {{ .url | quote }}
+        {{- if .tls }}
+        - name: SSL_CERT_FILE
+          value: /etc/ssl/crowdsec/ca.crt
+        {{- end }}
+      {{- if .tls }}
+      volumeMounts:
+        - name: tls
+          mountPath: /etc/ssl/crowdsec
+          readOnly: true
+      {{- end }}
+      {{- include "crowdsec.helperContainer" $ | trim | nindent 6 }}
+  {{- if .tls }}
+  {{- /* The LAPI certificate is checked against the CA of its own Secret */}}
+  volumes:
+    - name: tls
+      secret:
+        secretName: {{ include "crowdsec.tlsSecretName" (list $ "lapi") }}
+        items:
+          - key: ca.crt
+            path: ca.crt
+  {{- end }}
+{{- end }}

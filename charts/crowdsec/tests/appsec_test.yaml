@@ -1,0 +1,91 @@
+suite: appsec
+values:
+  - values/base.yaml
+templates:
+  - appsec/workload.yaml
+  - appsec/configmap.yaml
+  - appsec/service.yaml
+tests:
+  - it: is disabled by default
+    asserts:
+      - hasDocuments:
+          count: 0
+  - it: works out of the box when enabled
+    set:
+      appsec.enabled: true
+    asserts:
+      - template: appsec/workload.yaml
+        contains:
+          path: spec.template.spec.containers[0].env
+          content: {name: COLLECTIONS, value: "crowdsecurity/appsec-virtual-patching crowdsecurity/appsec-generic-rules"}
+      - template: appsec/workload.yaml
+        notContains:
+          path: spec.template.spec.volumes
+          any: true
+          content: {name: host-logs}
+      - template: appsec/configmap.yaml
+        matchRegex:
+          path: data["acquis.yaml"]
+          pattern: "appsec_config: crowdsecurity/appsec-default"
+      - template: appsec/service.yaml
+        contains:
+          path: spec.ports
+          content: {name: appsec, port: 7422, targetPort: appsec, protocol: TCP}
+  - it: mounts custom appsec rules
+    set:
+      appsec.enabled: true
+      appsec.files:
+        appsec-rules/my-rule.yaml: "name: me/rule"
+    asserts:
+      - template: appsec/workload.yaml
+        contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: config
+            mountPath: /etc/crowdsec/appsec-rules/my-rule.yaml
+            subPath: file.appsec-rules__my-rule.yaml
+  - it: runs as a DaemonSet next to node-local ingress controllers
+    set:
+      appsec:
+        enabled: true
+        kind: DaemonSet
+        updateStrategy: {type: RollingUpdate, rollingUpdate: {maxUnavailable: 1}}
+        service: {internalTrafficPolicy: Local, trafficDistribution: PreferClose}
+    asserts:
+      - template: appsec/workload.yaml
+        isKind:
+          of: DaemonSet
+      - template: appsec/workload.yaml
+        notExists:
+          path: spec.replicas
+      - template: appsec/workload.yaml
+        equal:
+          path: spec.updateStrategy.rollingUpdate.maxUnavailable
+          value: 1
+      - template: appsec/service.yaml
+        equal:
+          path: spec.internalTrafficPolicy
+          value: Local
+        documentIndex: 0
+      - template: appsec/service.yaml
+        equal:
+          path: spec.trafficDistribution
+          value: PreferClose
+        documentIndex: 0
+  - it: exposes extra appsec listeners
+    set:
+      appsec.enabled: true
+      appsec.extraPorts: [{name: appsec-crs, port: 7423}]
+    asserts:
+      - template: appsec/workload.yaml
+        contains:
+          path: spec.template.spec.containers[0].ports
+          content: {name: appsec-crs, containerPort: 7423, protocol: TCP}
+      - template: appsec/service.yaml
+        equal:
+          path: spec.ports
+          value:
+            - {name: appsec, port: 7422, targetPort: appsec, protocol: TCP}
+            - {name: metrics, port: 6060, targetPort: metrics, protocol: TCP}
+            - {name: appsec-crs, port: 7423, targetPort: appsec-crs, protocol: TCP}
+        documentIndex: 0

@@ -1,0 +1,9 @@
+{{- /* Extra manifests deployed with the release; strings are rendered with tpl */ -}}
+{{- range .Values.extraObjects }}
+---
+{{- if kindIs "string" . }}
+{{ tpl . $ }}
+{{- else }}
+{{ tpl (toYaml .) $ }}
+{{- end }}
+{{- end }}

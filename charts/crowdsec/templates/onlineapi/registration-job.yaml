@@ -1,0 +1,154 @@
+{{- /*
+  Registers the instance to the Central API once and stores the credentials in a
+  Secret shared by every LAPI replica. The Secret is not managed by Helm: it is
+  kept on uninstall so that reinstalling keeps the same Console identity.
+*/ -}}
+{{- if and .Values.lapi.enabled .Values.lapi.onlineAPI.enabled (not .Values.lapi.onlineAPI.existingSecret) }}
+{{- $name := include "crowdsec.componentName" (list . "capi-register") }}
+{{- $secretName := include "crowdsec.onlineAPISecretName" . }}
+{{- $job := .Values.lapi.onlineAPI.registrationJob }}
+{{- $hook := dict "helm.sh/hook" "pre-install,pre-upgrade" "helm.sh/hook-weight" "-10" "helm.sh/hook-delete-policy" "before-hook-creation,hook-succeeded" }}
+{{- /* The Secret outlives the release: no managed-by label */}}
+{{- $secretMetadata := dict
+  "name" $secretName
+  "labels" (merge (include "crowdsec.selectorLabels" (list . "lapi") | fromYaml) (dict "app.kubernetes.io/part-of" "crowdsec") .Values.commonLabels)
+}}
+{{- with .Values.commonAnnotations }}
+{{- $_ := set $secretMetadata "annotations" . }}
+{{- end }}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ $name }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "crowdsec.labels" (list . "capi-register") | nindent 4 }}
+  {{- include "crowdsec.annotations" (dict "ctx" . "extra" $hook) | nindent 2 }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ $name }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "crowdsec.labels" (list . "capi-register") | nindent 4 }}
+  {{- include "crowdsec.annotations" (dict "ctx" . "extra" $hook) | nindent 2 }}
+rules:
+  - apiGroups: [""]
+    resources: ["secrets"]
+    resourceNames: [{{ $secretName | quote }}]
+    verbs: ["get"]
+  # "create" cannot be restricted by resourceNames
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["create"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ $name }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "crowdsec.labels" (list . "capi-register") | nindent 4 }}
+  {{- include "crowdsec.annotations" (dict "ctx" . "extra" $hook) | nindent 2 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ $name }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ $name }}
+    namespace: {{ .Release.Namespace }}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ $name }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "crowdsec.labels" (list . "capi-register") | nindent 4 }}
+  {{- include "crowdsec.annotations" (dict "ctx" . "extra" (merge (dict "helm.sh/hook-weight" "0") $hook)) | nindent 2 }}
+spec:
+  backoffLimit: 3
+  template:
+    metadata:
+      labels:
+        {{- include "crowdsec.selectorLabels" (list . "capi-register") | nindent 8 }}
+        {{- with (merge (dict) $job.podLabels .Values.podLabels .Values.commonLabels) }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- with (merge (dict) $job.podAnnotations .Values.podAnnotations) }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+      serviceAccountName: {{ $name }}
+      restartPolicy: Never
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.lapi.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.lapi.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      initContainers:
+        - name: kubectl
+          image: {{ include "crowdsec.imageRef" (list . $job.image "") }}
+          imagePullPolicy: {{ $job.image.pullPolicy }}
+          command: ["/bin/sh", "-c", "cp \"$(command -v kubectl)\" /tools/kubectl"]
+          {{- include "crowdsec.helperContainer" . | trim | nindent 10 }}
+          volumeMounts:
+            - name: tools
+              mountPath: /tools
+      containers:
+        - name: register
+          image: {{ include "crowdsec.image" . }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+            - /bin/bash
+            - -c
+            - |
+              set -euo pipefail
+              if /tools/kubectl get secret {{ $secretName }} >/dev/null 2>&1; then
+                echo "Secret {{ $secretName }} already exists, nothing to do."
+                exit 0
+              fi
+              # Work on a copy of the image config: the root filesystem is read-only.
+              # The image config has an empty online_client section, which cscli refuses.
+              cp /staging/etc/crowdsec/config.yaml /work/config.yaml
+              yq -i '.api.server.online_client.credentials_path = "/work/online_api_credentials.yaml" | .api.server.profiles_path = "/staging/etc/crowdsec/profiles.yaml"' /work/config.yaml
+              cscli -c /work/config.yaml capi register
+              yq -i '.papi_url = "https://papi.api.crowdsec.net/"' /work/online_api_credentials.yaml
+              cat > /work/secret.yaml <<'EOF'
+              {{- toYaml (dict "apiVersion" "v1" "kind" "Secret" "type" "Opaque" "metadata" $secretMetadata) | nindent 14 }}
+              EOF
+              yq -i '.stringData."online_api_credentials.yaml" = load_str("/work/online_api_credentials.yaml")' /work/secret.yaml
+              /tools/kubectl create -f /work/secret.yaml
+          env:
+            - name: HOME
+              value: /work
+          {{- include "crowdsec.helperContainer" . | trim | nindent 10 }}
+          volumeMounts:
+            - name: tools
+              mountPath: /tools
+            - name: work
+              mountPath: /work
+            - name: tmp
+              mountPath: /tmp
+            - name: data
+              mountPath: /var/lib/crowdsec/data
+      volumes:
+        - name: tools
+          emptyDir: {}
+        - name: work
+          emptyDir: {}
+        - name: tmp
+          emptyDir: {}
+        - name: data
+          emptyDir: {}
+{{- end }}

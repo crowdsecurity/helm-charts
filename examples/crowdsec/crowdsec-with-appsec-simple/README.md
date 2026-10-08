@@ -56,7 +56,11 @@ Nuclei will return a critical vulnerability on the target.
 
 ## Crowdsec Installation
 
+CrowdSec needs a PostgreSQL or MySQL database, and the ingress-nginx bouncer key used in `ingress-nginx-bouncer-values.yaml`:
+
 ```
+kubectl create secret generic crowdsec-db --from-literal=password=<db password>
+kubectl create secret generic crowdsec-bouncer-keys --from-literal=nginx=<MY_BOUNCER_KEY>
 helm install crowdsec crowdsec/crowdsec -f crowdsec-values.yaml
 ```
 
@@ -165,8 +169,8 @@ Now lets add this rule to crowdsec values and upgrade the helm chart.
 ```yaml
 # upgrade-crowdsec-values.yaml
 appsec:
-  rules:
-    mycustom-appsec-rule.yaml: |
+  files:
+    appsec-rules/mycustom-appsec-rule.yaml: |
       name: crowdsecurity/vpatch-xmlrpc
       debug: true
       description: "Block XMLRPC requests"

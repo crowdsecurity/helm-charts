@@ -2,6 +2,8 @@
     "CN": "CrowdSec LAPI",
     "hosts": [
         "${LAPI_DNS}",
+        "${LAPI_DNS}.svc",
+        "localhost",
         "${LAPI_CLUSTER_IP}"
     ],
     "key": {

@@ -1,0 +1,79 @@
+suite: auth and online API
+values:
+  - values/base.yaml
+templates:
+  - auth-secret.yaml
+  - onlineapi/registration-job.yaml
+  - lapi/deployment.yaml
+  - lapi/configmap.yaml
+tests:
+  - it: generates the auth secret
+    template: auth-secret.yaml
+    asserts:
+      - exists:
+          path: data.registrationToken
+      - exists:
+          path: data.csLapiSecret
+      - notExists:
+          path: data.enrollKey
+  - it: stores the console enrollment key
+    template: auth-secret.yaml
+    set:
+      lapi.console.enrollKey: abc
+    asserts:
+      - equal:
+          path: data.enrollKey
+          value: YWJj
+  - it: uses an existing secret
+    set:
+      auth.existingSecret: my-auth
+    asserts:
+      - template: auth-secret.yaml
+        hasDocuments:
+          count: 0
+      - template: lapi/deployment.yaml
+        contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: CS_LAPI_SECRET
+            valueFrom: {secretKeyRef: {name: my-auth, key: csLapiSecret}}
+  - it: registers to the Central API with a hook job
+    template: onlineapi/registration-job.yaml
+    asserts:
+      - hasDocuments:
+          count: 4
+      - isKind:
+          of: Job
+        documentIndex: 3
+      - equal:
+          path: metadata.annotations["helm.sh/hook"]
+          value: pre-install,pre-upgrade
+        documentIndex: 3
+      - equal:
+          path: rules[0].resourceNames[0]
+          value: RELEASE-NAME-crowdsec-capi-credentials
+        documentIndex: 1
+  - it: skips the job with existing Central API credentials
+    set:
+      lapi.onlineAPI.existingSecret: capi
+    asserts:
+      - template: onlineapi/registration-job.yaml
+        hasDocuments:
+          count: 0
+      - template: lapi/deployment.yaml
+        contains:
+          path: spec.template.spec.volumes
+          content:
+            name: capi-credentials
+            secret:
+              secretName: capi
+              items:
+                - key: online_api_credentials.yaml
+                  path: online_api_credentials.yaml
+  - it: skips the job without online API
+    template: onlineapi/registration-job.yaml
+    set:
+      lapi.onlineAPI.enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0

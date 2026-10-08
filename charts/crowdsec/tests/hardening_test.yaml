@@ -1,0 +1,72 @@
+suite: hardening defaults (#350)
+values:
+  - values/base.yaml
+set:
+  appsec.enabled: true
+templates:
+  - lapi/deployment.yaml
+  - lapi/configmap.yaml
+  - agent/workload.yaml
+  - agent/configmap.yaml
+  - appsec/workload.yaml
+  - appsec/configmap.yaml
+  - onlineapi/registration-job.yaml
+  - tests/test-connection.yaml
+tests:
+  - it: uses the RuntimeDefault seccomp profile on every component
+    asserts:
+      - template: lapi/deployment.yaml
+        equal: &seccomp {path: spec.template.spec.securityContext.seccompProfile.type, value: RuntimeDefault}
+      - template: agent/workload.yaml
+        equal: *seccomp
+      - template: appsec/workload.yaml
+        equal: *seccomp
+  - it: does not set hostUsers by default
+    template: lapi/deployment.yaml
+    asserts:
+      - notExists: {path: spec.template.spec.hostUsers}
+  - it: runs pods in a user namespace on demand
+    set:
+      lapi.podSpec.hostUsers: false
+      appsec.podSpec.hostUsers: false
+    asserts:
+      - template: lapi/deployment.yaml
+        equal: {path: spec.template.spec.hostUsers, value: false}
+      - template: appsec/workload.yaml
+        equal: {path: spec.template.spec.hostUsers, value: false}
+      - template: agent/workload.yaml
+        notExists: {path: spec.template.spec.hostUsers}
+  - it: hardens every helper container
+    asserts:
+      - template: agent/workload.yaml
+        isSubset: &hardened
+          path: spec.template.spec.initContainers[0].securityContext
+          content:
+            runAsNonRoot: true
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            capabilities: {drop: [ALL]}
+      - template: appsec/workload.yaml
+        isSubset: *hardened
+      - template: onlineapi/registration-job.yaml
+        documentSelector: {path: kind, value: Job}
+        isSubset: *hardened
+      - template: onlineapi/registration-job.yaml
+        documentSelector: {path: kind, value: Job}
+        isSubset:
+          path: spec.template.spec.containers[0].securityContext
+          content: {runAsNonRoot: true, readOnlyRootFilesystem: true}
+      - template: tests/test-connection.yaml
+        documentSelector: {path: metadata.name, value: RELEASE-NAME-crowdsec-test-lapi}
+        isSubset:
+          path: spec.containers[0].securityContext
+          content: {runAsNonRoot: true, readOnlyRootFilesystem: true}
+      - template: tests/test-connection.yaml
+        documentSelector: {path: metadata.name, value: RELEASE-NAME-crowdsec-test-lapi}
+        exists: {path: "spec.containers[0].resources.limits.memory"}
+  - it: does not write to the root filesystem in the registration init container
+    template: agent/workload.yaml
+    asserts:
+      - notMatchRegex:
+          path: spec.template.spec.initContainers[0].command[2]
+          pattern: "ln -s"

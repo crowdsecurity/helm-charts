@@ -1,0 +1,90 @@
+{{- /*
+  Cross-field checks that the JSON schema cannot express.
+  Unknown keys (including every 1.x key) are already rejected by values.schema.json.
+*/ -}}
+{{- $logProcessors := or .Values.agent.enabled .Values.appsec.enabled -}}
+{{- $migration := "see https://github.com/crowdsecurity/helm-charts/blob/main/charts/crowdsec/MIGRATION.md" -}}
+
+{{- if contains "debian" (.Values.image.tag | toString) -}}
+{{- fail "image.tag: the debian image is not supported, use the default (alpine) image: the chart relies on its busybox tools (wget)." -}}
+{{- end -}}
+
+{{- if not (or .Values.lapi.enabled $logProcessors) -}}
+{{- fail "Nothing to deploy: enable at least one of lapi, agent or appsec." -}}
+{{- end -}}
+
+{{- if .Values.lapi.enabled -}}
+{{- if not .Values.lapi.database.host -}}
+{{- fail (printf "lapi.database.host is required: LAPI needs an external PostgreSQL or MySQL database (%s)." $migration) -}}
+{{- end -}}
+{{- if not .Values.lapi.database.existingSecret -}}
+{{- fail "lapi.database.existingSecret is required: create a Secret holding the database password." -}}
+{{- end -}}
+{{- else if $logProcessors -}}
+{{- if not .Values.lapi.externalURL -}}
+{{- fail "lapi.externalURL is required when lapi.enabled is false." -}}
+{{- end -}}
+{{- if and (not .Values.tls.enabled) (not .Values.auth.existingSecret) -}}
+{{- fail "auth.existingSecret is required when lapi.enabled is false: agents need the registration token of the external LAPI." -}}
+{{- end -}}
+{{- if and .Values.tls.enabled .Values.tls.certManager.enabled (not .Values.tls.certManager.issuerRef) -}}
+{{- fail "tls.certManager.issuerRef is required when lapi.enabled is false: the agent certificate must be signed by the CA trusted by the external LAPI." -}}
+{{- end -}}
+{{- end -}}
+
+{{- if and .Values.tls.enabled (not .Values.tls.certManager.enabled) -}}
+{{- if and .Values.lapi.enabled (not .Values.tls.existingSecrets.lapi) -}}
+{{- fail "tls.existingSecrets.lapi is required when tls.certManager.enabled is false." -}}
+{{- end -}}
+{{- if and $logProcessors (not .Values.tls.existingSecrets.agent) -}}
+{{- fail "tls.existingSecrets.agent is required when tls.certManager.enabled is false." -}}
+{{- end -}}
+{{- end -}}
+
+{{- if and .Values.agent.enabled (not .Values.agent.podLogs) (not .Values.agent.acquisition) -}}
+{{- fail "The agent has nothing to read: set agent.podLogs and/or agent.acquisition, or disable the agent." -}}
+{{- end -}}
+{{- range .Values.agent.acquisition -}}
+{{- if hasKey . "podName" -}}
+{{- fail (printf "agent.acquisition now takes raw CrowdSec datasources; move {namespace, podName, program} entries to agent.podLogs as {namespace, pod, program} (%s)." $migration) -}}
+{{- end -}}
+{{- end -}}
+
+{{- if and .Values.appsec.enabled (not .Values.appsec.acquisition) -}}
+{{- fail "appsec.acquisition must define at least one appsec listener." -}}
+{{- end -}}
+
+{{- /* Fields of the free-form overrides that the chart builds itself, with the value to use instead */ -}}
+{{- $managedSpecFields := dict
+  "podSpec" (dict "containers" "extraContainers" "initContainers" "extraInitContainers" "volumes" "extraVolumes")
+  "containerSpec" (dict "name" "" "image" "image" "command" "" "args" "" "env" "env" "envFrom" "envFrom" "ports" "extraPorts" "volumeMounts" "extraVolumeMounts")
+  "workloadSpec" (dict "selector" "" "template" "podSpec" "replicas" "replicas")
+-}}
+{{- range $component := list "lapi" "agent" "appsec" -}}
+{{- range $override, $managed := $managedSpecFields -}}
+{{- range $field, $_ := (get (get $.Values $component) $override | default dict) -}}
+{{- if hasKey $managed $field -}}
+{{- $instead := get $managed $field -}}
+{{- fail (printf "%s.%s.%s is managed by the chart%s." $component $override $field (ternary "" (printf ": use %s.%s instead" $component $instead) (empty $instead))) -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+
+{{- $managedServiceFields := list "type" "selector" "ports" "internalTrafficPolicy" "trafficDistribution" -}}
+{{- range $component := list "lapi" "agent" "appsec" -}}
+{{- range $field, $_ := (get $.Values $component).service.extraSpec -}}
+{{- if has $field $managedServiceFields -}}
+{{- fail (printf "%s.service.extraSpec.%s is managed by the chart: use %s.service.type, .nodePorts, .internalTrafficPolicy or .trafficDistribution instead." $component $field $component) -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+
+{{- $reserved := list "config.yaml" "config.yaml.local" "acquis.yaml" "local_api_credentials.yaml" "online_api_credentials.yaml" -}}
+{{- range $component := list "lapi" "agent" "appsec" -}}
+{{- range $path, $_ := (get $.Values $component).files -}}
+{{- if or (has $path $reserved) (hasPrefix "/" $path) (contains ".." $path) (not (regexMatch "^[-._a-zA-Z0-9/]+$" $path)) -}}
+{{- fail (printf "%s.files: invalid path %q (must be relative to /etc/crowdsec, use [-._a-zA-Z0-9/] only, and not be one of %s; use %s.config for config.yaml.local)." $component $path (join ", " $reserved) $component) -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}

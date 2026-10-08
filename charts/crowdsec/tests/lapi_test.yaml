@@ -1,0 +1,240 @@
+suite: lapi
+values:
+  - values/base.yaml
+templates:
+  - lapi/deployment.yaml
+  - lapi/configmap.yaml
+  - lapi/service.yaml
+  - lapi/ingress.yaml
+tests:
+  - it: configures PostgreSQL with the password from the secret
+    template: lapi/configmap.yaml
+    asserts:
+      - matchRegex:
+          path: data["config.yaml.local"]
+          pattern: "(?s)db_config:.*host: pg.example.svc.*password: \\$\\{DB_PASSWORD\\}.*port: 5432.*type: postgresql"
+  - it: auto-deletes machines without heartbeat for 2 hours
+    template: lapi/configmap.yaml
+    asserts:
+      - matchRegex:
+          path: data["config.yaml.local"]
+          pattern: "agents_autodelete:\\n\\s+cert: 2h\\n\\s+login_password: 2h"
+  - it: shares one local machine between replicas
+    template: lapi/deployment.yaml
+    set:
+      lapi.replicas: 2
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content: {name: CUSTOM_HOSTNAME, value: RELEASE-NAME-crowdsec-lapi}
+      - equal:
+          path: spec.template.spec.initContainers[0].name
+          value: local-machine
+      - contains:
+          path: spec.template.spec.initContainers[0].env
+          content: {name: MACHINE_NAME, value: RELEASE-NAME-crowdsec-lapi}
+      - matchRegex:
+          path: spec.template.spec.initContainers[0].command[2]
+          pattern: "cscli machines add \"\\$\\{MACHINE_NAME\\}\" --password \"\\$\\{password\\}\" --force"
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content: {name: run, mountPath: /run/crowdsec}
+  - it: mounts user files in the local-machine init container
+    template: lapi/deployment.yaml
+    set:
+      lapi.files:
+        profiles.yaml: "name: x"
+    asserts:
+      - contains:
+          path: spec.template.spec.initContainers[0].volumeMounts
+          content: {name: config, mountPath: /etc/crowdsec/profiles.yaml, subPath: file.profiles.yaml}
+  - it: keeps user init containers after the local-machine one
+    template: lapi/deployment.yaml
+    set:
+      lapi.extraInitContainers:
+        - {name: mine, image: busybox}
+    asserts:
+      - equal:
+          path: spec.template.spec.initContainers[1].name
+          value: mine
+  - it: points cscli to the shared credentials
+    template: lapi/configmap.yaml
+    asserts:
+      - matchRegex:
+          path: data["config.yaml.local"]
+          pattern: "client:\\n\\s+credentials_path: /run/crowdsec/local_api_credentials.yaml"
+  - it: defaults the MySQL port
+    template: lapi/configmap.yaml
+    set:
+      lapi.database.type: mysql
+    asserts:
+      - matchRegex:
+          path: data["config.yaml.local"]
+          pattern: "port: 3306"
+  - it: lets user config override chart-managed settings
+    template: lapi/configmap.yaml
+    set:
+      lapi.config:
+        api:
+          server:
+            auto_registration:
+              allowed_ranges: ["10.42.0.0/16"]
+        db_config:
+          max_open_conns: 50
+    asserts:
+      - matchRegex:
+          path: data["config.yaml.local"]
+          pattern: "allowed_ranges:\\n\\s+- 10.42.0.0/16\\n\\s+enabled: true"
+      - matchRegex:
+          path: data["config.yaml.local"]
+          pattern: "max_open_conns: 50"
+      - matchRegex:
+          path: data["config.yaml.local"]
+          pattern: "token: \\$\\{REGISTRATION_TOKEN\\}"
+  - it: stores files in the configmap and mounts them
+    set:
+      lapi.files:
+        notifications/slack.yaml: "type: slack"
+    asserts:
+      - template: lapi/configmap.yaml
+        equal:
+          path: data["file.notifications__slack.yaml"]
+          value: "type: slack\n"
+      - template: lapi/deployment.yaml
+        contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: config
+            mountPath: /etc/crowdsec/notifications/slack.yaml
+            subPath: file.notifications__slack.yaml
+  - it: mounts Central API credentials from the registration secret
+    template: lapi/deployment.yaml
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: capi-credentials
+            secret:
+              secretName: RELEASE-NAME-crowdsec-capi-credentials
+              items:
+                - key: online_api_credentials.yaml
+                  path: online_api_credentials.yaml
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content: {name: DISABLE_ONLINE_API, value: "true"}
+  - it: disables the online API
+    set:
+      lapi.onlineAPI.enabled: false
+    asserts:
+      - template: lapi/deployment.yaml
+        contains:
+          path: spec.template.spec.containers[0].env
+          content: {name: DISABLE_ONLINE_API, value: "true"}
+      - template: lapi/deployment.yaml
+        notContains:
+          path: spec.template.spec.volumes
+          any: true
+          content: {name: capi-credentials}
+      - template: lapi/configmap.yaml
+        notMatchRegex:
+          path: data["config.yaml.local"]
+          pattern: online_client
+  - it: passes console enrollment settings
+    template: lapi/deployment.yaml
+    set:
+      lapi.console: {instanceName: prod, tags: [k8s, eu]}
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content: {name: ENROLL_TAGS, value: "k8s eu"}
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content: {name: ENROLL_INSTANCE_NAME, value: prod}
+  - it: serves HTTPS with TLS
+    template: lapi/deployment.yaml
+    set:
+      tls.enabled: true
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].livenessProbe.httpGet.scheme
+          value: HTTPS
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content: {name: LOCAL_API_URL, value: "https://localhost:8080"}
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content: {name: AGENTS_ALLOWED_OU, value: agent-ou}
+      - contains:
+          path: spec.template.spec.volumes
+          content: {name: tls, secret: {secretName: RELEASE-NAME-crowdsec-lapi-tls}}
+  - it: merges global and component pod labels
+    template: lapi/deployment.yaml
+    set:
+      podLabels: {team: sec, tier: shared}
+      lapi.podLabels: {tier: api}
+    asserts:
+      - equal:
+          path: spec.template.metadata.labels.team
+          value: sec
+      - equal:
+          path: spec.template.metadata.labels.tier
+          value: api
+  - it: rolls pods when the config changes
+    template: lapi/deployment.yaml
+    asserts:
+      - exists:
+          path: spec.template.metadata.annotations["checksum/config"]
+  - it: renders an ingress
+    template: lapi/ingress.yaml
+    set:
+      lapi.ingress: {enabled: true, host: lapi.example.com, className: nginx}
+    asserts:
+      - equal:
+          path: spec.rules[0].host
+          value: lapi.example.com
+      - equal:
+          path: spec.rules[0].http.paths[0].backend.service.port.name
+          value: lapi
+  - it: renders a ServiceMonitor and a PodDisruptionBudget on demand
+    template: lapi/service.yaml
+    set:
+      lapi.metrics.serviceMonitor.enabled: true
+      lapi.podDisruptionBudget.enabled: true
+    asserts:
+      - hasDocuments:
+          count: 3
+      - isKind:
+          of: ServiceMonitor
+        documentIndex: 1
+      - isKind:
+          of: PodDisruptionBudget
+        documentIndex: 2
+  - it: adds the machine label used by the CrowdSec dashboards (#92)
+    template: lapi/service.yaml
+    set:
+      lapi.metrics.serviceMonitor.enabled: true
+    documentIndex: 1
+    asserts:
+      - equal:
+          path: spec.endpoints[0].relabelings
+          value:
+            - {action: replace, sourceLabels: [__meta_kubernetes_pod_node_name], targetLabel: machine}
+  - it: appends user relabelings after the machine label
+    template: lapi/service.yaml
+    set:
+      lapi.metrics.serviceMonitor:
+        enabled: true
+        relabelings:
+          - {action: labeldrop, regex: machine}
+    documentIndex: 1
+    asserts:
+      - equal:
+          path: spec.endpoints[0].relabelings[1]
+          value: {action: labeldrop, regex: machine}
+  - it: is not rendered when disabled
+    set:
+      lapi: {enabled: false, externalURL: "http://lapi:8080"}
+      auth.existingSecret: external
+    asserts:
+      - hasDocuments:
+          count: 0
