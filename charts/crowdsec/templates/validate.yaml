@@ -5,6 +5,10 @@
 {{- $logProcessors := or .Values.agent.enabled .Values.appsec.enabled -}}
 {{- $migration := "see https://github.com/crowdsecurity/helm-charts/blob/main/charts/crowdsec/MIGRATION.md" -}}
 
+{{- if contains "debian" (.Values.image.tag | toString) -}}
+{{- fail "image.tag: the debian image is not supported, use the default (alpine) image: the chart relies on its busybox tools (wget)." -}}
+{{- end -}}
+
 {{- if not (or .Values.lapi.enabled $logProcessors) -}}
 {{- fail "Nothing to deploy: enable at least one of lapi, agent or appsec." -}}
 {{- end -}}

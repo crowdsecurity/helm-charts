@@ -38,9 +38,14 @@ tests:
       - equal:
           path: spec.template.spec.initContainers[0].name
           value: wait-for-lapi
+      - matchRegex:
+          path: spec.template.spec.initContainers[0].command[2]
+          pattern: 'wget .*"\$\{URL%/\}/health"'
       - notMatchRegex:
           path: spec.template.spec.initContainers[0].command[2]
-          pattern: "cscli|wget"
+          pattern: "cscli"
+      - notExists:
+          path: spec.template.spec.initContainers[0].volumeMounts
   - it: uses the image entrypoint as-is with TLS
     template: agent/workload.yaml
     set:
@@ -89,6 +94,12 @@ tests:
           path: spec.template.spec.initContainers[0].env
           any: true
           content: {name: REGISTRATION_TOKEN}
+      - contains:
+          path: spec.template.spec.initContainers[0].env
+          content: {name: SSL_CERT_FILE, value: /etc/ssl/crowdsec/ca.crt}
+      - contains:
+          path: spec.template.spec.initContainers[0].volumeMounts
+          content: {name: tls, mountPath: /etc/ssl/crowdsec, readOnly: true}
       - contains:
           path: spec.template.spec.containers[0].env
           content: {name: LOCAL_API_URL, value: "https://RELEASE-NAME-crowdsec-lapi.NAMESPACE.svc:8080"}

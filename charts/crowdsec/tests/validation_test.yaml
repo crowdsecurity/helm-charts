@@ -2,6 +2,12 @@ suite: validation
 templates:
   - validate.yaml
 tests:
+  - it: rejects the debian image
+    set:
+      image.tag: v1.8.1-debian
+    asserts:
+      - failedTemplate:
+          errorPattern: "the debian image is not supported"
   - it: requires a database host
     asserts:
       - failedTemplate:

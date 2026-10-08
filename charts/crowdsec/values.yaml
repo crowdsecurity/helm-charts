@@ -15,7 +15,7 @@ imageRegistry: ""
 
 ## @param image.registry CrowdSec image registry (defaults to `imageRegistry`)
 ## @param image.repository CrowdSec image repository (used by every component)
-## @param image.tag CrowdSec image tag (defaults to the chart appVersion)
+## @param image.tag CrowdSec image tag (defaults to the chart appVersion). Only the default (alpine) image is supported, not `-debian` tags
 ## @param image.digest CrowdSec image digest (e.g. `sha256:...`), appended to the tag
 ## @param image.pullPolicy Image pull policy
 image:

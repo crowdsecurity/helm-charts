@@ -76,25 +76,33 @@ spec:
   {{- include "crowdsec.podSpecCommon" (dict "ctx" $ctx "values" $values) | trim | nindent 2 }}
   initContainers:
     {{- /*
-      Waits until LAPI accepts connections, so that the main container does not crash-loop
-      while LAPI starts. Plain TCP check with bash: the debian image has no wget or curl.
+      Waits until LAPI answers on /health, so that the main container does not crash-loop
+      while LAPI starts. With TLS, the LAPI certificate is checked against the agent CA.
     */}}
     - name: wait-for-lapi
       image: {{ include "crowdsec.image" $ctx }}
       imagePullPolicy: {{ $ctx.Values.image.pullPolicy }}
       command:
-        - /bin/bash
+        - /bin/sh
         - -c
         - |
-          set -eu
-          {{- include "crowdsec.bashParseURL" . | nindent 10 }}
-          until timeout 5 bash -c 'exec 3<>"/dev/tcp/$0/$1"' "${host}" "${port}" 2>/dev/null; do
+          until wget -q -O /dev/null -T 5 "${URL%/}/health"; do
             echo "Waiting for LAPI at ${URL}"
             sleep 5
           done
       env:
         - name: URL
           value: {{ include "crowdsec.lapiURL" $ctx | quote }}
+        {{- if $ctx.Values.tls.enabled }}
+        - name: SSL_CERT_FILE
+          value: /etc/ssl/crowdsec/ca.crt
+        {{- end }}
+      {{- if $ctx.Values.tls.enabled }}
+      volumeMounts:
+        - name: tls
+          mountPath: /etc/ssl/crowdsec
+          readOnly: true
+      {{- end }}
       {{- include "crowdsec.helperContainer" $ctx | trim | nindent 6 }}
     {{- with $values.extraInitContainers }}
     {{- toYaml . | nindent 4 }}

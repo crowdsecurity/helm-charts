@@ -92,24 +92,6 @@ annotations:
 {{- end -}}
 
 {{/*
-  Bash lines splitting ${URL} into ${host}, ${port} and ${path}, for checks without wget or curl
-  (the debian image has neither).
-*/}}
-{{- define "crowdsec.bashParseURL" -}}
-hostport="${URL#*://}"
-path="/${hostport#*/}"
-[ "${hostport#*/}" = "${hostport}" ] && path=/
-hostport="${hostport%%/*}"
-host="${hostport%:*}"
-port="${hostport##*:}"
-if [ "${host}" = "${hostport}" ]; then
-  case "${URL}" in https://*) port=443 ;; *) port=80 ;; esac
-fi
-host="${host#[}"
-host="${host%]}"
-{{- end -}}
-
-{{/*
   Environment variables referenced by the LAPI config.yaml.local, shared by the LAPI container
   and its local-machine init container. LOCAL_API_URL is also written to the cscli credentials.
 */}}
