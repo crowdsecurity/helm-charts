@@ -30,7 +30,6 @@ def service(with_port=False):
 
 metrics = obj({"serviceMonitor": obj({"enabled": B(), "labels": MAP, "interval": S(), "scrapeTimeout": S(),
                                       "honorLabels": B(), "relabelings": OBJARR, "metricRelabelings": OBJARR})})
-NULLABLE_INT = {"type": ["integer", "null"], "minimum": 0}
 pdb = obj({"enabled": B(), "maxUnavailable": {"type": ["integer", "string"]}})
 
 def hub(keys):
@@ -47,13 +46,11 @@ pod_common = {
     "podSecurityContext": ANYOBJ, "securityContext": ANYOBJ,
     "serviceAccountName": S(), "priorityClassName": S(),
     "nodeSelector": MAP, "tolerations": OBJARR, "affinity": ANYOBJ,
-    "topologySpreadConstraints": OBJARR, "dnsConfig": ANYOBJ,
+    "topologySpreadConstraints": OBJARR,
     "extraInitContainers": OBJARR, "extraVolumes": OBJARR, "extraVolumeMounts": OBJARR,
-    "extraContainers": OBJARR, "lifecycle": ANYOBJ,
-    "terminationGracePeriodSeconds": NULLABLE_INT, "hostAliases": OBJARR, "runtimeClassName": S(),
-    "dnsPolicy": {"type": "string", "enum": ["", "ClusterFirst", "ClusterFirstWithHostNet", "Default", "None"]},
-    "enableServiceLinks": B(), "revisionHistoryLimit": NULLABLE_INT, "minReadySeconds": I(0),
-    "hostUsers": {"type": ["boolean", "null"]},
+    "extraContainers": OBJARR,
+    # Free-form: any Kubernetes field, validated by the API server (fields built by the chart are refused in validate.yaml)
+    "podSpec": ANYOBJ, "containerSpec": ANYOBJ, "workloadSpec": ANYOBJ,
 }
 
 lapi = obj({**pod_common,

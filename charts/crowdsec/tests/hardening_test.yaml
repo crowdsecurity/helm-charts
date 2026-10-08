@@ -27,8 +27,8 @@ tests:
       - notExists: {path: spec.template.spec.hostUsers}
   - it: runs pods in a user namespace on demand
     set:
-      lapi.hostUsers: false
-      appsec.hostUsers: false
+      lapi.podSpec.hostUsers: false
+      appsec.podSpec.hostUsers: false
     asserts:
       - template: lapi/deployment.yaml
         equal: {path: spec.template.spec.hostUsers, value: false}

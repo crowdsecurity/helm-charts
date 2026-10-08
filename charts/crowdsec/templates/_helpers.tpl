@@ -246,9 +246,6 @@ imagePullSecrets:
 serviceAccountName: {{ . }}
 {{- end }}
 automountServiceAccountToken: false
-{{- with .values.priorityClassName }}
-priorityClassName: {{ . }}
-{{- end }}
 {{- with .values.podSecurityContext }}
 securityContext:
   {{- toYaml . | nindent 2 }}
@@ -269,27 +266,7 @@ affinity:
 topologySpreadConstraints:
   {{- toYaml . | nindent 2 }}
 {{- end }}
-{{- with .values.dnsPolicy }}
-dnsPolicy: {{ . }}
-{{- end }}
-{{- with .values.dnsConfig }}
-dnsConfig:
-  {{- toYaml . | nindent 2 }}
-{{- end }}
-{{- with .values.hostAliases }}
-hostAliases:
-  {{- toYaml . | nindent 2 }}
-{{- end }}
-{{- with .values.runtimeClassName }}
-runtimeClassName: {{ . }}
-{{- end }}
-{{- if not (kindIs "invalid" .values.hostUsers) }}
-hostUsers: {{ .values.hostUsers }}
-{{- end }}
-enableServiceLinks: {{ .values.enableServiceLinks }}
-{{- if not (kindIs "invalid" .values.terminationGracePeriodSeconds) }}
-terminationGracePeriodSeconds: {{ .values.terminationGracePeriodSeconds }}
-{{- end }}
+enableServiceLinks: false
 {{- end -}}
 
 {{/*
@@ -308,16 +285,6 @@ resources:
 {{- end }}
 {{- end -}}
 
-{{/* Workload-level fields shared by Deployments and DaemonSets */}}
-{{- define "crowdsec.workloadSpecCommon" -}}
-{{- if not (kindIs "invalid" .revisionHistoryLimit) }}
-revisionHistoryLimit: {{ .revisionHistoryLimit }}
-{{- end }}
-{{- with .minReadySeconds }}
-minReadySeconds: {{ . }}
-{{- end }}
-{{- end -}}
-
 {{/* Probes, resources and security context of the main container */}}
 {{- define "crowdsec.containerCommon" -}}
 {{- with .values.resources }}
@@ -326,10 +293,6 @@ resources:
 {{- end }}
 {{- with .values.securityContext }}
 securityContext:
-  {{- toYaml . | nindent 2 }}
-{{- end }}
-{{- with .values.lifecycle }}
-lifecycle:
   {{- toYaml . | nindent 2 }}
 {{- end }}
 {{- range $probe := list "livenessProbe" "readinessProbe" "startupProbe" }}
@@ -342,4 +305,23 @@ lifecycle:
   {{- toYaml $probeSpec | nindent 2 }}
 {{- end }}
 {{- end }}
+{{- end -}}
+
+{{/*
+  Applies the free-form overrides of a component to its rendered workload manifest:
+  `containerSpec` is merged into the main container, `podSpec` into the pod spec and
+  `workloadSpec` into the Deployment/DaemonSet spec. Maps are merged, lists and scalars replaced.
+  Fields built by the chart (containers, volumes, selector...) are refused in validate.yaml.
+  Usage: include "crowdsec.applyOverrides" (dict "manifest" $yaml "values" .Values.lapi)
+*/}}
+{{- define "crowdsec.applyOverrides" -}}
+{{- $doc := .manifest | fromYaml -}}
+{{- if hasKey $doc "Error" -}}
+{{- fail (printf "internal error, the rendered manifest is not valid YAML: %s" $doc.Error) -}}
+{{- end -}}
+{{- $pod := $doc.spec.template.spec -}}
+{{- $_ := mustMergeOverwrite (index $pod.containers 0) (deepCopy .values.containerSpec) -}}
+{{- $_ = mustMergeOverwrite $pod (deepCopy .values.podSpec) -}}
+{{- $_ = mustMergeOverwrite $doc.spec (deepCopy .values.workloadSpec) -}}
+{{ toYaml $doc }}
 {{- end -}}

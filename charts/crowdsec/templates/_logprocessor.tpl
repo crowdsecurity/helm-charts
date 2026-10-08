@@ -31,9 +31,6 @@ metadata:
     {{- include "crowdsec.labels" (list .ctx .component) | nindent 4 }}
   {{- include "crowdsec.annotations" (dict "ctx" .ctx "extra" $values.annotations) | nindent 2 }}
 spec:
-  {{- with (include "crowdsec.workloadSpecCommon" $values | trim) }}
-  {{- . | nindent 2 }}
-  {{- end }}
   {{- if eq $values.kind "Deployment" }}
   replicas: {{ $values.replicas }}
   {{- with $values.updateStrategy }}

@@ -20,6 +20,7 @@
 - [Exposing LAPI or AppSec outside the cluster](#exposing-lapi-or-appsec-outside-the-cluster)
 - [Security defaults](#security-defaults)
 - [Labels and annotations](#labels-and-annotations)
+- [Other Kubernetes settings](#other-kubernetes-settings)
 - [Parameters](#parameters)
 
 ## Architecture
@@ -358,9 +359,9 @@ accepted or refused by `auto_registration.allowed_ranges` based on the node addr
 ## Security defaults
 
 Every pod uses the `RuntimeDefault` seccomp profile and runs without a service account token.
-Helper containers (LAPI wait/registration, Central API registration Job, `helm test` pods) run as `nobody` with a read-only
-root filesystem and no capabilities (`helperContainers`). User namespaces can be enabled per component with `hostUsers: false`
-on runtimes that support them; the agent may then be unable to read host logs.
+Helper containers (`wait-for-lapi` and LAPI `local-machine` init containers, Central API registration Job, `helm test` pods)
+run as `nobody` with a read-only root filesystem and no capabilities (`helperContainers`). User namespaces can be enabled
+per component with `podSpec.hostUsers: false` on runtimes that support them; the agent may then be unable to read host logs.
 
 The CrowdSec containers themselves still run as root: notification plugins switch users, and the agent reads host logs.
 
@@ -382,6 +383,31 @@ Most resources also accept their own annotations: `<component>.annotations` (wor
 `extraObjects` deploys additional manifests with the release (e.g. an ExternalSecret providing the database password).
 For changes the values do not cover, use a [post-renderer](https://helm.sh/docs/topics/advanced/#post-rendering) such as kustomize
 rather than forking the chart.
+
+## Other Kubernetes settings
+
+The values cover the common settings. Any other field goes in a free-form object per component, merged into what the
+chart renders (maps are merged, lists and scalars replaced, so `false` and `0` work):
+
+```yaml
+agent:
+  podSpec:                        # pod spec
+    priorityClassName: system-node-critical
+    terminationGracePeriodSeconds: 60
+    dnsConfig:
+      options: [{name: ndots, value: "2"}]
+  containerSpec:                  # main container
+    lifecycle:
+      preStop:
+        exec: {command: [sleep, "5"]}
+  workloadSpec:                   # DaemonSet or Deployment spec
+    revisionHistoryLimit: 3
+```
+
+Fields built by the chart are refused with a pointer to the dedicated value: `podSpec.containers`, `.initContainers`,
+`.volumes` (use `extraContainers`, `extraInitContainers`, `extraVolumes`), `containerSpec.name`, `.image`, `.command`,
+`.args`, `.env`, `.envFrom`, `.ports`, `.volumeMounts`, and `workloadSpec.selector`, `.template`, `.replicas`.
+These fields are not validated by the chart: check them with `helm template` or a server-side dry run.
 
 ## Parameters
 
@@ -489,25 +515,17 @@ rather than forking the chart.
 | `lapi.podSecurityContext`                         | Pod security context                                                                                                                                          | `{}`             |
 | `lapi.securityContext`                            | Container security context                                                                                                                                    | `{}`             |
 | `lapi.serviceAccountName`                         | Service account of the pods (none of the pods need Kubernetes API access)                                                                                     | `""`             |
-| `lapi.priorityClassName`                          | Priority class name                                                                                                                                           | `""`             |
 | `lapi.nodeSelector`                               | Node selector                                                                                                                                                 | `{}`             |
 | `lapi.tolerations`                                | Tolerations                                                                                                                                                   | `[]`             |
 | `lapi.affinity`                                   | Affinity                                                                                                                                                      | `{}`             |
 | `lapi.topologySpreadConstraints`                  | Topology spread constraints                                                                                                                                   | `[]`             |
-| `lapi.dnsConfig`                                  | Pod DNS configuration                                                                                                                                         | `{}`             |
 | `lapi.extraInitContainers`                        | Extra init containers                                                                                                                                         | `[]`             |
 | `lapi.extraVolumes`                               | Extra volumes                                                                                                                                                 | `[]`             |
 | `lapi.extraVolumeMounts`                          | Extra volume mounts for the LAPI container                                                                                                                    | `[]`             |
 | `lapi.extraContainers`                            | Extra containers (sidecars)                                                                                                                                   | `[]`             |
-| `lapi.lifecycle`                                  | Lifecycle hooks of the LAPI container                                                                                                                         | `{}`             |
-| `lapi.terminationGracePeriodSeconds`              | Pod termination grace period (Kubernetes default when null)                                                                                                   | `nil`            |
-| `lapi.hostAliases`                                | Pod host aliases                                                                                                                                              | `[]`             |
-| `lapi.runtimeClassName`                           | Pod runtime class                                                                                                                                             | `""`             |
-| `lapi.hostUsers`                                  | Set to `false` to run the pods in a user namespace (Kubernetes >= 1.33 with a supporting runtime)                                                             | `nil`            |
-| `lapi.dnsPolicy`                                  | Pod DNS policy                                                                                                                                                | `""`             |
-| `lapi.enableServiceLinks`                         | Inject environment variables for the Services of the namespace                                                                                                | `false`          |
-| `lapi.revisionHistoryLimit`                       | Number of old ReplicaSets/revisions to keep (Kubernetes default when null)                                                                                    | `nil`            |
-| `lapi.minReadySeconds`                            | Seconds a new pod must be ready before being considered available                                                                                             | `0`              |
+| `lapi.podSpec`                                    | Merged into the pod spec, e.g. `priorityClassName`, `terminationGracePeriodSeconds`, `dnsConfig`, `hostAliases`, `runtimeClassName`, `hostUsers`              | `{}`             |
+| `lapi.containerSpec`                              | Merged into the lapi container, e.g. `lifecycle`, `stdin`, or probe fields                                                                                    | `{}`             |
+| `lapi.workloadSpec`                               | Merged into the Deployment spec, e.g. `revisionHistoryLimit`, `minReadySeconds`                                                                               | `{}`             |
 
 ### Agent
 
@@ -553,25 +571,17 @@ rather than forking the chart.
 | `agent.podSecurityContext`                       | Pod security context                                                                                                                                                     | `{}`        |
 | `agent.securityContext`                          | Container security context                                                                                                                                               | `{}`        |
 | `agent.serviceAccountName`                       | Service account of the pods (e.g. for cloud datasources using workload identity)                                                                                         | `""`        |
-| `agent.priorityClassName`                        | Priority class name                                                                                                                                                      | `""`        |
 | `agent.nodeSelector`                             | Node selector                                                                                                                                                            | `{}`        |
 | `agent.tolerations`                              | Tolerations                                                                                                                                                              | `[]`        |
 | `agent.affinity`                                 | Affinity                                                                                                                                                                 | `{}`        |
 | `agent.topologySpreadConstraints`                | Topology spread constraints                                                                                                                                              | `[]`        |
-| `agent.dnsConfig`                                | Pod DNS configuration                                                                                                                                                    | `{}`        |
 | `agent.extraInitContainers`                      | Extra init containers                                                                                                                                                    | `[]`        |
 | `agent.extraVolumes`                             | Extra volumes                                                                                                                                                            | `[]`        |
 | `agent.extraVolumeMounts`                        | Extra volume mounts for the agent container                                                                                                                              | `[]`        |
 | `agent.extraContainers`                          | Extra containers (sidecars)                                                                                                                                              | `[]`        |
-| `agent.lifecycle`                                | Lifecycle hooks of the agent container                                                                                                                                   | `{}`        |
-| `agent.terminationGracePeriodSeconds`            | Pod termination grace period (Kubernetes default when null)                                                                                                              | `nil`       |
-| `agent.hostAliases`                              | Pod host aliases                                                                                                                                                         | `[]`        |
-| `agent.runtimeClassName`                         | Pod runtime class                                                                                                                                                        | `""`        |
-| `agent.hostUsers`                                | Set to `false` to run the pods in a user namespace (Kubernetes >= 1.33 with a supporting runtime; reading host logs may then fail)                                       | `nil`       |
-| `agent.dnsPolicy`                                | Pod DNS policy                                                                                                                                                           | `""`        |
-| `agent.enableServiceLinks`                       | Inject environment variables for the Services of the namespace                                                                                                           | `false`     |
-| `agent.revisionHistoryLimit`                     | Number of old ReplicaSets/revisions to keep (Kubernetes default when null)                                                                                               | `nil`       |
-| `agent.minReadySeconds`                          | Seconds a new pod must be ready before being considered available                                                                                                        | `0`         |
+| `agent.podSpec`                                  | Merged into the pod spec, e.g. `priorityClassName`, `terminationGracePeriodSeconds`, `dnsConfig`, `hostAliases`, `runtimeClassName`, `hostUsers`                         | `{}`        |
+| `agent.containerSpec`                            | Merged into the agent container, e.g. `lifecycle`, `stdin`, or probe fields                                                                                              | `{}`        |
+| `agent.workloadSpec`                             | Merged into the DaemonSet/Deployment spec, e.g. `revisionHistoryLimit`, `minReadySeconds`                                                                                | `{}`        |
 
 ### AppSec
 
@@ -619,22 +629,14 @@ rather than forking the chart.
 | `appsec.podSecurityContext`                       | Pod security context                                                                                                                                 | `{}`                                                                             |
 | `appsec.securityContext`                          | Container security context                                                                                                                           | `{}`                                                                             |
 | `appsec.serviceAccountName`                       | Service account of the pods                                                                                                                          | `""`                                                                             |
-| `appsec.priorityClassName`                        | Priority class name                                                                                                                                  | `""`                                                                             |
 | `appsec.nodeSelector`                             | Node selector                                                                                                                                        | `{}`                                                                             |
 | `appsec.tolerations`                              | Tolerations                                                                                                                                          | `[]`                                                                             |
 | `appsec.affinity`                                 | Affinity                                                                                                                                             | `{}`                                                                             |
 | `appsec.topologySpreadConstraints`                | Topology spread constraints                                                                                                                          | `[]`                                                                             |
-| `appsec.dnsConfig`                                | Pod DNS configuration                                                                                                                                | `{}`                                                                             |
 | `appsec.extraInitContainers`                      | Extra init containers                                                                                                                                | `[]`                                                                             |
 | `appsec.extraVolumes`                             | Extra volumes                                                                                                                                        | `[]`                                                                             |
 | `appsec.extraVolumeMounts`                        | Extra volume mounts for the AppSec container                                                                                                         | `[]`                                                                             |
 | `appsec.extraContainers`                          | Extra containers (sidecars)                                                                                                                          | `[]`                                                                             |
-| `appsec.lifecycle`                                | Lifecycle hooks of the AppSec container                                                                                                              | `{}`                                                                             |
-| `appsec.terminationGracePeriodSeconds`            | Pod termination grace period (Kubernetes default when null)                                                                                          | `nil`                                                                            |
-| `appsec.hostAliases`                              | Pod host aliases                                                                                                                                     | `[]`                                                                             |
-| `appsec.runtimeClassName`                         | Pod runtime class                                                                                                                                    | `""`                                                                             |
-| `appsec.hostUsers`                                | Set to `false` to run the pods in a user namespace (Kubernetes >= 1.33 with a supporting runtime)                                                    | `nil`                                                                            |
-| `appsec.dnsPolicy`                                | Pod DNS policy                                                                                                                                       | `""`                                                                             |
-| `appsec.enableServiceLinks`                       | Inject environment variables for the Services of the namespace                                                                                       | `false`                                                                          |
-| `appsec.revisionHistoryLimit`                     | Number of old ReplicaSets/revisions to keep (Kubernetes default when null)                                                                           | `nil`                                                                            |
-| `appsec.minReadySeconds`                          | Seconds a new pod must be ready before being considered available                                                                                    | `0`                                                                              |
+| `appsec.podSpec`                                  | Merged into the pod spec, e.g. `priorityClassName`, `terminationGracePeriodSeconds`, `dnsConfig`, `hostAliases`, `runtimeClassName`, `hostUsers`     | `{}`                                                                             |
+| `appsec.containerSpec`                            | Merged into the appsec container, e.g. `lifecycle`, `stdin`, or probe fields                                                                         | `{}`                                                                             |
+| `appsec.workloadSpec`                             | Merged into the Deployment/DaemonSet spec, e.g. `revisionHistoryLimit`, `minReadySeconds`                                                            | `{}`                                                                             |

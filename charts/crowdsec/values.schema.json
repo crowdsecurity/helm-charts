@@ -303,9 +303,6 @@
             "type": "object"
           }
         },
-        "dnsConfig": {
-          "type": "object"
-        },
         "extraInitContainers": {
           "type": "array",
           "items": {
@@ -330,54 +327,14 @@
             "type": "object"
           }
         },
-        "lifecycle": {
+        "podSpec": {
           "type": "object"
         },
-        "terminationGracePeriodSeconds": {
-          "type": [
-            "integer",
-            "null"
-          ],
-          "minimum": 0
+        "containerSpec": {
+          "type": "object"
         },
-        "hostAliases": {
-          "type": "array",
-          "items": {
-            "type": "object"
-          }
-        },
-        "runtimeClassName": {
-          "type": "string"
-        },
-        "dnsPolicy": {
-          "type": "string",
-          "enum": [
-            "",
-            "ClusterFirst",
-            "ClusterFirstWithHostNet",
-            "Default",
-            "None"
-          ]
-        },
-        "enableServiceLinks": {
-          "type": "boolean"
-        },
-        "revisionHistoryLimit": {
-          "type": [
-            "integer",
-            "null"
-          ],
-          "minimum": 0
-        },
-        "minReadySeconds": {
-          "type": "integer",
-          "minimum": 0
-        },
-        "hostUsers": {
-          "type": [
-            "boolean",
-            "null"
-          ]
+        "workloadSpec": {
+          "type": "object"
         },
         "enabled": {
           "type": "boolean"
@@ -735,9 +692,6 @@
             "type": "object"
           }
         },
-        "dnsConfig": {
-          "type": "object"
-        },
         "extraInitContainers": {
           "type": "array",
           "items": {
@@ -762,54 +716,14 @@
             "type": "object"
           }
         },
-        "lifecycle": {
+        "podSpec": {
           "type": "object"
         },
-        "terminationGracePeriodSeconds": {
-          "type": [
-            "integer",
-            "null"
-          ],
-          "minimum": 0
+        "containerSpec": {
+          "type": "object"
         },
-        "hostAliases": {
-          "type": "array",
-          "items": {
-            "type": "object"
-          }
-        },
-        "runtimeClassName": {
-          "type": "string"
-        },
-        "dnsPolicy": {
-          "type": "string",
-          "enum": [
-            "",
-            "ClusterFirst",
-            "ClusterFirstWithHostNet",
-            "Default",
-            "None"
-          ]
-        },
-        "enableServiceLinks": {
-          "type": "boolean"
-        },
-        "revisionHistoryLimit": {
-          "type": [
-            "integer",
-            "null"
-          ],
-          "minimum": 0
-        },
-        "minReadySeconds": {
-          "type": "integer",
-          "minimum": 0
-        },
-        "hostUsers": {
-          "type": [
-            "boolean",
-            "null"
-          ]
+        "workloadSpec": {
+          "type": "object"
         },
         "enabled": {
           "type": "boolean"
@@ -1104,9 +1018,6 @@
             "type": "object"
           }
         },
-        "dnsConfig": {
-          "type": "object"
-        },
         "extraInitContainers": {
           "type": "array",
           "items": {
@@ -1131,54 +1042,14 @@
             "type": "object"
           }
         },
-        "lifecycle": {
+        "podSpec": {
           "type": "object"
         },
-        "terminationGracePeriodSeconds": {
-          "type": [
-            "integer",
-            "null"
-          ],
-          "minimum": 0
+        "containerSpec": {
+          "type": "object"
         },
-        "hostAliases": {
-          "type": "array",
-          "items": {
-            "type": "object"
-          }
-        },
-        "runtimeClassName": {
-          "type": "string"
-        },
-        "dnsPolicy": {
-          "type": "string",
-          "enum": [
-            "",
-            "ClusterFirst",
-            "ClusterFirstWithHostNet",
-            "Default",
-            "None"
-          ]
-        },
-        "enableServiceLinks": {
-          "type": "boolean"
-        },
-        "revisionHistoryLimit": {
-          "type": [
-            "integer",
-            "null"
-          ],
-          "minimum": 0
-        },
-        "minReadySeconds": {
-          "type": "integer",
-          "minimum": 0
-        },
-        "hostUsers": {
-          "type": [
-            "boolean",
-            "null"
-          ]
+        "workloadSpec": {
+          "type": "object"
         },
         "enabled": {
           "type": "boolean"

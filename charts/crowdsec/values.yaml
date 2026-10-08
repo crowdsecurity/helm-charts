@@ -267,8 +267,6 @@ lapi:
     privileged: false
   ## @param lapi.serviceAccountName Service account of the pods (none of the pods need Kubernetes API access)
   serviceAccountName: ""
-  ## @param lapi.priorityClassName Priority class name
-  priorityClassName: ""
   ## @param lapi.nodeSelector Node selector
   nodeSelector: {}
   ## @param lapi.tolerations Tolerations
@@ -277,8 +275,6 @@ lapi:
   affinity: {}
   ## @param lapi.topologySpreadConstraints Topology spread constraints
   topologySpreadConstraints: []
-  ## @param lapi.dnsConfig Pod DNS configuration
-  dnsConfig: {}
   ## @param lapi.extraInitContainers Extra init containers
   extraInitContainers: []
   ## @param lapi.extraVolumes Extra volumes
@@ -287,24 +283,15 @@ lapi:
   extraVolumeMounts: []
   ## @param lapi.extraContainers Extra containers (sidecars)
   extraContainers: []
-  ## @param lapi.lifecycle Lifecycle hooks of the LAPI container
-  lifecycle: {}
-  ## @param lapi.terminationGracePeriodSeconds [nullable] Pod termination grace period (Kubernetes default when null)
-  terminationGracePeriodSeconds: null
-  ## @param lapi.hostAliases Pod host aliases
-  hostAliases: []
-  ## @param lapi.runtimeClassName Pod runtime class
-  runtimeClassName: ""
-  ## @param lapi.hostUsers [nullable] Set to `false` to run the pods in a user namespace (Kubernetes >= 1.33 with a supporting runtime)
-  hostUsers: null
-  ## @param lapi.dnsPolicy Pod DNS policy
-  dnsPolicy: ""
-  ## @param lapi.enableServiceLinks Inject environment variables for the Services of the namespace
-  enableServiceLinks: false
-  ## @param lapi.revisionHistoryLimit [nullable] Number of old ReplicaSets/revisions to keep (Kubernetes default when null)
-  revisionHistoryLimit: null
-  ## @param lapi.minReadySeconds Seconds a new pod must be ready before being considered available
-  minReadySeconds: 0
+  ## Free-form overrides for any other Kubernetes field, merged into what the chart renders
+  ## (maps are merged, lists and scalars replaced). Fields built by the chart are refused: use the
+  ## dedicated values (`extraContainers`, `extraVolumes`, `env`...) instead.
+  ## @param lapi.podSpec Merged into the pod spec, e.g. `priorityClassName`, `terminationGracePeriodSeconds`, `dnsConfig`, `hostAliases`, `runtimeClassName`, `hostUsers`
+  podSpec: {}
+  ## @param lapi.containerSpec Merged into the lapi container, e.g. `lifecycle`, `stdin`, or probe fields
+  containerSpec: {}
+  ## @param lapi.workloadSpec Merged into the Deployment spec, e.g. `revisionHistoryLimit`, `minReadySeconds`
+  workloadSpec: {}
 
 ## @section Agent
 agent:
@@ -440,8 +427,6 @@ agent:
     privileged: false
   ## @param agent.serviceAccountName Service account of the pods (e.g. for cloud datasources using workload identity)
   serviceAccountName: ""
-  ## @param agent.priorityClassName Priority class name
-  priorityClassName: ""
   ## @param agent.nodeSelector Node selector
   nodeSelector: {}
   ## @param agent.tolerations Tolerations
@@ -450,8 +435,6 @@ agent:
   affinity: {}
   ## @param agent.topologySpreadConstraints Topology spread constraints
   topologySpreadConstraints: []
-  ## @param agent.dnsConfig Pod DNS configuration
-  dnsConfig: {}
   ## @param agent.extraInitContainers Extra init containers
   extraInitContainers: []
   ## @param agent.extraVolumes Extra volumes
@@ -460,24 +443,15 @@ agent:
   extraVolumeMounts: []
   ## @param agent.extraContainers Extra containers (sidecars)
   extraContainers: []
-  ## @param agent.lifecycle Lifecycle hooks of the agent container
-  lifecycle: {}
-  ## @param agent.terminationGracePeriodSeconds [nullable] Pod termination grace period (Kubernetes default when null)
-  terminationGracePeriodSeconds: null
-  ## @param agent.hostAliases Pod host aliases
-  hostAliases: []
-  ## @param agent.runtimeClassName Pod runtime class
-  runtimeClassName: ""
-  ## @param agent.hostUsers [nullable] Set to `false` to run the pods in a user namespace (Kubernetes >= 1.33 with a supporting runtime; reading host logs may then fail)
-  hostUsers: null
-  ## @param agent.dnsPolicy Pod DNS policy
-  dnsPolicy: ""
-  ## @param agent.enableServiceLinks Inject environment variables for the Services of the namespace
-  enableServiceLinks: false
-  ## @param agent.revisionHistoryLimit [nullable] Number of old ReplicaSets/revisions to keep (Kubernetes default when null)
-  revisionHistoryLimit: null
-  ## @param agent.minReadySeconds Seconds a new pod must be ready before being considered available
-  minReadySeconds: 0
+  ## Free-form overrides for any other Kubernetes field, merged into what the chart renders
+  ## (maps are merged, lists and scalars replaced). Fields built by the chart are refused: use the
+  ## dedicated values (`extraContainers`, `extraVolumes`, `env`...) instead.
+  ## @param agent.podSpec Merged into the pod spec, e.g. `priorityClassName`, `terminationGracePeriodSeconds`, `dnsConfig`, `hostAliases`, `runtimeClassName`, `hostUsers`
+  podSpec: {}
+  ## @param agent.containerSpec Merged into the agent container, e.g. `lifecycle`, `stdin`, or probe fields
+  containerSpec: {}
+  ## @param agent.workloadSpec Merged into the DaemonSet/Deployment spec, e.g. `revisionHistoryLimit`, `minReadySeconds`
+  workloadSpec: {}
 
 ## @section AppSec
 appsec:
@@ -613,8 +587,6 @@ appsec:
     privileged: false
   ## @param appsec.serviceAccountName Service account of the pods
   serviceAccountName: ""
-  ## @param appsec.priorityClassName Priority class name
-  priorityClassName: ""
   ## @param appsec.nodeSelector Node selector
   nodeSelector: {}
   ## @param appsec.tolerations Tolerations
@@ -623,8 +595,6 @@ appsec:
   affinity: {}
   ## @param appsec.topologySpreadConstraints Topology spread constraints
   topologySpreadConstraints: []
-  ## @param appsec.dnsConfig Pod DNS configuration
-  dnsConfig: {}
   ## @param appsec.extraInitContainers Extra init containers
   extraInitContainers: []
   ## @param appsec.extraVolumes Extra volumes
@@ -633,21 +603,12 @@ appsec:
   extraVolumeMounts: []
   ## @param appsec.extraContainers Extra containers (sidecars)
   extraContainers: []
-  ## @param appsec.lifecycle Lifecycle hooks of the AppSec container
-  lifecycle: {}
-  ## @param appsec.terminationGracePeriodSeconds [nullable] Pod termination grace period (Kubernetes default when null)
-  terminationGracePeriodSeconds: null
-  ## @param appsec.hostAliases Pod host aliases
-  hostAliases: []
-  ## @param appsec.runtimeClassName Pod runtime class
-  runtimeClassName: ""
-  ## @param appsec.hostUsers [nullable] Set to `false` to run the pods in a user namespace (Kubernetes >= 1.33 with a supporting runtime)
-  hostUsers: null
-  ## @param appsec.dnsPolicy Pod DNS policy
-  dnsPolicy: ""
-  ## @param appsec.enableServiceLinks Inject environment variables for the Services of the namespace
-  enableServiceLinks: false
-  ## @param appsec.revisionHistoryLimit [nullable] Number of old ReplicaSets/revisions to keep (Kubernetes default when null)
-  revisionHistoryLimit: null
-  ## @param appsec.minReadySeconds Seconds a new pod must be ready before being considered available
-  minReadySeconds: 0
+  ## Free-form overrides for any other Kubernetes field, merged into what the chart renders
+  ## (maps are merged, lists and scalars replaced). Fields built by the chart are refused: use the
+  ## dedicated values (`extraContainers`, `extraVolumes`, `env`...) instead.
+  ## @param appsec.podSpec Merged into the pod spec, e.g. `priorityClassName`, `terminationGracePeriodSeconds`, `dnsConfig`, `hostAliases`, `runtimeClassName`, `hostUsers`
+  podSpec: {}
+  ## @param appsec.containerSpec Merged into the appsec container, e.g. `lifecycle`, `stdin`, or probe fields
+  containerSpec: {}
+  ## @param appsec.workloadSpec Merged into the Deployment/DaemonSet spec, e.g. `revisionHistoryLimit`, `minReadySeconds`
+  workloadSpec: {}

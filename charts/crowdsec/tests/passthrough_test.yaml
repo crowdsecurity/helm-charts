@@ -37,17 +37,19 @@ tests:
       - equal:
           path: spec.template.spec.containers[0].image
           value: ghcr.io/crowdsecurity/crowdsec:v1.8.1
-  - it: passes pod and workload settings through on every component
+  - it: passes pod, container and workload overrides through on every component
     set:
       appsec.enabled: true
       lapi: &pod
-        hostAliases: [{ip: 10.0.0.1, hostnames: [db.local]}]
-        runtimeClassName: gvisor
-        dnsPolicy: ClusterFirstWithHostNet
-        terminationGracePeriodSeconds: 0
-        revisionHistoryLimit: 0
-        minReadySeconds: 5
-        lifecycle: {preStop: {exec: {command: [sleep, "5"]}}}
+        podSpec:
+          hostAliases: [{ip: 10.0.0.1, hostnames: [db.local]}]
+          runtimeClassName: gvisor
+          dnsPolicy: ClusterFirstWithHostNet
+          terminationGracePeriodSeconds: 0
+          shareProcessNamespace: true
+        containerSpec:
+          lifecycle: {preStop: {exec: {command: [sleep, "5"]}}}
+        workloadSpec: {revisionHistoryLimit: 0, minReadySeconds: 5}
         extraContainers: [{name: sidecar, image: busybox}]
       agent: *pod
       appsec: *pod
@@ -60,6 +62,7 @@ tests:
             runtimeClassName: gvisor
             dnsPolicy: ClusterFirstWithHostNet
             terminationGracePeriodSeconds: 0
+            shareProcessNamespace: true
       - template: agent/workload.yaml
         isSubset: *podSpec
       - template: appsec/workload.yaml
@@ -78,8 +81,14 @@ tests:
         equal: *sidecar
       - template: appsec/workload.yaml
         equal: *sidecar
+      - template: lapi/deployment.yaml
+        exists: &prestop {path: "spec.template.spec.containers[0].lifecycle.preStop"}
       - template: agent/workload.yaml
-        exists: {path: "spec.template.spec.containers[0].lifecycle.preStop"}
+        exists: *prestop
+      - template: appsec/workload.yaml
+        exists: *prestop
+      - template: lapi/deployment.yaml
+        notExists: {path: "spec.template.spec.containers[1].lifecycle"}
   - it: does not render unset optional fields
     template: lapi/deployment.yaml
     asserts:
@@ -87,6 +96,59 @@ tests:
       - notExists: {path: spec.minReadySeconds}
       - notExists: {path: spec.template.spec.terminationGracePeriodSeconds}
       - equal: {path: spec.template.spec.enableServiceLinks, value: false}
+      - equal: {path: spec.template.spec.automountServiceAccountToken, value: false}
+  - it: lets overrides replace chart defaults, including with false (#332)
+    template: agent/workload.yaml
+    set:
+      agent.podSpec: {enableServiceLinks: true, automountServiceAccountToken: true}
+      agent.serviceAccountName: crowdsec-reader
+    asserts:
+      - equal: {path: spec.template.spec.enableServiceLinks, value: true}
+      - equal: {path: spec.template.spec.automountServiceAccountToken, value: true}
+      - equal: {path: spec.template.spec.serviceAccountName, value: crowdsec-reader}
+  - it: merges override maps with the typed values instead of replacing them
+    template: agent/workload.yaml
+    set:
+      agent.podSpec.securityContext: {fsGroup: 1000}
+      agent.containerSpec.livenessProbe: {periodSeconds: 30}
+    asserts:
+      - equal:
+          path: spec.template.spec.securityContext
+          value: {fsGroup: 1000, seccompProfile: {type: RuntimeDefault}}
+      - equal: {path: "spec.template.spec.containers[0].livenessProbe.periodSeconds", value: 30}
+      - equal: {path: "spec.template.spec.containers[0].livenessProbe.httpGet.path", value: /metrics}
+  - it: keeps every chart-built field when no override is set
+    template: lapi/deployment.yaml
+    asserts:
+      - equal: {path: "spec.template.spec.containers[0].name", value: lapi}
+      - equal: {path: "spec.template.spec.initContainers[0].name", value: local-machine}
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content: {name: DISABLE_AGENT, value: "true"}
+      - contains:
+          path: spec.template.spec.containers[0].ports
+          content: {name: lapi, containerPort: 8080, protocol: TCP}
+  - it: refuses pod fields built by the chart
+    template: validate.yaml
+    set:
+      agent.podSpec.volumes: [{name: x, emptyDir: {}}]
+    asserts:
+      - failedTemplate:
+          errorMessage: "agent.podSpec.volumes is managed by the chart: use agent.extraVolumes instead."
+  - it: refuses container fields built by the chart
+    template: validate.yaml
+    set:
+      lapi.containerSpec.command: [sh]
+    asserts:
+      - failedTemplate:
+          errorMessage: "lapi.containerSpec.command is managed by the chart."
+  - it: refuses workload fields built by the chart
+    template: validate.yaml
+    set:
+      appsec.workloadSpec.selector: {matchLabels: {a: b}}
+    asserts:
+      - failedTemplate:
+          errorMessage: "appsec.workloadSpec.selector is managed by the chart."
   - it: exposes LAPI on fixed node ports with extra Service fields
     template: lapi/service.yaml
     set:

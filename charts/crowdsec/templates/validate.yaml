@@ -50,6 +50,23 @@
 {{- fail "appsec.acquisition must define at least one appsec listener." -}}
 {{- end -}}
 
+{{- /* Fields of the free-form overrides that the chart builds itself, with the value to use instead */ -}}
+{{- $managedSpecFields := dict
+  "podSpec" (dict "containers" "extraContainers" "initContainers" "extraInitContainers" "volumes" "extraVolumes")
+  "containerSpec" (dict "name" "" "image" "image" "command" "" "args" "" "env" "env" "envFrom" "envFrom" "ports" "extraPorts" "volumeMounts" "extraVolumeMounts")
+  "workloadSpec" (dict "selector" "" "template" "podSpec" "replicas" "replicas")
+-}}
+{{- range $component := list "lapi" "agent" "appsec" -}}
+{{- range $override, $managed := $managedSpecFields -}}
+{{- range $field, $_ := (get (get $.Values $component) $override) -}}
+{{- if hasKey $managed $field -}}
+{{- $instead := get $managed $field -}}
+{{- fail (printf "%s.%s.%s is managed by the chart%s." $component $override $field (ternary "" (printf ": use %s.%s instead" $component $instead) (empty $instead))) -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+
 {{- $managedServiceFields := list "type" "selector" "ports" "internalTrafficPolicy" "trafficDistribution" -}}
 {{- range $component := list "lapi" "agent" "appsec" -}}
 {{- range $field, $_ := (get $.Values $component).service.extraSpec -}}

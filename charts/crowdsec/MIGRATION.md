@@ -122,7 +122,8 @@ agent:
 | `lapi.metrics.serviceMonitor.additionalLabels` | `lapi.metrics.serviceMonitor.labels` |
 | `lapi.metrics.serviceMonitor` `attachMetadata.node` | removed: the `machine` label (node name) is still added, without needing Prometheus access to Node objects |
 | `lapi.metrics.podMonitor` | removed: use `lapi.metrics.serviceMonitor` |
-| `lapi.lifecycle` | unchanged |
+| `lapi.lifecycle` | `lapi.containerSpec.lifecycle` |
+| `lapi.priorityClassName`, `lapi.dnsConfig` | `lapi.podSpec.priorityClassName`, `lapi.podSpec.dnsConfig` (any pod field can be set in `podSpec`, see the README) |
 | `lapi.strategy` | unchanged, now defaults to `RollingUpdate` |
 
 ### Agent
@@ -130,6 +131,7 @@ agent:
 | 1.x | 2.0 |
 |-----|-----|
 | `agent.isDeployment: true` | `agent.kind: Deployment` |
+| `agent.priorityClassName` | `agent.podSpec.priorityClassName` |
 | `agent.acquisition` (`namespace`, `podName`, `program`) | `agent.podLogs` (`namespace`, `pod`, `program`) |
 | `agent.acquisition[].poll_without_inotify` | use a raw entry in `agent.acquisition` |
 | `agent.additionalAcquisition` | `agent.acquisition` |
@@ -149,6 +151,7 @@ agent:
 | 1.x | 2.0 |
 |-----|-----|
 | `appsec.acquisitions` | `appsec.acquisition` (a working default is provided) |
+| `appsec.priorityClassName` | `appsec.podSpec.priorityClassName` |
 | `appsec.configs.<file>` | `appsec.files["appsec-configs/<file>"]` |
 | `appsec.rules.<file>` | `appsec.files["appsec-rules/<file>"]` |
 | `appsec.scenarios.<file>` | `appsec.files["scenarios/<file>"]` |
