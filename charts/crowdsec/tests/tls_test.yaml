@@ -8,6 +8,27 @@ tests:
     asserts:
       - hasDocuments:
           count: 0
+  - it: keeps the self-signed CA key on renewal, with a long lifetime (#362)
+    set:
+      tls.enabled: true
+    documentIndex: 1
+    asserts:
+      - isKind: {of: Certificate}
+      - isSubset:
+          path: spec
+          content:
+            duration: 87600h
+            renewBefore: 720h
+            privateKey: {algorithm: ECDSA, size: 256, rotationPolicy: Never}
+  - it: makes the self-signed CA lifetime configurable
+    set:
+      tls.enabled: true
+      tls.certManager.ca: {duration: 43800h, renewBefore: 2160h}
+    documentIndex: 1
+    asserts:
+      - isSubset:
+          path: spec
+          content: {duration: 43800h, renewBefore: 2160h}
   - it: bootstraps a self-signed CA and issues lapi, bouncer and agent certificates
     set:
       tls.enabled: true

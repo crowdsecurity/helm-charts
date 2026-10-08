@@ -154,6 +154,18 @@
                   }
                 }
               }
+            },
+            "ca": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "duration": {
+                  "type": "string"
+                },
+                "renewBefore": {
+                  "type": "string"
+                }
+              }
             }
           }
         },

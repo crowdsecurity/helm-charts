@@ -74,6 +74,8 @@ auth:
 ## @param tls.certManager.duration Certificate validity duration
 ## @param tls.certManager.renewBefore Renew certificates this long before they expire
 ## @param tls.certManager.secretTemplate Labels and annotations added to the generated Secrets (e.g. for reflector/replicator)
+## @param tls.certManager.ca.duration Validity of the self-signed CA created when `issuerRef` is empty (its key is kept on renewal)
+## @param tls.certManager.ca.renewBefore Renew the self-signed CA this long before it expires
 ## @param tls.existingSecrets.lapi Secret holding the LAPI server certificate (`tls.crt`, `tls.key`, `ca.crt`), used when cert-manager is disabled
 ## @param tls.existingSecrets.agent Secret holding the agent client certificate (`tls.crt`, `tls.key`, `ca.crt`), used when cert-manager is disabled
 tls:
@@ -84,6 +86,9 @@ tls:
     duration: 2160h
     renewBefore: 720h
     secretTemplate: {}
+    ca:
+      duration: 87600h
+      renewBefore: 720h
   existingSecrets:
     lapi: ""
     agent: ""

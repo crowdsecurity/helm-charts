@@ -440,16 +440,18 @@ These fields are not validated by the chart: check them with `helm template` or 
 
 ### TLS
 
-| Name                             | Description                                                                                                      | Value   |
-| -------------------------------- | ---------------------------------------------------------------------------------------------------------------- | ------- |
-| `tls.enabled`                    | Enable TLS for LAPI and certificate authentication for agents and AppSec                                         | `false` |
-| `tls.certManager.enabled`        | Issue certificates with cert-manager (otherwise provide `tls.existingSecrets`)                                   | `true`  |
-| `tls.certManager.issuerRef`      | Existing issuer (`{name, kind}`) to sign certificates. Empty creates a self-signed CA for the release            | `{}`    |
-| `tls.certManager.duration`       | Certificate validity duration                                                                                    | `2160h` |
-| `tls.certManager.renewBefore`    | Renew certificates this long before they expire                                                                  | `720h`  |
-| `tls.certManager.secretTemplate` | Labels and annotations added to the generated Secrets (e.g. for reflector/replicator)                            | `{}`    |
-| `tls.existingSecrets.lapi`       | Secret holding the LAPI server certificate (`tls.crt`, `tls.key`, `ca.crt`), used when cert-manager is disabled  | `""`    |
-| `tls.existingSecrets.agent`      | Secret holding the agent client certificate (`tls.crt`, `tls.key`, `ca.crt`), used when cert-manager is disabled | `""`    |
+| Name                             | Description                                                                                                      | Value    |
+| -------------------------------- | ---------------------------------------------------------------------------------------------------------------- | -------- |
+| `tls.enabled`                    | Enable TLS for LAPI and certificate authentication for agents and AppSec                                         | `false`  |
+| `tls.certManager.enabled`        | Issue certificates with cert-manager (otherwise provide `tls.existingSecrets`)                                   | `true`   |
+| `tls.certManager.issuerRef`      | Existing issuer (`{name, kind}`) to sign certificates. Empty creates a self-signed CA for the release            | `{}`     |
+| `tls.certManager.duration`       | Certificate validity duration                                                                                    | `2160h`  |
+| `tls.certManager.renewBefore`    | Renew certificates this long before they expire                                                                  | `720h`   |
+| `tls.certManager.secretTemplate` | Labels and annotations added to the generated Secrets (e.g. for reflector/replicator)                            | `{}`     |
+| `tls.certManager.ca.duration`    | Validity of the self-signed CA created when `issuerRef` is empty (its key is kept on renewal)                    | `87600h` |
+| `tls.certManager.ca.renewBefore` | Renew the self-signed CA this long before it expires                                                             | `720h`   |
+| `tls.existingSecrets.lapi`       | Secret holding the LAPI server certificate (`tls.crt`, `tls.key`, `ca.crt`), used when cert-manager is disabled  | `""`     |
+| `tls.existingSecrets.agent`      | Secret holding the agent client certificate (`tls.crt`, `tls.key`, `ca.crt`), used when cert-manager is disabled | `""`     |
 
 ### LAPI
 
