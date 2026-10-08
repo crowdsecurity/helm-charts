@@ -302,8 +302,8 @@ securityContext:
 {{- fail (printf "internal error, the rendered manifest is not valid YAML: %s" $doc.Error) -}}
 {{- end -}}
 {{- $pod := $doc.spec.template.spec -}}
-{{- $_ := mustMergeOverwrite (index $pod.containers 0) (deepCopy .values.containerSpec) -}}
-{{- $_ = mustMergeOverwrite $pod (deepCopy .values.podSpec) -}}
-{{- $_ = mustMergeOverwrite $doc.spec (deepCopy .values.workloadSpec) -}}
+{{- $_ := mustMergeOverwrite (index $pod.containers 0) (deepCopy (.values.containerSpec | default dict)) -}}
+{{- $_ = mustMergeOverwrite $pod (deepCopy (.values.podSpec | default dict)) -}}
+{{- $_ = mustMergeOverwrite $doc.spec (deepCopy (.values.workloadSpec | default dict)) -}}
 {{ toYaml $doc }}
 {{- end -}}

@@ -62,7 +62,7 @@
 -}}
 {{- range $component := list "lapi" "agent" "appsec" -}}
 {{- range $override, $managed := $managedSpecFields -}}
-{{- range $field, $_ := (get (get $.Values $component) $override) -}}
+{{- range $field, $_ := (get (get $.Values $component) $override | default dict) -}}
 {{- if hasKey $managed $field -}}
 {{- $instead := get $managed $field -}}
 {{- fail (printf "%s.%s.%s is managed by the chart%s." $component $override $field (ternary "" (printf ": use %s.%s instead" $component $instead) (empty $instead))) -}}

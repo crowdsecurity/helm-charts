@@ -214,3 +214,16 @@ tests:
         equal: {path: metadata.name, value: RELEASE-NAME-extra}
       - documentIndex: 1
         equal: {path: metadata.name, value: RELEASE-NAME-raw}
+  - it: accepts null pod, container and workload overrides
+    set:
+      appsec.enabled: true
+      lapi: &null {podSpec: null, containerSpec: null, workloadSpec: null}
+      agent: *null
+      appsec: *null
+    asserts:
+      - template: lapi/deployment.yaml
+        equal: {path: "spec.template.spec.containers[0].name", value: lapi}
+      - template: agent/workload.yaml
+        equal: {path: "spec.template.spec.containers[0].name", value: agent}
+      - template: appsec/workload.yaml
+        equal: {path: "spec.template.spec.containers[0].name", value: appsec}
