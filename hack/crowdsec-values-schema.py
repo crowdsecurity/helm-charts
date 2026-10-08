@@ -44,7 +44,7 @@ pod_common = {
     "livenessProbe": ANYOBJ, "readinessProbe": ANYOBJ, "startupProbe": ANYOBJ,
     "annotations": MAP, "podLabels": MAP, "podAnnotations": MAP,
     "podSecurityContext": ANYOBJ, "securityContext": ANYOBJ,
-    "serviceAccountName": S(), "priorityClassName": S(),
+    "serviceAccountName": S(),
     "nodeSelector": MAP, "tolerations": OBJARR, "affinity": ANYOBJ,
     "topologySpreadConstraints": OBJARR,
     "extraInitContainers": OBJARR, "extraVolumes": OBJARR, "extraVolumeMounts": OBJARR,

@@ -291,9 +291,6 @@
         "serviceAccountName": {
           "type": "string"
         },
-        "priorityClassName": {
-          "type": "string"
-        },
         "nodeSelector": {
           "type": "object",
           "additionalProperties": {
@@ -680,9 +677,6 @@
         "serviceAccountName": {
           "type": "string"
         },
-        "priorityClassName": {
-          "type": "string"
-        },
         "nodeSelector": {
           "type": "object",
           "additionalProperties": {
@@ -1004,9 +998,6 @@
           "type": "object"
         },
         "serviceAccountName": {
-          "type": "string"
-        },
-        "priorityClassName": {
           "type": "string"
         },
         "nodeSelector": {

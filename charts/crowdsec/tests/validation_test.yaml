@@ -2,6 +2,12 @@ suite: validation
 templates:
   - validate.yaml
 tests:
+  - it: rejects the removed 1.x priorityClassName key
+    set:
+      agent.priorityClassName: high
+    asserts:
+      - failedTemplate:
+          errorPattern: "priorityClassName"
   - it: rejects the debian image
     set:
       image.tag: v1.8.1-debian
