@@ -1,22 +1,47 @@
 apiVersion: v2
 name: crowdsec
-description: Crowdsec helm chart is an open-source, lightweight agent to detect and respond to bad behaviours.
-# A chart can be either an 'application' or a 'library' chart.
-#
-# Application charts are a collection of templates that can be packaged into versioned archives
-# to be deployed.
-#
-# Library charts provide useful utilities or functions for the chart developer. They're included as
-# a dependency of application charts to inject those utilities and functions into the rendering
-# pipeline. Library charts do not define any templates and therefore cannot be deployed.
+description: CrowdSec is an open-source, lightweight security engine that detects and responds to bad behaviours.
 type: application
-
-# This is the chart version. This version number should be incremented each time you make changes
-# to the chart and its templates, including the app version.
-# Versions are expected to follow Semantic Versioning (https://semver.org/)
-version: 0.24.2
-
-# This is the version number of the application being deployed. This version number should be
-# incremented each time you make changes to the application. Versions are not expected to
-# follow Semantic Versioning. They should reflect the version the application is using.
+version: 2.0.0
 appVersion: v1.8.1
+kubeVersion: ">=1.27.0-0"
+home: https://crowdsec.net
+icon: https://raw.githubusercontent.com/crowdsecurity/crowdsec-docs/main/crowdsec-docs/static/img/crowdsec_logo.png
+sources:
+  - https://github.com/crowdsecurity/crowdsec
+  - https://github.com/crowdsecurity/helm-charts
+keywords:
+  - crowdsec
+  - security
+  - waf
+  - ids
+maintainers:
+  - name: CrowdSec
+    url: https://crowdsec.net
+annotations:
+  artifacthub.io/changes: |
+    - kind: changed
+      description: "Breaking: the chart is rewritten and values are restructured; read the migration guide before upgrading from 1.x"
+      links:
+        - name: Migration guide
+          url: https://github.com/crowdsecurity/helm-charts/blob/main/charts/crowdsec/MIGRATION.md
+    - kind: changed
+      description: "Breaking: LAPI requires an external PostgreSQL or MySQL database and runs as a stateless Deployment that can have several replicas"
+    - kind: changed
+      description: "Breaking: resources are renamed to <release>-crowdsec-<component> (e.g. the LAPI Service is crowdsec-lapi); update your bouncers' LAPI and AppSec URLs"
+    - kind: changed
+      description: "Breaking: labels follow app.kubernetes.io/* conventions, so workloads are recreated on upgrade"
+    - kind: changed
+      description: Configuration files are set per component with <component>.files and <component>.config
+    - kind: changed
+      description: The upstream CrowdSec image is used as-is, without the custom entrypoint script
+    - kind: changed
+      description: With TLS enabled, agents and AppSec always authenticate to LAPI with client certificates
+    - kind: added
+      description: Strict values.schema.json validation that names any unknown or 1.x key
+    - kind: added
+      description: agent.podLogs to read pod logs, and agent.hub / appsec.hub to install hub items
+    - kind: removed
+      description: SQLite support, the persistent volumes, container_runtime, secrets.username/password and PodMonitor support
+    - kind: removed
+      description: Out-of-the-box Docker JSON log support (manual configuration is documented in the migration guide)

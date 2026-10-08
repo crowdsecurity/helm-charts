@@ -1,0 +1,152 @@
+suite: passthrough settings
+values:
+  - values/base.yaml
+templates:
+  - lapi/deployment.yaml
+  - lapi/configmap.yaml
+  - lapi/service.yaml
+  - agent/workload.yaml
+  - agent/configmap.yaml
+  - appsec/workload.yaml
+  - appsec/configmap.yaml
+  - appsec/service.yaml
+  - onlineapi/registration-job.yaml
+  - extra-objects.yaml
+  - validate.yaml
+tests:
+  - it: applies imageRegistry to every image and appends digests
+    set:
+      imageRegistry: mirror.example.com
+      image.digest: sha256:abc
+    asserts:
+      - template: lapi/deployment.yaml
+        equal:
+          path: spec.template.spec.containers[0].image
+          value: mirror.example.com/crowdsecurity/crowdsec:v1.8.1@sha256:abc
+      - template: onlineapi/registration-job.yaml
+        documentSelector: {path: kind, value: Job}
+        equal:
+          path: spec.template.spec.initContainers[0].image
+          value: mirror.example.com/alpine/kubectl:1.36.4
+  - it: lets an image override the registry
+    template: lapi/deployment.yaml
+    set:
+      imageRegistry: mirror.example.com
+      image.registry: ghcr.io
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: ghcr.io/crowdsecurity/crowdsec:v1.8.1
+  - it: passes pod and workload settings through on every component
+    set:
+      appsec.enabled: true
+      lapi: &pod
+        hostAliases: [{ip: 10.0.0.1, hostnames: [db.local]}]
+        runtimeClassName: gvisor
+        dnsPolicy: ClusterFirstWithHostNet
+        terminationGracePeriodSeconds: 0
+        revisionHistoryLimit: 0
+        minReadySeconds: 5
+        lifecycle: {preStop: {exec: {command: [sleep, "5"]}}}
+        extraContainers: [{name: sidecar, image: busybox}]
+      agent: *pod
+      appsec: *pod
+    asserts:
+      - template: lapi/deployment.yaml
+        isSubset: &podSpec
+          path: spec.template.spec
+          content:
+            hostAliases: [{ip: 10.0.0.1, hostnames: [db.local]}]
+            runtimeClassName: gvisor
+            dnsPolicy: ClusterFirstWithHostNet
+            terminationGracePeriodSeconds: 0
+      - template: agent/workload.yaml
+        isSubset: *podSpec
+      - template: appsec/workload.yaml
+        isSubset: *podSpec
+      - template: lapi/deployment.yaml
+        isSubset: &workload
+          path: spec
+          content: {revisionHistoryLimit: 0, minReadySeconds: 5}
+      - template: agent/workload.yaml
+        isSubset: *workload
+      - template: appsec/workload.yaml
+        isSubset: *workload
+      - template: lapi/deployment.yaml
+        equal: &sidecar {path: "spec.template.spec.containers[1].name", value: sidecar}
+      - template: agent/workload.yaml
+        equal: *sidecar
+      - template: appsec/workload.yaml
+        equal: *sidecar
+      - template: agent/workload.yaml
+        exists: {path: "spec.template.spec.containers[0].lifecycle.preStop"}
+  - it: does not render unset optional fields
+    template: lapi/deployment.yaml
+    asserts:
+      - notExists: {path: spec.revisionHistoryLimit}
+      - notExists: {path: spec.minReadySeconds}
+      - notExists: {path: spec.template.spec.terminationGracePeriodSeconds}
+      - equal: {path: spec.template.spec.enableServiceLinks, value: false}
+  - it: exposes LAPI on fixed node ports with extra Service fields
+    template: lapi/service.yaml
+    set:
+      lapi.service:
+        type: LoadBalancer
+        nodePorts: {lapi: 30080}
+        extraSpec:
+          externalTrafficPolicy: Local
+          loadBalancerSourceRanges: [192.0.2.0/24]
+    asserts:
+      - documentIndex: 0
+        isSubset:
+          path: spec
+          content:
+            type: LoadBalancer
+            externalTrafficPolicy: Local
+            loadBalancerSourceRanges: [192.0.2.0/24]
+      - documentIndex: 0
+        contains:
+          path: spec.ports
+          content: {name: lapi, port: 8080, targetPort: lapi, protocol: TCP, nodePort: 30080}
+  - it: refuses extraSpec fields managed by the chart
+    template: validate.yaml
+    set:
+      appsec.service.extraSpec: {ports: []}
+    asserts:
+      - failedTemplate:
+          errorPattern: "appsec.service.extraSpec.ports is managed by the chart"
+  - it: configures ServiceMonitor scraping
+    template: lapi/service.yaml
+    set:
+      lapi.metrics.serviceMonitor:
+        enabled: true
+        scrapeTimeout: 10s
+        honorLabels: true
+        relabelings: [{targetLabel: cluster, replacement: eu-1}]
+        metricRelabelings: [{action: drop, regex: go_.*, sourceLabels: [__name__]}]
+    documentSelector: {path: kind, value: ServiceMonitor}
+    asserts:
+      - isSubset:
+          path: spec.endpoints[0]
+          content:
+            scrapeTimeout: 10s
+            honorLabels: true
+            relabelings: [{targetLabel: cluster, replacement: eu-1}]
+  - it: deploys extra objects, rendered with tpl
+    template: extra-objects.yaml
+    set:
+      extraObjects:
+        - apiVersion: v1
+          kind: ConfigMap
+          metadata: {name: "{{ .Release.Name }}-extra"}
+        - |
+          apiVersion: v1
+          kind: Secret
+          metadata:
+            name: {{ .Release.Name }}-raw
+    asserts:
+      - hasDocuments: {count: 2}
+      - documentIndex: 0
+        equal: {path: metadata.name, value: RELEASE-NAME-extra}
+      - documentIndex: 1
+        equal: {path: metadata.name, value: RELEASE-NAME-raw}

@@ -1,0 +1,77 @@
+suite: validation
+templates:
+  - validate.yaml
+tests:
+  - it: requires a database host
+    asserts:
+      - failedTemplate:
+          errorPattern: "lapi.database.host is required"
+  - it: requires a database password secret
+    set:
+      lapi.database.host: pg
+    asserts:
+      - failedTemplate:
+          errorPattern: "lapi.database.existingSecret is required"
+  - it: requires the agent to read something
+    set:
+      lapi.database: {host: pg, existingSecret: db}
+    asserts:
+      - failedTemplate:
+          errorPattern: "The agent has nothing to read"
+  - it: points old-style acquisition entries to podLogs
+    values: [values/base.yaml]
+    set:
+      agent.acquisition: [{namespace: a, podName: b, program: c}]
+    asserts:
+      - failedTemplate:
+          errorPattern: "move \\{namespace, podName, program\\} entries to agent.podLogs"
+  - it: requires an external URL when LAPI is disabled
+    values: [values/base.yaml]
+    set:
+      lapi.enabled: false
+    asserts:
+      - failedTemplate:
+          errorPattern: "lapi.externalURL is required"
+  - it: requires the external LAPI registration token
+    values: [values/base.yaml]
+    set:
+      lapi: {enabled: false, externalURL: "http://lapi:8080"}
+    asserts:
+      - failedTemplate:
+          errorPattern: "auth.existingSecret is required"
+  - it: requires an issuer for TLS with an external LAPI
+    values: [values/base.yaml]
+    set:
+      lapi: {enabled: false, externalURL: "https://lapi:8080"}
+      tls.enabled: true
+    asserts:
+      - failedTemplate:
+          errorPattern: "tls.certManager.issuerRef is required"
+  - it: requires TLS secrets without cert-manager
+    values: [values/base.yaml]
+    set:
+      tls: {enabled: true, certManager: {enabled: false}}
+    asserts:
+      - failedTemplate:
+          errorPattern: "tls.existingSecrets.lapi is required"
+  - it: rejects reserved file paths
+    values: [values/base.yaml]
+    set:
+      agent.files:
+        acquis.yaml: "x"
+    asserts:
+      - failedTemplate:
+          errorPattern: 'agent.files: invalid path "acquis.yaml"'
+  - it: rejects path traversal
+    values: [values/base.yaml]
+    set:
+      lapi.files:
+        ../etc/passwd: "x"
+    asserts:
+      - failedTemplate:
+          errorPattern: 'lapi.files: invalid path'
+  - it: renders nothing for valid values
+    values: [values/base.yaml]
+    asserts:
+      - hasDocuments:
+          count: 0

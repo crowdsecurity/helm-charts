@@ -1,0 +1,19 @@
+# LAPI over HTTPS, agents and AppSec (as a DaemonSet) authenticating with cert-manager issued certificates.
+lapi:
+  database:
+    host: postgres.crowdsec-ci-db.svc
+    existingSecret: crowdsec-db
+  onlineAPI:
+    enabled: false
+tls:
+  enabled: true
+agent:
+  podLogs:
+    - namespace: kube-system
+      pod: coredns-*
+      program: coredns
+appsec:
+  enabled: true
+  kind: DaemonSet
+  service:
+    internalTrafficPolicy: Local

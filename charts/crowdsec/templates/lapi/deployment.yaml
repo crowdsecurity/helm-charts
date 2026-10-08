@@ -1,0 +1,151 @@
+{{- if .Values.lapi.enabled }}
+{{- $values := .Values.lapi }}
+{{- $checksum := include (print $.Template.BasePath "/lapi/configmap.yaml") . | sha256sum }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "crowdsec.componentName" (list . "lapi") }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "crowdsec.labels" (list . "lapi") | nindent 4 }}
+  {{- include "crowdsec.annotations" (dict "ctx" . "extra" $values.annotations) | nindent 2 }}
+spec:
+  replicas: {{ $values.replicas }}
+  {{- with (include "crowdsec.workloadSpecCommon" $values | trim) }}
+  {{- . | nindent 2 }}
+  {{- end }}
+  {{- with $values.strategy }}
+  strategy:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "crowdsec.selectorLabels" (list . "lapi") | nindent 6 }}
+  template:
+    metadata:
+      {{- include "crowdsec.podMetadata" (dict "ctx" . "component" "lapi" "values" $values "checksum" $checksum) | nindent 6 }}
+    spec:
+      {{- include "crowdsec.podSpecCommon" (dict "ctx" . "values" $values) | trim | nindent 6 }}
+      {{- with $values.extraInitContainers }}
+      initContainers:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: lapi
+          image: {{ include "crowdsec.image" . }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: DISABLE_AGENT
+              value: "true"
+            - name: CUSTOM_HOSTNAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: LOCAL_API_URL
+              value: {{ printf "%s://localhost:8080" (include "crowdsec.lapiScheme" .) }}
+            - name: REGISTRATION_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "crowdsec.authSecretName" . }}
+                  key: registrationToken
+            - name: CS_LAPI_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "crowdsec.authSecretName" . }}
+                  key: csLapiSecret
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $values.database.existingSecret }}
+                  key: {{ $values.database.passwordKey }}
+            {{- if $values.onlineAPI.enabled }}
+            - name: ENROLL_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "crowdsec.authSecretName" . }}
+                  key: enrollKey
+                  optional: true
+            {{- with $values.console.instanceName }}
+            - name: ENROLL_INSTANCE_NAME
+              value: {{ . | quote }}
+            {{- end }}
+            {{- with $values.console.tags }}
+            - name: ENROLL_TAGS
+              value: {{ join " " . | quote }}
+            {{- end }}
+            {{- else }}
+            - name: DISABLE_ONLINE_API
+              value: "true"
+            {{- end }}
+            {{- if .Values.tls.enabled }}
+            - name: USE_TLS
+              value: "true"
+            - name: LAPI_CERT_FILE
+              value: /etc/ssl/crowdsec/tls.crt
+            - name: LAPI_KEY_FILE
+              value: /etc/ssl/crowdsec/tls.key
+            - name: CACERT_FILE
+              value: /etc/ssl/crowdsec/ca.crt
+            - name: AGENTS_ALLOWED_OU
+              value: agent-ou
+            - name: BOUNCERS_ALLOWED_OU
+              value: bouncer-ou
+            {{- end }}
+            {{- with $values.env }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          {{- with $values.envFrom }}
+          envFrom:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          ports:
+            - name: lapi
+              containerPort: 8080
+              protocol: TCP
+            - name: metrics
+              containerPort: 6060
+              protocol: TCP
+          {{- include "crowdsec.containerCommon" (dict "values" $values "httpsProbes" .Values.tls.enabled) | trim | nindent 10 }}
+          volumeMounts:
+            {{- include "crowdsec.configVolumeMounts" (dict "files" $values.files) | nindent 12 }}
+            - name: data
+              mountPath: /var/lib/crowdsec/data
+            {{- if $values.onlineAPI.enabled }}
+            - name: capi-credentials
+              mountPath: /etc/crowdsec-capi
+              readOnly: true
+            {{- end }}
+            {{- if .Values.tls.enabled }}
+            - name: tls
+              mountPath: /etc/ssl/crowdsec
+              readOnly: true
+            {{- end }}
+            {{- with $values.extraVolumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+        {{- with $values.extraContainers }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      volumes:
+        - name: config
+          configMap:
+            name: {{ include "crowdsec.componentName" (list . "lapi") }}
+        - name: data
+          emptyDir: {}
+        {{- if $values.onlineAPI.enabled }}
+        - name: capi-credentials
+          secret:
+            secretName: {{ include "crowdsec.onlineAPISecretName" . }}
+            items:
+              - key: online_api_credentials.yaml
+                path: online_api_credentials.yaml
+        {{- end }}
+        {{- if .Values.tls.enabled }}
+        - name: tls
+          secret:
+            secretName: {{ include "crowdsec.tlsSecretName" (list . "lapi") }}
+        {{- end }}
+        {{- with $values.extraVolumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+{{- end }}

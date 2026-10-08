@@ -1,0 +1,118 @@
+{{- if and .Values.tls.enabled .Values.tls.certManager.enabled }}
+{{- $cm := .Values.tls.certManager }}
+{{- $secretTemplate := deepCopy ($cm.secretTemplate | default dict) }}
+{{- with .Values.commonLabels }}
+{{- $_ := set $secretTemplate "labels" (merge ($secretTemplate.labels | default dict) .) }}
+{{- end }}
+{{- with .Values.commonAnnotations }}
+{{- $_ := set $secretTemplate "annotations" (merge ($secretTemplate.annotations | default dict) .) }}
+{{- end }}
+{{- $issuerRef := $cm.issuerRef }}
+{{- if not $issuerRef }}
+{{- /* No issuer provided: bootstrap a self-signed CA dedicated to this release */}}
+{{- $issuerRef = dict "name" (include "crowdsec.componentName" (list . "ca")) "kind" "Issuer" }}
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: {{ include "crowdsec.componentName" (list . "selfsigned") }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "crowdsec.labels" (list . "tls") | nindent 4 }}
+  {{- include "crowdsec.annotations" (dict "ctx" .) | nindent 2 }}
+spec:
+  selfSigned: {}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ include "crowdsec.componentName" (list . "ca") }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "crowdsec.labels" (list . "tls") | nindent 4 }}
+  {{- include "crowdsec.annotations" (dict "ctx" .) | nindent 2 }}
+spec:
+  isCA: true
+  commonName: {{ include "crowdsec.componentName" (list . "ca") }}
+  secretName: {{ include "crowdsec.componentName" (list . "ca") }}
+  privateKey:
+    algorithm: ECDSA
+    size: 256
+  issuerRef:
+    name: {{ include "crowdsec.componentName" (list . "selfsigned") }}
+    kind: Issuer
+  {{- with $secretTemplate }}
+  secretTemplate:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+---
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: {{ include "crowdsec.componentName" (list . "ca") }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "crowdsec.labels" (list . "tls") | nindent 4 }}
+  {{- include "crowdsec.annotations" (dict "ctx" .) | nindent 2 }}
+spec:
+  ca:
+    secretName: {{ include "crowdsec.componentName" (list . "ca") }}
+{{- end }}
+
+{{- $certificates := list }}
+{{- if .Values.lapi.enabled }}
+{{- $lapiService := include "crowdsec.componentName" (list . "lapi") }}
+{{- $certificates = append $certificates (dict
+  "component" "lapi"
+  "usages" (list "server auth" "client auth")
+  "dnsNames" (list
+    "localhost"
+    $lapiService
+    (printf "%s.%s" $lapiService .Release.Namespace)
+    (printf "%s.%s.svc" $lapiService .Release.Namespace)
+    (printf "%s.%s.svc.cluster.local" $lapiService .Release.Namespace))
+) }}
+{{- $certificates = append $certificates (dict "component" "bouncer" "usages" (list "client auth") "ou" "bouncer-ou") }}
+{{- end }}
+{{- if or .Values.agent.enabled .Values.appsec.enabled }}
+{{- $certificates = append $certificates (dict "component" "agent" "usages" (list "client auth") "ou" "agent-ou") }}
+{{- end }}
+{{- range $certificates }}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ include "crowdsec.componentName" (list $ .component) }}
+  namespace: {{ $.Release.Namespace }}
+  labels:
+    {{- include "crowdsec.labels" (list $ "tls") | nindent 4 }}
+  {{- include "crowdsec.annotations" (dict "ctx" $) | nindent 2 }}
+spec:
+  secretName: {{ include "crowdsec.componentName" (list $ (printf "%s-tls" .component)) }}
+  commonName: {{ include "crowdsec.componentName" (list $ .component) }}
+  duration: {{ $cm.duration }}
+  renewBefore: {{ $cm.renewBefore }}
+  privateKey:
+    algorithm: ECDSA
+    size: 256
+    rotationPolicy: Always
+  usages:
+    {{- toYaml .usages | nindent 4 }}
+  {{- with .dnsNames }}
+  dnsNames:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with .ou }}
+  subject:
+    organizationalUnits:
+      - {{ . }}
+  {{- end }}
+  {{- with $secretTemplate }}
+  secretTemplate:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  issuerRef:
+    name: {{ $issuerRef.name }}
+    kind: {{ $issuerRef.kind | default "Issuer" }}
+    group: cert-manager.io
+{{- end }}
+{{- end }}

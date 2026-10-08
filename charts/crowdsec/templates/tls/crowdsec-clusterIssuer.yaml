@@ -1,8 +1,0 @@
-{{ if and (.Values.tls.enabled) (.Values.tls.certManager.enabled) (not .Values.tls.certManager.issuerRef) }}
-apiVersion: cert-manager.io/v1
-kind: ClusterIssuer
-metadata:
-  name: {{ .Release.Name }}-root-issuer
-spec:
-  selfSigned: {}
-{{ end }}

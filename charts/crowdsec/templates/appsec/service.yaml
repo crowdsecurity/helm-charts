@@ -1,0 +1,12 @@
+{{- if .Values.appsec.enabled }}
+{{- $ports := include "crowdsec.logProcessor.ports" (dict "values" .Values.appsec "mainPort" (dict "name" "appsec" "port" .Values.appsec.port)) | fromYamlArray }}
+{{- include "crowdsec.service" (dict "ctx" . "component" "appsec" "values" .Values.appsec "ports" $ports) }}
+{{- with (include "crowdsec.serviceMonitor" (dict "ctx" . "component" "appsec" "values" .Values.appsec)) }}
+---
+{{- . }}
+{{- end }}
+{{- with (include "crowdsec.podDisruptionBudget" (dict "ctx" . "component" "appsec" "values" .Values.appsec)) }}
+---
+{{- . }}
+{{- end }}
+{{- end }}

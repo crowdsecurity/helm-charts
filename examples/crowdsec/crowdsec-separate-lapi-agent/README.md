@@ -9,13 +9,21 @@ This example shows how to install Crowdsec with a separate LAPI and Agent. The L
 
 ## Install Crowdsec as Local API (LAPI)
 
+Create the secrets listed at the top of `crowdsec-lapi-values.yaml`, then:
+
 ```bash
 helm install crowdsec crowdsec/crowdsec -f crowdsec-lapi-values.yaml -n crowdsec-lapi --create-namespace
 ```
 
 ## Install Crowdsec Agent
 
-For testing we install the agent in the default namespace.
+For testing we install the agent in the default namespace. It needs the registration token of the LAPI:
+
+```bash
+kubectl get secret crowdsec-auth -n crowdsec-lapi -o yaml \
+  | sed '/namespace:/d;/resourceVersion:/d;/uid:/d;/creationTimestamp:/d' \
+  | kubectl apply -n default -f -
+```
 
 ```bash
 helm install crowdsec-agent crowdsec/crowdsec -f crowdsec-agent-values.yaml

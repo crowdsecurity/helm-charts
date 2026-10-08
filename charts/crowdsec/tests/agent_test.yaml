@@ -1,0 +1,132 @@
+suite: agent
+values:
+  - values/base.yaml
+templates:
+  - agent/workload.yaml
+  - agent/configmap.yaml
+  - agent/service.yaml
+tests:
+  - it: runs as a DaemonSet reading pod logs from the host
+    template: agent/workload.yaml
+    asserts:
+      - isKind:
+          of: DaemonSet
+      - contains:
+          path: spec.template.spec.volumes
+          content: {name: host-logs, hostPath: {path: /var/log}}
+  - it: turns podLogs into file acquisition
+    template: agent/configmap.yaml
+    asserts:
+      - matchRegex:
+          path: data["acquis.yaml"]
+          pattern: "/var/log/containers/ingress-nginx-controller-\\*_ingress-nginx_\\*.log"
+      - matchRegex:
+          path: data["acquis.yaml"]
+          pattern: "program: nginx\\n\\s+type: containerd\\npoll_without_inotify: true"
+  - it: appends raw acquisition entries
+    template: agent/configmap.yaml
+    set:
+      agent.acquisition:
+        - {source: syslog, listen_port: 4242, labels: {type: syslog}}
+    asserts:
+      - matchRegex:
+          path: data["acquis.yaml"]
+          pattern: "(?s)source: file.*---\\n\\s*labels:\\n\\s+type: syslog\\n\\s*listen_port: 4242\\n\\s*source: syslog"
+  - it: registers with the token by default
+    template: agent/workload.yaml
+    asserts:
+      - equal:
+          path: spec.template.spec.initContainers[0].name
+          value: register
+      - contains:
+          path: spec.template.spec.initContainers[0].env
+          content: {name: LAPI_URL, value: "http://RELEASE-NAME-crowdsec-lapi.NAMESPACE.svc:8080"}
+  - it: authenticates with a client certificate with TLS
+    template: agent/workload.yaml
+    set:
+      tls.enabled: true
+    asserts:
+      - equal:
+          path: spec.template.spec.initContainers[0].name
+          value: wait-for-lapi
+      - notContains:
+          path: spec.template.spec.initContainers[0].env
+          any: true
+          content: {name: REGISTRATION_TOKEN}
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content: {name: LOCAL_API_URL, value: "https://RELEASE-NAME-crowdsec-lapi.NAMESPACE.svc:8080"}
+      - contains:
+          path: spec.template.spec.volumes
+          content: {name: tls, secret: {secretName: RELEASE-NAME-crowdsec-agent-tls}}
+  - it: keeps extra init containers with TLS
+    template: agent/workload.yaml
+    set:
+      tls.enabled: true
+      agent.extraInitContainers: [{name: extra, image: busybox}]
+    asserts:
+      - equal:
+          path: spec.template.spec.initContainers[1].name
+          value: extra
+  - it: installs hub items through the entrypoint
+    template: agent/workload.yaml
+    set:
+      agent.hub: {collections: [crowdsecurity/nginx, crowdsecurity/base-http-scenarios]}
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content: {name: COLLECTIONS, value: "crowdsecurity/nginx crowdsecurity/base-http-scenarios"}
+  - it: runs as a Deployment for network datasources
+    template: agent/workload.yaml
+    set:
+      agent: {kind: Deployment, replicas: 2, podLogs: [], acquisition: [{source: http}], extraPorts: [{name: http-logs, port: 8081}]}
+    asserts:
+      - isKind:
+          of: Deployment
+      - equal:
+          path: spec.replicas
+          value: 2
+      - notContains:
+          path: spec.template.spec.volumes
+          any: true
+          content: {name: host-logs}
+      - contains:
+          path: spec.template.spec.containers[0].ports
+          content: {name: http-logs, containerPort: 8081, protocol: TCP}
+  - it: exposes extra ports on the service
+    template: agent/service.yaml
+    set:
+      agent.extraPorts: [{name: syslog, port: 4242, protocol: UDP}]
+    asserts:
+      - contains:
+          path: spec.ports
+          content: {name: syslog, port: 4242, targetPort: syslog, protocol: UDP}
+  - it: connects to an external LAPI
+    template: agent/workload.yaml
+    set:
+      lapi: {enabled: false, externalURL: "https://lapi.example.com"}
+      auth.existingSecret: lapi-auth
+    asserts:
+      - contains:
+          path: spec.template.spec.initContainers[0].env
+          content: {name: LAPI_URL, value: "https://lapi.example.com"}
+      - contains:
+          path: spec.template.spec.initContainers[0].env
+          content:
+            name: REGISTRATION_TOKEN
+            valueFrom: {secretKeyRef: {name: lapi-auth, key: registrationToken}}
+  - it: makes the registration init container resources configurable (#366)
+    template: agent/workload.yaml
+    set:
+      helperContainers.resources: {limits: {memory: 300Mi}}
+    asserts:
+      - equal:
+          path: spec.template.spec.initContainers[0].resources.limits.memory
+          value: 300Mi
+  - it: does not set service traffic options by default
+    template: agent/service.yaml
+    asserts:
+      - notExists:
+          path: spec.internalTrafficPolicy
+      - notExists:
+          path: spec.trafficDistribution

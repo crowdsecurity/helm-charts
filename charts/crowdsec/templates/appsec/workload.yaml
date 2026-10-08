@@ -1,0 +1,4 @@
+{{- if .Values.appsec.enabled }}
+{{- $ports := include "crowdsec.logProcessor.ports" (dict "values" .Values.appsec "mainPort" (dict "name" "appsec" "port" .Values.appsec.port)) | fromYamlArray }}
+{{- include "crowdsec.logProcessor.workload" (dict "ctx" . "component" "appsec" "values" .Values.appsec "ports" $ports "hostLogs" false) }}
+{{- end }}

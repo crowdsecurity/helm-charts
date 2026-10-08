@@ -6,17 +6,26 @@ set up encrypted authentication and communication between agents, LAPI and
 bouncers. Keep in mind that in this case, the certificate rotation when they
 expire is your responsibility.
 
-You need to set `tls.enabled=true` and `tls.certManager.enabled=false` in the
-Helm values. When the chart is installed, the creation of the agent/LAPI pods
-will hang while looking for the following resources in the "crowdsec"
-namespace:
+Set the following Helm values:
 
- - crowdsec-ca: config map containing a Certificate Authority file (ca.crt)
- - crowdsec-agent-tls: secret containing the client certificate and key files (tls.crt, tls.key)
- - crowdsec-lapi-tls: secret containing the server certificate and key files (tls.crt, tls.key)
+```yaml
+tls:
+  enabled: true
+  certManager:
+    enabled: false
+  existingSecrets:
+    lapi: crowdsec-lapi-tls
+    agent: crowdsec-agent-tls
+```
 
-If you have installed the chart with a release name other than "crowdsec", the
-resource names are `{{release}}-ca` and so on.
+Until they exist, the agent/LAPI pods wait for the following secrets in the "crowdsec" namespace,
+each containing `tls.crt`, `tls.key` and `ca.crt`:
+
+ - crowdsec-lapi-tls: LAPI server certificate (SANs: the LAPI service name and `localhost`)
+ - crowdsec-agent-tls: agent client certificate (OU `agent-ou`), also used by AppSec
+ - crowdsec-bouncer-tls: bouncer client certificate (OU `bouncer-ou`), for your bouncers
+
+If you have installed the chart with a release name other than "crowdsec", adapt `environment.sh`.
 
 To create these, you can use the scripts in this folder.
 

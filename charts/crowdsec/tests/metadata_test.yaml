@@ -1,0 +1,82 @@
+suite: common labels and annotations on every resource
+values:
+  - values/base.yaml
+set:
+  commonLabels: {team: sec}
+  commonAnnotations: {owner: me}
+  appsec.enabled: true
+  lapi.ingress.enabled: true
+  lapi.podDisruptionBudget.enabled: true
+  appsec.podDisruptionBudget.enabled: true
+  lapi.metrics.serviceMonitor.enabled: true
+  agent.metrics.serviceMonitor.enabled: true
+  appsec.metrics.serviceMonitor.enabled: true
+templates:
+  - auth-secret.yaml
+  - lapi/configmap.yaml
+  - lapi/deployment.yaml
+  - lapi/service.yaml
+  - lapi/ingress.yaml
+  - agent/configmap.yaml
+  - agent/workload.yaml
+  - agent/service.yaml
+  - appsec/configmap.yaml
+  - appsec/workload.yaml
+  - appsec/service.yaml
+  - onlineapi/registration-job.yaml
+  - tls/certificates.yaml
+  - tests/test-connection.yaml
+tests:
+  - it: labels and annotates every resource
+    set:
+      tls.enabled: true
+    skipEmptyTemplates: true
+    asserts:
+      - equal:
+          path: metadata.labels.team
+          value: sec
+      - equal:
+          path: metadata.annotations.owner
+          value: me
+  - it: labels every pod template
+    asserts:
+      - template: lapi/deployment.yaml
+        equal: {path: spec.template.metadata.labels.team, value: sec}
+      - template: agent/workload.yaml
+        equal: {path: spec.template.metadata.labels.team, value: sec}
+      - template: appsec/workload.yaml
+        equal: {path: spec.template.metadata.labels.team, value: sec}
+      - template: onlineapi/registration-job.yaml
+        documentSelector: {path: kind, value: Job}
+        equal: {path: spec.template.metadata.labels.team, value: sec}
+  - it: keeps component pod labels over common labels
+    template: lapi/deployment.yaml
+    set:
+      lapi.podLabels: {team: api}
+    asserts:
+      - equal: {path: spec.template.metadata.labels.team, value: api}
+  - it: keeps hook annotations over common annotations
+    template: onlineapi/registration-job.yaml
+    set:
+      commonAnnotations: {helm.sh/hook-weight: "99"}
+    asserts:
+      - equal:
+          path: metadata.annotations["helm.sh/hook-weight"]
+          value: "-10"
+        documentSelector: {path: kind, value: Role}
+      - equal:
+          path: metadata.annotations["helm.sh/hook-weight"]
+          value: "0"
+        documentSelector: {path: kind, value: Job}
+  - it: propagates to Secrets created by cert-manager
+    template: tls/certificates.yaml
+    set:
+      tls.enabled: true
+      tls.certManager.secretTemplate: {labels: {reflect: "yes"}}
+    asserts:
+      - equal: {path: spec.secretTemplate.labels.team, value: sec}
+        documentSelector: {path: kind, value: Certificate, matchMany: true}
+      - equal: {path: spec.secretTemplate.labels.reflect, value: "yes"}
+        documentSelector: {path: metadata.name, value: RELEASE-NAME-crowdsec-agent}
+      - equal: {path: spec.secretTemplate.annotations.owner, value: me}
+        documentSelector: {path: metadata.name, value: RELEASE-NAME-crowdsec-lapi}

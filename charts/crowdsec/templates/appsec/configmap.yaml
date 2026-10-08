@@ -1,0 +1,13 @@
+{{- if .Values.appsec.enabled }}
+{{- $configLocal := mustMergeOverwrite (include "crowdsec.logProcessor.configLocal" . | fromYaml) (deepCopy .Values.appsec.config) }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "crowdsec.componentName" (list . "appsec") }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "crowdsec.labels" (list . "appsec") | nindent 4 }}
+  {{- include "crowdsec.annotations" (dict "ctx" .) | nindent 2 }}
+data:
+  {{- include "crowdsec.configMapData" (dict "configLocal" $configLocal "acquisition" .Values.appsec.acquisition "files" .Values.appsec.files) | nindent 2 }}
+{{- end }}

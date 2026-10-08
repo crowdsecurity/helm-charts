@@ -1,0 +1,35 @@
+{{- /* `helm test`: checks that every deployed component answers through its Service */ -}}
+{{- $checks := list }}
+{{- if .Values.lapi.enabled }}
+{{- $checks = append $checks (dict "component" "lapi" "url" (printf "%s/health" (include "crowdsec.lapiURL" .))) }}
+{{- end }}
+{{- if .Values.agent.enabled }}
+{{- $checks = append $checks (dict "component" "agent" "url" (printf "http://%s:6060/metrics" (include "crowdsec.componentName" (list . "agent")))) }}
+{{- end }}
+{{- if .Values.appsec.enabled }}
+{{- $checks = append $checks (dict "component" "appsec" "url" (printf "http://%s:6060/metrics" (include "crowdsec.componentName" (list . "appsec")))) }}
+{{- end }}
+{{- range $checks }}
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: {{ include "crowdsec.componentName" (list $ (printf "test-%s" .component)) }}
+  namespace: {{ $.Release.Namespace }}
+  labels:
+    {{- include "crowdsec.labels" (list $ "test") | nindent 4 }}
+  {{- include "crowdsec.annotations" (dict "ctx" $ "extra" (dict "helm.sh/hook" "test" "helm.sh/hook-delete-policy" "before-hook-creation,hook-succeeded")) | nindent 2 }}
+spec:
+  restartPolicy: Never
+  automountServiceAccountToken: false
+  {{- with $.Values.imagePullSecrets }}
+  imagePullSecrets:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  containers:
+    - name: check
+      image: {{ include "crowdsec.image" $ }}
+      imagePullPolicy: {{ $.Values.image.pullPolicy }}
+      command: ["wget", "-q", "-O", "/dev/null", "--no-check-certificate", "-T", "5", {{ .url | quote }}]
+      {{- include "crowdsec.helperContainer" $ | trim | nindent 6 }}
+{{- end }}

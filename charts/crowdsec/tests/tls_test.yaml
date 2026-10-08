@@ -1,0 +1,55 @@
+suite: tls
+values:
+  - values/base.yaml
+templates:
+  - tls/certificates.yaml
+tests:
+  - it: renders nothing without TLS
+    asserts:
+      - hasDocuments:
+          count: 0
+  - it: bootstraps a self-signed CA and issues lapi, bouncer and agent certificates
+    set:
+      tls.enabled: true
+    asserts:
+      - hasDocuments:
+          count: 6
+      - equal:
+          path: spec.isCA
+          value: true
+        documentIndex: 1
+      - contains:
+          path: spec.dnsNames
+          content: RELEASE-NAME-crowdsec-lapi.NAMESPACE.svc
+        documentIndex: 3
+      - equal:
+          path: spec.subject.organizationalUnits[0]
+          value: bouncer-ou
+        documentIndex: 4
+      - equal:
+          path: spec.subject.organizationalUnits[0]
+          value: agent-ou
+        documentIndex: 5
+      - equal:
+          path: spec.issuerRef.name
+          value: RELEASE-NAME-crowdsec-ca
+        documentIndex: 5
+  - it: uses an existing issuer
+    set:
+      tls.enabled: true
+      tls.certManager.issuerRef: {name: corp-ca, kind: ClusterIssuer}
+    asserts:
+      - hasDocuments:
+          count: 3
+      - equal:
+          path: spec.issuerRef
+          value: {name: corp-ca, kind: ClusterIssuer, group: cert-manager.io}
+  - it: passes the secret template
+    set:
+      tls.enabled: true
+      tls.certManager.secretTemplate: {annotations: {reflector.v1.k8s.emberstack.com/reflection-allowed: "true"}}
+    documentIndex: 4
+    asserts:
+      - equal:
+          path: spec.secretTemplate.annotations["reflector.v1.k8s.emberstack.com/reflection-allowed"]
+          value: "true"

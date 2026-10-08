@@ -1,0 +1,35 @@
+{{- if .Values.lapi.enabled }}
+{{- $db := .Values.lapi.database }}
+{{- $dbConfig := dict
+  "type" $db.type
+  "host" $db.host
+  "port" ($db.port | default (ternary 5432 3306 (eq $db.type "postgresql")))
+  "user" $db.user
+  "password" "${DB_PASSWORD}"
+  "db_name" $db.name
+  "flush" (dict "agents_autodelete" (dict "login_password" "7d" "cert" "7d"))
+}}
+{{- with $db.sslMode }}
+{{- $_ := set $dbConfig "sslmode" . }}
+{{- end }}
+{{- $server := dict
+  "auto_registration" (dict
+    "enabled" true
+    "token" "${REGISTRATION_TOKEN}"
+    "allowed_ranges" (list "127.0.0.1/32" "::1/128" "10.0.0.0/8" "172.16.0.0/12" "192.168.0.0/16" "fc00::/7"))
+}}
+{{- if .Values.lapi.onlineAPI.enabled }}
+{{- $_ := set $server "online_client" (dict "credentials_path" "/etc/crowdsec-capi/online_api_credentials.yaml") }}
+{{- end }}
+{{- $configLocal := mustMergeOverwrite (dict "db_config" $dbConfig "api" (dict "server" $server)) (deepCopy .Values.lapi.config) }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "crowdsec.componentName" (list . "lapi") }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "crowdsec.labels" (list . "lapi") | nindent 4 }}
+  {{- include "crowdsec.annotations" (dict "ctx" .) | nindent 2 }}
+data:
+  {{- include "crowdsec.configMapData" (dict "configLocal" $configLocal "files" .Values.lapi.files) | nindent 2 }}
+{{- end }}

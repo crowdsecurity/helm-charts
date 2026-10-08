@@ -1,0 +1,15 @@
+{{- if .Values.lapi.enabled }}
+{{- $ports := list
+  (dict "name" "lapi" "port" .Values.lapi.service.port)
+  (dict "name" "metrics" "port" 6060)
+}}
+{{- include "crowdsec.service" (dict "ctx" . "component" "lapi" "values" .Values.lapi "ports" $ports) }}
+{{- with (include "crowdsec.serviceMonitor" (dict "ctx" . "component" "lapi" "values" .Values.lapi)) }}
+---
+{{- . }}
+{{- end }}
+{{- with (include "crowdsec.podDisruptionBudget" (dict "ctx" . "component" "lapi" "values" .Values.lapi)) }}
+---
+{{- . }}
+{{- end }}
+{{- end }}
