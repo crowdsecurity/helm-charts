@@ -62,6 +62,29 @@ tests:
       - equal:
           path: spec.template.metadata.annotations
           value: {sidecar.istio.io/inject: "false"}
+  - it: lets the registration Job pod override the global pod labels and annotations
+    template: onlineapi/registration-job.yaml
+    documentSelector: {path: kind, value: Job}
+    set:
+      podLabels: {team: pods}
+      podAnnotations: {sidecar.istio.io/inject: "true", keep: "me"}
+      lapi.onlineAPI.registrationJob:
+        podLabels: {team: job}
+        podAnnotations: {sidecar.istio.io/inject: "false"}
+    asserts:
+      - equal:
+          path: spec.template.metadata.labels.team
+          value: job
+      - equal:
+          path: spec.template.metadata.annotations
+          value: {sidecar.istio.io/inject: "false", keep: "me"}
+  - it: does not put the registration Job pod values on other pods
+    template: lapi/deployment.yaml
+    set:
+      lapi.onlineAPI.registrationJob.podAnnotations: {sidecar.istio.io/inject: "false"}
+    asserts:
+      - notExists:
+          path: spec.template.metadata.annotations["sidecar.istio.io/inject"]
   - it: applies the global podLabels and podAnnotations to the test pods
     template: tests/test-connection.yaml
     documentIndex: 0

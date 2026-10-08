@@ -123,6 +123,8 @@ lapi:
   ## @param lapi.onlineAPI.registrationJob.image.tag Tag of the `kubectl` image
   ## @param lapi.onlineAPI.registrationJob.image.digest Digest of the `kubectl` image
   ## @param lapi.onlineAPI.registrationJob.image.pullPolicy Pull policy of the `kubectl` image
+  ## @param lapi.onlineAPI.registrationJob.podLabels Labels of the Job pod (merged with the global `podLabels`)
+  ## @param lapi.onlineAPI.registrationJob.podAnnotations Annotations of the Job pod (merged with the global `podAnnotations`), e.g. `sidecar.istio.io/inject: "false"` so that a sidecar does not keep the Job running
   onlineAPI:
     enabled: true
     existingSecret: ""
@@ -133,6 +135,8 @@ lapi:
         tag: "1.36.4"
         digest: ""
         pullPolicy: IfNotPresent
+      podLabels: {}
+      podAnnotations: {}
 
   ## @param lapi.console.enrollKey CrowdSec Console enrollment key (stored in the auth Secret; or set `enrollKey` in `auth.existingSecret`)
   ## @param lapi.console.instanceName Name of the instance in the Console
