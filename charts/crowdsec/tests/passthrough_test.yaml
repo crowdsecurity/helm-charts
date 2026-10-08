@@ -131,7 +131,9 @@ tests:
           content:
             scrapeTimeout: 10s
             honorLabels: true
-            relabelings: [{targetLabel: cluster, replacement: eu-1}]
+      - equal:
+          path: spec.endpoints[0].relabelings[1]
+          value: {targetLabel: cluster, replacement: eu-1}
   - it: deploys extra objects, rendered with tpl
     template: extra-objects.yaml
     set:

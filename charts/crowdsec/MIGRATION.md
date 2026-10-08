@@ -120,6 +120,7 @@ agent:
 | `lapi.service.externalIPs`, `loadBalancerIP`, `loadBalancerClass`, `externalTrafficPolicy` | `lapi.service.extraSpec` (any Service spec field) |
 | `lapi.metrics.enabled` | removed: the metrics port is always exposed |
 | `lapi.metrics.serviceMonitor.additionalLabels` | `lapi.metrics.serviceMonitor.labels` |
+| `lapi.metrics.serviceMonitor` `attachMetadata.node` | removed: the `machine` label (node name) is still added, without needing Prometheus access to Node objects |
 | `lapi.metrics.podMonitor` | removed: use `lapi.metrics.serviceMonitor` |
 | `lapi.lifecycle` | unchanged |
 | `lapi.strategy` | unchanged, now defaults to `RollingUpdate` |

@@ -72,10 +72,17 @@ spec:
       {{- with $sm.honorLabels }}
       honorLabels: {{ . }}
       {{- end }}
-      {{- with $sm.relabelings }}
+      {{- /*
+        `machine` (the node name) is the label the CrowdSec Grafana dashboards group by.
+        User relabelings run after it, so they can override or drop it.
+      */}}
       relabelings:
+        - action: replace
+          sourceLabels: [__meta_kubernetes_pod_node_name]
+          targetLabel: machine
+        {{- with $sm.relabelings }}
         {{- toYaml . | nindent 8 }}
-      {{- end }}
+        {{- end }}
       {{- with $sm.metricRelabelings }}
       metricRelabelings:
         {{- toYaml . | nindent 8 }}

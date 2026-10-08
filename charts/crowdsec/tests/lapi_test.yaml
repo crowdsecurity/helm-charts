@@ -209,6 +209,28 @@ tests:
       - isKind:
           of: PodDisruptionBudget
         documentIndex: 2
+  - it: adds the machine label used by the CrowdSec dashboards (#92)
+    template: lapi/service.yaml
+    set:
+      lapi.metrics.serviceMonitor.enabled: true
+    documentIndex: 1
+    asserts:
+      - equal:
+          path: spec.endpoints[0].relabelings
+          value:
+            - {action: replace, sourceLabels: [__meta_kubernetes_pod_node_name], targetLabel: machine}
+  - it: appends user relabelings after the machine label
+    template: lapi/service.yaml
+    set:
+      lapi.metrics.serviceMonitor:
+        enabled: true
+        relabelings:
+          - {action: labeldrop, regex: machine}
+    documentIndex: 1
+    asserts:
+      - equal:
+          path: spec.endpoints[0].relabelings[1]
+          value: {action: labeldrop, regex: machine}
   - it: is not rendered when disabled
     set:
       lapi: {enabled: false, externalURL: "http://lapi:8080"}

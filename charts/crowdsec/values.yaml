@@ -195,7 +195,7 @@ lapi:
   ## @param lapi.metrics.serviceMonitor.interval Scrape interval
   ## @param lapi.metrics.serviceMonitor.scrapeTimeout Scrape timeout
   ## @param lapi.metrics.serviceMonitor.honorLabels Keep the scraped labels on conflicts
-  ## @param lapi.metrics.serviceMonitor.relabelings Relabelings applied before scraping
+  ## @param lapi.metrics.serviceMonitor.relabelings Relabelings applied before scraping, after the default one setting `machine` to the node name
   ## @param lapi.metrics.serviceMonitor.metricRelabelings Relabelings applied to the scraped samples
   metrics:
     serviceMonitor:
@@ -375,7 +375,7 @@ agent:
   ## @param agent.metrics.serviceMonitor.interval Scrape interval
   ## @param agent.metrics.serviceMonitor.scrapeTimeout Scrape timeout
   ## @param agent.metrics.serviceMonitor.honorLabels Keep the scraped labels on conflicts
-  ## @param agent.metrics.serviceMonitor.relabelings Relabelings applied before scraping
+  ## @param agent.metrics.serviceMonitor.relabelings Relabelings applied before scraping, after the default one setting `machine` to the node name
   ## @param agent.metrics.serviceMonitor.metricRelabelings Relabelings applied to the scraped samples
   metrics:
     serviceMonitor:
@@ -542,7 +542,7 @@ appsec:
   ## @param appsec.metrics.serviceMonitor.interval Scrape interval
   ## @param appsec.metrics.serviceMonitor.scrapeTimeout Scrape timeout
   ## @param appsec.metrics.serviceMonitor.honorLabels Keep the scraped labels on conflicts
-  ## @param appsec.metrics.serviceMonitor.relabelings Relabelings applied before scraping
+  ## @param appsec.metrics.serviceMonitor.relabelings Relabelings applied before scraping, after the default one setting `machine` to the node name
   ## @param appsec.metrics.serviceMonitor.metricRelabelings Relabelings applied to the scraped samples
   metrics:
     serviceMonitor:
