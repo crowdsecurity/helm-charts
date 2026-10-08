@@ -392,7 +392,7 @@ rather than forking the chart.
 | `nameOverride`                     | Override the chart name used in resource names                                                                                                      | `""`                     |
 | `fullnameOverride`                 | Override the full resource name prefix (defaults to <release>-<chart>, or <release> if it already contains the chart name)                          | `""`                     |
 | `commonLabels`                     | Labels added to every resource created by the chart, including pods and Secrets created by cert-manager or the registration Job                     | `{}`                     |
-| `commonAnnotations`                | Annotations added to every resource created by the chart (not pods: use `podAnnotations`)                                                           | `{}`                     |
+| `commonAnnotations`                | Annotations added to every resource created by the chart (not the pods of Deployments, DaemonSets and Jobs: use `podAnnotations`)                   | `{}`                     |
 | `imageRegistry`                    | Registry prepended to every image that has no `registry` of its own (e.g. a mirror)                                                                 | `""`                     |
 | `image.registry`                   | CrowdSec image registry (defaults to `imageRegistry`)                                                                                               | `""`                     |
 | `image.repository`                 | CrowdSec image repository (used by every component)                                                                                                 | `crowdsecurity/crowdsec` |

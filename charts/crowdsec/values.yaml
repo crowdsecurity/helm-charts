@@ -7,7 +7,7 @@ nameOverride: ""
 fullnameOverride: ""
 ## @param commonLabels Labels added to every resource created by the chart, including pods and Secrets created by cert-manager or the registration Job
 commonLabels: {}
-## @param commonAnnotations Annotations added to every resource created by the chart (not pods: use `podAnnotations`)
+## @param commonAnnotations Annotations added to every resource created by the chart (not the pods of Deployments, DaemonSets and Jobs: use `podAnnotations`)
 commonAnnotations: {}
 
 ## @param imageRegistry Registry prepended to every image that has no `registry` of its own (e.g. a mirror)

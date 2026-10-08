@@ -74,9 +74,13 @@ spec:
     metadata:
       labels:
         {{- include "crowdsec.selectorLabels" (list . "capi-register") | nindent 8 }}
-        {{- with .Values.commonLabels }}
+        {{- with (merge (dict) .Values.podLabels .Values.commonLabels) }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
     spec:
       serviceAccountName: {{ $name }}
       restartPolicy: Never

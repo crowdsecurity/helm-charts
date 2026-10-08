@@ -49,6 +49,32 @@ tests:
       - template: onlineapi/registration-job.yaml
         documentSelector: {path: kind, value: Job}
         equal: {path: spec.template.metadata.labels.team, value: sec}
+  - it: applies the global podLabels and podAnnotations to the registration Job pod (#234, #247)
+    template: onlineapi/registration-job.yaml
+    documentSelector: {path: kind, value: Job}
+    set:
+      podLabels: {team: pods, mesh: "off"}
+      podAnnotations: {sidecar.istio.io/inject: "false"}
+    asserts:
+      - isSubset:
+          path: spec.template.metadata.labels
+          content: {team: pods, mesh: "off"}
+      - equal:
+          path: spec.template.metadata.annotations
+          value: {sidecar.istio.io/inject: "false"}
+  - it: applies the global podLabels and podAnnotations to the test pods
+    template: tests/test-connection.yaml
+    documentIndex: 0
+    set:
+      podLabels: {team: pods, mesh: "off"}
+      podAnnotations: {sidecar.istio.io/inject: "false"}
+    asserts:
+      - isSubset:
+          path: metadata.labels
+          content: {team: pods, mesh: "off", app.kubernetes.io/component: test}
+      - isSubset:
+          path: metadata.annotations
+          content: {sidecar.istio.io/inject: "false", helm.sh/hook: test, owner: me}
   - it: keeps component pod labels over common labels
     template: lapi/deployment.yaml
     set:

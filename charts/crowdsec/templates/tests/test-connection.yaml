@@ -17,8 +17,8 @@ metadata:
   name: {{ include "crowdsec.componentName" (list $ (printf "test-%s" .component)) }}
   namespace: {{ $.Release.Namespace }}
   labels:
-    {{- include "crowdsec.labels" (list $ "test") | nindent 4 }}
-  {{- include "crowdsec.annotations" (dict "ctx" $ "extra" (dict "helm.sh/hook" "test" "helm.sh/hook-delete-policy" "before-hook-creation,hook-succeeded")) | nindent 2 }}
+    {{- toYaml (merge (dict) $.Values.podLabels (include "crowdsec.labels" (list $ "test") | fromYaml)) | nindent 4 }}
+  {{- include "crowdsec.annotations" (dict "ctx" $ "extra" (merge (dict "helm.sh/hook" "test" "helm.sh/hook-delete-policy" "before-hook-creation,hook-succeeded") $.Values.podAnnotations)) | nindent 2 }}
 spec:
   restartPolicy: Never
   automountServiceAccountToken: false
