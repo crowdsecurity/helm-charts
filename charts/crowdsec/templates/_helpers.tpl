@@ -91,6 +91,48 @@ annotations:
 {{- .Values.auth.existingSecret | default (include "crowdsec.componentName" (list . "auth")) -}}
 {{- end -}}
 
+{{/*
+  Bash lines splitting ${URL} into ${host}, ${port} and ${path}, for checks without wget or curl
+  (the debian image has neither).
+*/}}
+{{- define "crowdsec.bashParseURL" -}}
+hostport="${URL#*://}"
+path="/${hostport#*/}"
+[ "${hostport#*/}" = "${hostport}" ] && path=/
+hostport="${hostport%%/*}"
+host="${hostport%:*}"
+port="${hostport##*:}"
+if [ "${host}" = "${hostport}" ]; then
+  case "${URL}" in https://*) port=443 ;; *) port=80 ;; esac
+fi
+host="${host#[}"
+host="${host%]}"
+{{- end -}}
+
+{{/*
+  Environment variables referenced by the LAPI config.yaml.local, shared by the LAPI container
+  and its local-machine init container. LOCAL_API_URL is also written to the cscli credentials.
+*/}}
+{{- define "crowdsec.lapi.configEnv" -}}
+- name: LOCAL_API_URL
+  value: {{ printf "%s://localhost:8080" (include "crowdsec.lapiScheme" .) }}
+- name: REGISTRATION_TOKEN
+  valueFrom:
+    secretKeyRef:
+      name: {{ include "crowdsec.authSecretName" . }}
+      key: registrationToken
+- name: CS_LAPI_SECRET
+  valueFrom:
+    secretKeyRef:
+      name: {{ include "crowdsec.authSecretName" . }}
+      key: csLapiSecret
+- name: DB_PASSWORD
+  valueFrom:
+    secretKeyRef:
+      name: {{ .Values.lapi.database.existingSecret }}
+      key: {{ .Values.lapi.database.passwordKey }}
+{{- end -}}
+
 {{- define "crowdsec.onlineAPISecretName" -}}
 {{- .Values.lapi.onlineAPI.existingSecret | default (include "crowdsec.componentName" (list . "capi-credentials")) -}}
 {{- end -}}

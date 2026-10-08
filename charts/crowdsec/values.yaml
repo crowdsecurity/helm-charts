@@ -33,7 +33,7 @@ podLabels: {}
 ## @param podAnnotations Annotations added to every pod (merged with the component `podAnnotations`)
 podAnnotations: {}
 
-## @param helperContainers.securityContext [object] Security context of the helper containers: LAPI wait/registration init containers, Central API registration Job, `helm test` pods
+## @param helperContainers.securityContext [object] Security context of the helper containers: `wait-for-lapi` and LAPI `local-machine` init containers, Central API registration Job, `helm test` pods
 ## @param helperContainers.resources [object] Resources of the helper containers
 helperContainers:
   securityContext:
@@ -61,7 +61,7 @@ extraObjects: []
 ## When `existingSecret` is empty, the chart generates a Secret and reuses its values across upgrades.
 ## Set `existingSecret` when deploying with GitOps tools that render templates without cluster access (ArgoCD, `helm template`),
 ## otherwise the values are regenerated on every render.
-## @param auth.existingSecret Name of an existing Secret with keys `registrationToken` (>= 32 chars), `csLapiSecret` (>= 64 chars) and optionally `enrollKey`
+## @param auth.existingSecret Name of an existing Secret with keys `registrationToken` (>= 32 chars), `csLapiSecret` (>= 64 chars) and optionally `enrollKey`. With an external LAPI, only `registrationToken` is needed
 auth:
   existingSecret: ""
 

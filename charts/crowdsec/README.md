@@ -283,8 +283,12 @@ lapi:
           app.kubernetes.io/component: lapi
 ```
 
-Each agent pod registers as a separate machine. Machines that stopped sending heartbeats are deleted after 7 days
-(`lapi.config.db_config.flush.agents_autodelete`).
+All LAPI replicas share a single local machine (`<release>-crowdsec-lapi`, used by `cscli` in the pods), whose
+password is derived from `csLapiSecret`. Each agent and AppSec container start is a separate machine (registered with the token, or created by LAPI from the
+client certificate with TLS), which unregisters itself when it stops (`api.client.unregister_on_exit`, can be disabled
+in `agent.config` / `appsec.config`).
+LAPI deletes the machines left behind (removed pods, OOM kills, node loss) once they have sent no heartbeat for
+2 hours and own no alerts (`lapi.config.db_config.flush.agents_autodelete`).
 
 ## GitOps (ArgoCD, Flux)
 
@@ -318,8 +322,20 @@ agent:
   podLogs: [...]
 ```
 
-The LAPI must accept the agents' IPs in `api.server.auto_registration.allowed_ranges` (private ranges by default).
-With TLS, set `tls.certManager.issuerRef` to an issuer trusted by that LAPI.
+Only the `registrationToken` key of `auth.existingSecret` is used in this mode. On the external LAPI:
+
+- `api.server.auto_registration` must be enabled with the same token, and allow the agents' source IPs in `allowed_ranges`
+  (behind NAT, these are the node or egress IPs);
+- every agent pod start creates a new machine, so set `db_config.flush.agents_autodelete` to clean up the ones that
+  could not unregister, as this chart does for its own LAPI:
+  ```yaml
+  db_config:
+    flush:
+      agents_autodelete:
+        login_password: 2h
+        cert: 2h
+  ```
+- with TLS, set `tls.certManager.issuerRef` to an issuer trusted by that LAPI, which must accept the `agent-ou` OU.
 
 ## Exposing LAPI or AppSec outside the cluster
 
@@ -371,30 +387,30 @@ rather than forking the chart.
 
 ### Common
 
-| Name                               | Description                                                                                                                           | Value                    |
-| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- | ------------------------ |
-| `nameOverride`                     | Override the chart name used in resource names                                                                                        | `""`                     |
-| `fullnameOverride`                 | Override the full resource name prefix (defaults to <release>-<chart>, or <release> if it already contains the chart name)            | `""`                     |
-| `commonLabels`                     | Labels added to every resource created by the chart, including pods and Secrets created by cert-manager or the registration Job       | `{}`                     |
-| `commonAnnotations`                | Annotations added to every resource created by the chart (not pods: use `podAnnotations`)                                             | `{}`                     |
-| `imageRegistry`                    | Registry prepended to every image that has no `registry` of its own (e.g. a mirror)                                                   | `""`                     |
-| `image.registry`                   | CrowdSec image registry (defaults to `imageRegistry`)                                                                                 | `""`                     |
-| `image.repository`                 | CrowdSec image repository (used by every component)                                                                                   | `crowdsecurity/crowdsec` |
-| `image.tag`                        | CrowdSec image tag (defaults to the chart appVersion)                                                                                 | `""`                     |
-| `image.digest`                     | CrowdSec image digest (e.g. `sha256:...`), appended to the tag                                                                        | `""`                     |
-| `image.pullPolicy`                 | Image pull policy                                                                                                                     | `IfNotPresent`           |
-| `imagePullSecrets`                 | Image pull secrets for every pod (list of `{name: ...}`)                                                                              | `[]`                     |
-| `podLabels`                        | Labels added to every pod (merged with the component `podLabels`)                                                                     | `{}`                     |
-| `podAnnotations`                   | Annotations added to every pod (merged with the component `podAnnotations`)                                                           | `{}`                     |
-| `helperContainers.securityContext` | Security context of the helper containers: LAPI wait/registration init containers, Central API registration Job, `helm test` pods     | `{}`                     |
-| `helperContainers.resources`       | Resources of the helper containers                                                                                                    | `{}`                     |
-| `extraObjects`                     | Extra manifests deployed with the release (objects or strings, rendered with `tpl`), e.g. an ExternalSecret for the database password | `[]`                     |
+| Name                               | Description                                                                                                                                         | Value                    |
+| ---------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------ |
+| `nameOverride`                     | Override the chart name used in resource names                                                                                                      | `""`                     |
+| `fullnameOverride`                 | Override the full resource name prefix (defaults to <release>-<chart>, or <release> if it already contains the chart name)                          | `""`                     |
+| `commonLabels`                     | Labels added to every resource created by the chart, including pods and Secrets created by cert-manager or the registration Job                     | `{}`                     |
+| `commonAnnotations`                | Annotations added to every resource created by the chart (not pods: use `podAnnotations`)                                                           | `{}`                     |
+| `imageRegistry`                    | Registry prepended to every image that has no `registry` of its own (e.g. a mirror)                                                                 | `""`                     |
+| `image.registry`                   | CrowdSec image registry (defaults to `imageRegistry`)                                                                                               | `""`                     |
+| `image.repository`                 | CrowdSec image repository (used by every component)                                                                                                 | `crowdsecurity/crowdsec` |
+| `image.tag`                        | CrowdSec image tag (defaults to the chart appVersion)                                                                                               | `""`                     |
+| `image.digest`                     | CrowdSec image digest (e.g. `sha256:...`), appended to the tag                                                                                      | `""`                     |
+| `image.pullPolicy`                 | Image pull policy                                                                                                                                   | `IfNotPresent`           |
+| `imagePullSecrets`                 | Image pull secrets for every pod (list of `{name: ...}`)                                                                                            | `[]`                     |
+| `podLabels`                        | Labels added to every pod (merged with the component `podLabels`)                                                                                   | `{}`                     |
+| `podAnnotations`                   | Annotations added to every pod (merged with the component `podAnnotations`)                                                                         | `{}`                     |
+| `helperContainers.securityContext` | Security context of the helper containers: `wait-for-lapi` and LAPI `local-machine` init containers, Central API registration Job, `helm test` pods | `{}`                     |
+| `helperContainers.resources`       | Resources of the helper containers                                                                                                                  | `{}`                     |
+| `extraObjects`                     | Extra manifests deployed with the release (objects or strings, rendered with `tpl`), e.g. an ExternalSecret for the database password               | `[]`                     |
 
 ### Authentication
 
-| Name                  | Description                                                                                                                     | Value |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------------------- | ----- |
-| `auth.existingSecret` | Name of an existing Secret with keys `registrationToken` (>= 32 chars), `csLapiSecret` (>= 64 chars) and optionally `enrollKey` | `""`  |
+| Name                  | Description                                                                                                                                                                                | Value |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----- |
+| `auth.existingSecret` | Name of an existing Secret with keys `registrationToken` (>= 32 chars), `csLapiSecret` (>= 64 chars) and optionally `enrollKey`. With an external LAPI, only `registrationToken` is needed | `""`  |
 
 ### TLS
 

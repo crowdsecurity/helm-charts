@@ -30,6 +30,28 @@ spec:
     - name: check
       image: {{ include "crowdsec.image" $ }}
       imagePullPolicy: {{ $.Values.image.pullPolicy }}
-      command: ["wget", "-q", "-O", "/dev/null", "--no-check-certificate", "-T", "5", {{ .url | quote }}]
+      {{- /* HTTP endpoints must answer 200; HTTPS (LAPI with TLS) only gets a connection check */}}
+      command:
+        - /bin/bash
+        - -c
+        - |
+          set -eu
+          {{- include "crowdsec.bashParseURL" . | nindent 10 }}
+          case "${URL}" in
+            https://*)
+              timeout 5 bash -c 'exec 3<>"/dev/tcp/$0/$1"' "${host}" "${port}"
+              echo "${URL} accepts connections"
+              ;;
+            *)
+              status=$(timeout 5 bash -c 'exec 3<>"/dev/tcp/$0/$1"
+                printf "GET %s HTTP/1.0\r\nHost: %s\r\n\r\n" "$2" "$0" >&3
+                head -n 1 <&3' "${host}" "${port}" "${path}")
+              echo "${URL}: ${status}"
+              case "${status}" in "HTTP/1."?" 200"*) ;; *) exit 1 ;; esac
+              ;;
+          esac
+      env:
+        - name: URL
+          value: {{ .url | quote }}
       {{- include "crowdsec.helperContainer" $ | trim | nindent 6 }}
 {{- end }}

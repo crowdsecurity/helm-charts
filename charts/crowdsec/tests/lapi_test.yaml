@@ -13,6 +13,56 @@ tests:
       - matchRegex:
           path: data["config.yaml.local"]
           pattern: "(?s)db_config:.*host: pg.example.svc.*password: \\$\\{DB_PASSWORD\\}.*port: 5432.*type: postgresql"
+  - it: auto-deletes machines without heartbeat for 2 hours
+    template: lapi/configmap.yaml
+    asserts:
+      - matchRegex:
+          path: data["config.yaml.local"]
+          pattern: "agents_autodelete:\\n\\s+cert: 2h\\n\\s+login_password: 2h"
+  - it: shares one local machine between replicas
+    template: lapi/deployment.yaml
+    set:
+      lapi.replicas: 2
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content: {name: CUSTOM_HOSTNAME, value: RELEASE-NAME-crowdsec-lapi}
+      - equal:
+          path: spec.template.spec.initContainers[0].name
+          value: local-machine
+      - contains:
+          path: spec.template.spec.initContainers[0].env
+          content: {name: MACHINE_NAME, value: RELEASE-NAME-crowdsec-lapi}
+      - matchRegex:
+          path: spec.template.spec.initContainers[0].command[2]
+          pattern: "cscli machines add \"\\$\\{MACHINE_NAME\\}\" --password \"\\$\\{password\\}\" --force"
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content: {name: run, mountPath: /run/crowdsec}
+  - it: mounts user files in the local-machine init container
+    template: lapi/deployment.yaml
+    set:
+      lapi.files:
+        profiles.yaml: "name: x"
+    asserts:
+      - contains:
+          path: spec.template.spec.initContainers[0].volumeMounts
+          content: {name: config, mountPath: /etc/crowdsec/profiles.yaml, subPath: file.profiles.yaml}
+  - it: keeps user init containers after the local-machine one
+    template: lapi/deployment.yaml
+    set:
+      lapi.extraInitContainers:
+        - {name: mine, image: busybox}
+    asserts:
+      - equal:
+          path: spec.template.spec.initContainers[1].name
+          value: mine
+  - it: points cscli to the shared credentials
+    template: lapi/configmap.yaml
+    asserts:
+      - matchRegex:
+          path: data["config.yaml.local"]
+          pattern: "client:\\n\\s+credentials_path: /run/crowdsec/local_api_credentials.yaml"
   - it: defaults the MySQL port
     template: lapi/configmap.yaml
     set:

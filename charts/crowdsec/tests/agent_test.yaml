@@ -23,6 +23,42 @@ tests:
       - matchRegex:
           path: data["acquis.yaml"]
           pattern: "program: nginx\\n\\s+type: containerd\\npoll_without_inotify: true"
+  - it: unregisters the machine on exit
+    template: agent/configmap.yaml
+    asserts:
+      - matchRegex:
+          path: data["config.yaml.local"]
+          pattern: "unregister_on_exit: true"
+  - it: registers on every container start with the token, then runs the image entrypoint
+    template: agent/workload.yaml
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[0].command[2]
+          pattern: "(?s)lapi register.*--token \"\\$\\{REGISTRATION_TOKEN\\}\".*exec /bin/bash /docker_start.sh"
+      - equal:
+          path: spec.template.spec.initContainers[0].name
+          value: wait-for-lapi
+      - notMatchRegex:
+          path: spec.template.spec.initContainers[0].command[2]
+          pattern: "cscli|wget"
+  - it: uses the image entrypoint as-is with TLS
+    template: agent/workload.yaml
+    set:
+      tls.enabled: true
+    asserts:
+      - notExists:
+          path: spec.template.spec.containers[0].command
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content: {name: REGISTRATION_TOKEN, valueFrom: {secretKeyRef: {name: RELEASE-NAME-crowdsec-auth, key: registrationToken}}}
+  - it: lets agent.config disable unregister on exit
+    template: agent/configmap.yaml
+    set:
+      agent.config.api.client.unregister_on_exit: false
+    asserts:
+      - matchRegex:
+          path: data["config.yaml.local"]
+          pattern: "unregister_on_exit: false"
   - it: appends raw acquisition entries
     template: agent/configmap.yaml
     set:
@@ -35,12 +71,12 @@ tests:
   - it: registers with the token by default
     template: agent/workload.yaml
     asserts:
-      - equal:
-          path: spec.template.spec.initContainers[0].name
-          value: register
       - contains:
           path: spec.template.spec.initContainers[0].env
-          content: {name: LAPI_URL, value: "http://RELEASE-NAME-crowdsec-lapi.NAMESPACE.svc:8080"}
+          content: {name: URL, value: "http://RELEASE-NAME-crowdsec-lapi.NAMESPACE.svc:8080"}
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content: {name: LOCAL_API_URL, value: "http://RELEASE-NAME-crowdsec-lapi.NAMESPACE.svc:8080"}
   - it: authenticates with a client certificate with TLS
     template: agent/workload.yaml
     set:
@@ -109,9 +145,9 @@ tests:
     asserts:
       - contains:
           path: spec.template.spec.initContainers[0].env
-          content: {name: LAPI_URL, value: "https://lapi.example.com"}
+          content: {name: URL, value: "https://lapi.example.com"}
       - contains:
-          path: spec.template.spec.initContainers[0].env
+          path: spec.template.spec.containers[0].env
           content:
             name: REGISTRATION_TOKEN
             valueFrom: {secretKeyRef: {name: lapi-auth, key: registrationToken}}

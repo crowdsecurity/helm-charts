@@ -7,7 +7,7 @@
   "user" $db.user
   "password" "${DB_PASSWORD}"
   "db_name" $db.name
-  "flush" (dict "agents_autodelete" (dict "login_password" "7d" "cert" "7d"))
+  "flush" (dict "agents_autodelete" (dict "login_password" "2h" "cert" "2h"))
 }}
 {{- with $db.sslMode }}
 {{- $_ := set $dbConfig "sslmode" . }}
@@ -21,7 +21,8 @@
 {{- if .Values.lapi.onlineAPI.enabled }}
 {{- $_ := set $server "online_client" (dict "credentials_path" "/etc/crowdsec-capi/online_api_credentials.yaml") }}
 {{- end }}
-{{- $configLocal := mustMergeOverwrite (dict "db_config" $dbConfig "api" (dict "server" $server)) (deepCopy .Values.lapi.config) }}
+{{- $client := dict "credentials_path" "/run/crowdsec/local_api_credentials.yaml" }}
+{{- $configLocal := mustMergeOverwrite (dict "db_config" $dbConfig "api" (dict "client" $client "server" $server)) (deepCopy .Values.lapi.config) }}
 apiVersion: v1
 kind: ConfigMap
 metadata:

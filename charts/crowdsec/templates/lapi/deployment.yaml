@@ -1,6 +1,7 @@
 {{- if .Values.lapi.enabled }}
 {{- $values := .Values.lapi }}
 {{- $checksum := include (print $.Template.BasePath "/lapi/configmap.yaml") . | sha256sum }}
+{{- $machine := include "crowdsec.componentName" (list . "lapi") }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -26,10 +27,60 @@ spec:
       {{- include "crowdsec.podMetadata" (dict "ctx" . "component" "lapi" "values" $values "checksum" $checksum) | nindent 6 }}
     spec:
       {{- include "crowdsec.podSpecCommon" (dict "ctx" . "values" $values) | trim | nindent 6 }}
-      {{- with $values.extraInitContainers }}
       initContainers:
+        {{- /*
+          All replicas share one local machine, used by cscli in the pod. Its password is derived from
+          csLapiSecret, so every replica sets the same one and the entrypoint finds matching credentials
+          instead of creating a machine per pod.
+        */}}
+        - name: local-machine
+          image: {{ include "crowdsec.image" . }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+            - /bin/bash
+            - -c
+            - |
+              set -eu
+              # cscli loads the whole LAPI configuration: add the image defaults next to the mounted
+              # files, as the entrypoint does (the hub and credentials are not needed, and not readable)
+              for f in /staging/etc/crowdsec/*.yaml; do
+                case "${f}" in *_credentials.yaml) continue ;; esac
+                cp -n "${f}" /etc/crowdsec/
+              done
+              umask 077
+              password=$(printf 'crowdsec-lapi-machine:%s' "${CS_LAPI_SECRET}" | sha256sum | cut -d' ' -f1)
+              cscli machines add "${MACHINE_NAME}" --password "${password}" --force -f /dev/null
+              printf 'url: %s\nlogin: %s\npassword: %s\n' "${LOCAL_API_URL}" "${MACHINE_NAME}" "${password}" \
+                > /run/crowdsec/local_api_credentials.yaml
+          env:
+            - name: MACHINE_NAME
+              value: {{ $machine }}
+            {{- include "crowdsec.lapi.configEnv" . | nindent 12 }}
+            {{- with $values.env }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          {{- with $values.envFrom }}
+          envFrom:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- include "crowdsec.helperContainer" . | trim | nindent 10 }}
+          volumeMounts:
+            - name: init-etc
+              mountPath: /etc/crowdsec
+            {{- include "crowdsec.configVolumeMounts" (dict "files" $values.files) | nindent 12 }}
+            - name: run
+              mountPath: /run/crowdsec
+            {{- /* cscli writes a trace directory there */}}
+            - name: data
+              mountPath: /var/lib/crowdsec/data
+            {{- if $values.onlineAPI.enabled }}
+            - name: capi-credentials
+              mountPath: /etc/crowdsec-capi
+              readOnly: true
+            {{- end }}
+        {{- with $values.extraInitContainers }}
         {{- toYaml . | nindent 8 }}
-      {{- end }}
+        {{- end }}
       containers:
         - name: lapi
           image: {{ include "crowdsec.image" . }}
@@ -38,26 +89,8 @@ spec:
             - name: DISABLE_AGENT
               value: "true"
             - name: CUSTOM_HOSTNAME
-              valueFrom:
-                fieldRef:
-                  fieldPath: metadata.name
-            - name: LOCAL_API_URL
-              value: {{ printf "%s://localhost:8080" (include "crowdsec.lapiScheme" .) }}
-            - name: REGISTRATION_TOKEN
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "crowdsec.authSecretName" . }}
-                  key: registrationToken
-            - name: CS_LAPI_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "crowdsec.authSecretName" . }}
-                  key: csLapiSecret
-            - name: DB_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: {{ $values.database.existingSecret }}
-                  key: {{ $values.database.passwordKey }}
+              value: {{ $machine }}
+            {{- include "crowdsec.lapi.configEnv" . | nindent 12 }}
             {{- if $values.onlineAPI.enabled }}
             - name: ENROLL_KEY
               valueFrom:
@@ -110,6 +143,8 @@ spec:
             {{- include "crowdsec.configVolumeMounts" (dict "files" $values.files) | nindent 12 }}
             - name: data
               mountPath: /var/lib/crowdsec/data
+            - name: run
+              mountPath: /run/crowdsec
             {{- if $values.onlineAPI.enabled }}
             - name: capi-credentials
               mountPath: /etc/crowdsec-capi
@@ -131,6 +166,10 @@ spec:
           configMap:
             name: {{ include "crowdsec.componentName" (list . "lapi") }}
         - name: data
+          emptyDir: {}
+        - name: run
+          emptyDir: {}
+        - name: init-etc
           emptyDir: {}
         {{- if $values.onlineAPI.enabled }}
         - name: capi-credentials

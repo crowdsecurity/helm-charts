@@ -45,7 +45,9 @@ Use the tables below to translate them.
      ```
 4. Bouncer API keys, alerts and decisions are stored in the database. When moving from SQLite, either re-register
    the bouncers (`cscli bouncers add`, or `BOUNCER_KEY_<name>` variables to keep the same keys) or migrate the data.
-5. Translate your values with the tables below, then `helm uninstall` the 1.x release and install 2.0
+5. When keeping the 1.x database, 1.x LAPI pods left one machine each (named after the pod), which are never cleaned up
+   automatically. 2.0 uses a single `<release>-crowdsec-lapi` machine: delete the old ones with `cscli machines delete`.
+6. Translate your values with the tables below, then `helm uninstall` the 1.x release and install 2.0
    (an in-place upgrade also works, but the workloads are recreated anyway because their selectors changed).
 
 ## Values mapping
@@ -137,7 +139,7 @@ agent:
 | `agent.strategy` | `agent.updateStrategy` |
 | `agent.hostVarLog` | removed: `/var/log` is mounted when `agent.podLogs` is set |
 | `agent.persistentVolume.*` | removed |
-| `agent.wait_for_lapi.*` | removed: the registration init container waits for LAPI. Its security context and resources are set by `helperContainers` (hardened by default) |
+| `agent.wait_for_lapi.*` | removed: the `wait-for-lapi` init container waits for LAPI. Its security context and resources are set by `helperContainers` (hardened by default) |
 | `agent.metrics.*` | see LAPI |
 | `agent.service.externalIPs`, ... | see LAPI |
 

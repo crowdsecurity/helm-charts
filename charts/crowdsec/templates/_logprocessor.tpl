@@ -54,8 +54,15 @@ spec:
 {{- end -}}
 
 {{/* Usage: include "crowdsec.logProcessor.configLocal" . */}}
+{{- /*
+  Every container start gets a new machine: registered by the container command with the token,
+  or created by LAPI at login with TLS (<CN>@<pod IP>). It is removed on clean shutdown, and
+  LAPI deletes the ones left behind by crashes (db_config.flush.agents_autodelete).
+*/ -}}
 {{- define "crowdsec.logProcessor.configLocal" -}}
-{{- toYaml (dict "api" (dict "client" (dict "credentials_path" "/run/crowdsec/local_api_credentials.yaml"))) -}}
+{{- toYaml (dict "api" (dict "client" (dict
+  "credentials_path" "/run/crowdsec/local_api_credentials.yaml"
+  "unregister_on_exit" true))) -}}
 {{- end -}}
 
 {{/*
@@ -72,13 +79,10 @@ spec:
   {{- include "crowdsec.podSpecCommon" (dict "ctx" $ctx "values" $values) | trim | nindent 2 }}
   initContainers:
     {{- /*
-      Waits for LAPI, then (without TLS) registers with the auto-registration token.
-      The machine name gets a random suffix: init containers re-run with the same pod
-      name after a pod sandbox restart, and LAPI refuses to register an existing machine.
-      Stale machines are removed by LAPI (db_config.flush.agents_autodelete).
-      With TLS, the client certificate is the identity and only the wait is needed.
+      Waits until LAPI accepts connections, so that the main container does not crash-loop
+      while LAPI starts. Plain TCP check with bash: the debian image has no wget or curl.
     */}}
-    - name: {{ ternary "wait-for-lapi" "register" $ctx.Values.tls.enabled }}
+    - name: wait-for-lapi
       image: {{ include "crowdsec.image" $ctx }}
       imagePullPolicy: {{ $ctx.Values.image.pullPolicy }}
       command:
@@ -86,24 +90,44 @@ spec:
         - -c
         - |
           set -eu
-          {{- if $ctx.Values.tls.enabled }}
-          until wget -q -O /dev/null -T 5 --no-check-certificate "${LAPI_URL}/health"; do
-            echo "Waiting for LAPI at ${LAPI_URL}"
+          {{- include "crowdsec.bashParseURL" . | nindent 10 }}
+          until timeout 5 bash -c 'exec 3<>"/dev/tcp/$0/$1"' "${host}" "${port}" 2>/dev/null; do
+            echo "Waiting for LAPI at ${URL}"
             sleep 5
           done
-          {{- else }}
+      env:
+        - name: URL
+          value: {{ include "crowdsec.lapiURL" $ctx | quote }}
+      {{- include "crowdsec.helperContainer" $ctx | trim | nindent 6 }}
+    {{- with $values.extraInitContainers }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  containers:
+    - name: {{ .component }}
+      image: {{ include "crowdsec.image" $ctx }}
+      imagePullPolicy: {{ $ctx.Values.image.pullPolicy }}
+      {{- if not $ctx.Values.tls.enabled }}
+      {{- /*
+        Registers with the auto-registration token on every container start, before the image
+        entrypoint: the machine of the previous start may have been unregistered on exit.
+        The random suffix keeps names unique across restarts of the same pod.
+      */}}
+      command:
+        - /bin/bash
+        - -c
+        - |
+          set -eu
           until cscli -c /staging/etc/crowdsec/config.yaml lapi register \
               --machine "${POD_NAME}-$(tr -dc a-z0-9 </dev/urandom | head -c 6)" \
-              --url "${LAPI_URL}" \
+              --url "${LOCAL_API_URL}" \
               --token "${REGISTRATION_TOKEN}" \
               --file /run/crowdsec/local_api_credentials.yaml; do
-            echo "Registration to ${LAPI_URL} failed, retrying in 5s"
+            echo "Registration to ${LOCAL_API_URL} failed, retrying in 5s"
             sleep 5
           done
-          {{- end }}
+          exec /bin/bash /docker_start.sh
+      {{- end }}
       env:
-        - name: LAPI_URL
-          value: {{ include "crowdsec.lapiURL" $ctx | quote }}
         {{- if not $ctx.Values.tls.enabled }}
         - name: POD_NAME
           valueFrom:
@@ -115,21 +139,6 @@ spec:
               name: {{ include "crowdsec.authSecretName" $ctx }}
               key: registrationToken
         {{- end }}
-      {{- include "crowdsec.helperContainer" $ctx | trim | nindent 6 }}
-      volumeMounts:
-        - name: run
-          mountPath: /run/crowdsec
-        {{- /* cscli writes a trace directory there */}}
-        - name: data
-          mountPath: /var/lib/crowdsec/data
-    {{- with $values.extraInitContainers }}
-    {{- toYaml . | nindent 4 }}
-    {{- end }}
-  containers:
-    - name: {{ .component }}
-      image: {{ include "crowdsec.image" $ctx }}
-      imagePullPolicy: {{ $ctx.Values.image.pullPolicy }}
-      env:
         - name: DISABLE_LOCAL_API
           value: "true"
         - name: DISABLE_ONLINE_API
