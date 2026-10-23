@@ -51,6 +51,7 @@ spec:
 {{ toYaml .Values.image.pullSecrets | indent 8 }}
       {{- end }}
       initContainers:
+      {{- if or (ne (toString .Values.agent.selfRegister) "false") (and .Values.tls.enabled .Values.tls.agent.tlsClientAuth) }}
       {{- if or (not .Values.tls.enabled) (not .Values.tls.agent.tlsClientAuth) }}
       - name: wait-for-lapi-and-register
         image: "{{ .Values.image.repository | default "crowdsecurity/crowdsec" }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
@@ -91,6 +92,7 @@ spec:
           - name: LAPI_PORT
             value: "{{ .Values.agent.lapiPort | default "8080" }}"
         {{- end }}
+      {{- end }}
       {{- if .Values.agent.extraInitContainers }}
       {{- toYaml .Values.agent.extraInitContainers | nindent 6 }}
       {{- end }}

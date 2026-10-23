@@ -95,6 +95,10 @@
                     "type": "string",
                     "description": "Optional, the serviceAccountName used in the deployment."
                 },
+                "selfRegister": {
+                    "type": "boolean",
+                    "description": "Optional, defaults to true. When false, the chart does not render the init container that registers the agent on the LAPI with the registration token; credentials must then be provided through extraInitContainers."
+                },
                 "acquisition": {
                     "type": "array",
                     "items": {

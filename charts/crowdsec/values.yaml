@@ -471,6 +471,12 @@ agent:
   # -- lapiPort for agent to connect to (default is the lapi service port)
   ## @param agent.lapiPort Port of the LAPI for the agent to connect to
   lapiPort: 8080
+  # -- selfRegister: when true (default), an init container registers the agent on the LAPI with the
+  # registration token. Set to false when the machines are already registered on the LAPI: the chart
+  # then renders no register init container, and an agent.extraInitContainers entry must write
+  # /tmp_config/local_api_credentials.yaml. Has no effect when tls.enabled and tls.agent.tlsClientAuth are set.
+  ## @param agent.selfRegister [default: true] Register the agent on the LAPI with the registration token from an init container
+  selfRegister: true
   # -- replicas for agent if isDeployment is set to true
   ## @param agent.replicas Number of replicas when deploying as a Deployment
   replicas: 1

@@ -639,6 +639,7 @@ controller:
 | `agent.lapiURL`                                  | URL of the LAPI for the agent to connect to (defaults to internal service URL)             | `""`    |
 | `agent.lapiHost`                                 | Host of the LAPI for the agent to connect to                                               | `""`    |
 | `agent.lapiPort`                                 | Port of the LAPI for the agent to connect to                                               | `8080`  |
+| `agent.selfRegister`                             | Register the agent on the LAPI with the registration token from an init container          | `true`  |
 | `agent.replicas`                                 | Number of replicas when deploying as a Deployment                                          | `1`     |
 | `agent.strategy`                                 | Deployment strategy when `isDeployment` is true                                            | `{}`    |
 | `agent.ports`                                    | Custom container ports to expose (default: metrics port 6060 if enabled)                   | `[]`    |
