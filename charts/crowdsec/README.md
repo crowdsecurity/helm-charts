@@ -286,11 +286,12 @@ lapi:
 ```
 
 All LAPI replicas share a single local machine (`<release>-crowdsec-lapi`, used by `cscli` in the pods), whose
-password is derived from `csLapiSecret`. Each agent and AppSec container start is a separate machine (registered with the token, or created by LAPI from the
-client certificate with TLS), which unregisters itself when it stops (`api.client.unregister_on_exit`, can be disabled
-in `agent.config` / `appsec.config`).
-LAPI deletes the machines left behind (removed pods, OOM kills, node loss) once they have sent no heartbeat for
-2 hours and own no alerts (`lapi.config.db_config.flush.agents_autodelete`).
+password is derived from `csLapiSecret`. Each agent and AppSec pod is one machine: registered with the token and named
+after the pod, or created by LAPI from the client certificate with TLS (`<CN>@<pod IP>`). Container restarts reuse it,
+and it unregisters itself when the pod stops cleanly (`api.client.unregister_on_exit`, can be disabled in
+`agent.config` / `appsec.config`).
+LAPI deletes the machines of pods that could not unregister (node loss, forced deletion) once they have sent no
+heartbeat for 2 hours and own no alerts (`lapi.config.db_config.flush.agents_autodelete`).
 
 ## GitOps (ArgoCD, Flux)
 
@@ -328,7 +329,7 @@ Only the `registrationToken` key of `auth.existingSecret` is used in this mode. 
 
 - `api.server.auto_registration` must be enabled with the same token, and allow the agents' source IPs in `allowed_ranges`
   (behind NAT, these are the node or egress IPs);
-- every agent pod start creates a new machine, so set `db_config.flush.agents_autodelete` to clean up the ones that
+- every agent pod creates a new machine, so set `db_config.flush.agents_autodelete` to clean up the ones that
   could not unregister, as this chart does for its own LAPI:
   ```yaml
   db_config:

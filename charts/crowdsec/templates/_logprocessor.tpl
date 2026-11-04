@@ -52,9 +52,9 @@ spec:
 
 {{/* Usage: include "crowdsec.logProcessor.configLocal" . */}}
 {{- /*
-  Every container start gets a new machine: registered by the container command with the token,
-  or created by LAPI at login with TLS (<CN>@<pod IP>). It is removed on clean shutdown, and
-  LAPI deletes the ones left behind by crashes (db_config.flush.agents_autodelete).
+  Every pod is one machine: registered by the container command with the token (named after the pod),
+  or created by LAPI at login with TLS (<CN>@<pod IP>). It is removed on clean shutdown, and LAPI
+  deletes the ones left behind by lost pods (db_config.flush.agents_autodelete).
 */ -}}
 {{- define "crowdsec.logProcessor.configLocal" -}}
 {{- toYaml (dict "api" (dict "client" (dict
@@ -113,20 +113,37 @@ spec:
       imagePullPolicy: {{ $ctx.Values.image.pullPolicy }}
       {{- if not $ctx.Values.tls.enabled }}
       {{- /*
-        Registers with the auto-registration token on every container start, before the image
-        entrypoint: the machine of the previous start may have been unregistered on exit.
-        The random suffix keeps names unique across restarts of the same pod.
+        Registers the pod with the auto-registration token before the image entrypoint, as one
+        machine named after the pod. A clean exit unregisters it, so a restart registers again.
+        After a crash the machine still exists: the credentials kept in /run/crowdsec (emptyDir,
+        survives container restarts) are still valid and are reused.
       */}}
       command:
         - /bin/bash
         - -c
         - |
           set -eu
-          until cscli -c /staging/etc/crowdsec/config.yaml lapi register \
-              --machine "${POD_NAME}-$(tr -dc a-z0-9 </dev/urandom | head -c 6)" \
-              --url "${LOCAL_API_URL}" \
-              --token "${REGISTRATION_TOKEN}" \
-              --file /run/crowdsec/local_api_credentials.yaml; do
+          creds=/run/crowdsec/local_api_credentials.yaml
+          while :; do
+            if out=$(cscli -c /staging/etc/crowdsec/config.yaml lapi register \
+                --machine "${POD_NAME}" \
+                --url "${LOCAL_API_URL}" \
+                --token "${REGISTRATION_TOKEN}" \
+                --file "${creds}.new" 2>&1); then
+              mv -f "${creds}.new" "${creds}"
+              echo "Registered machine ${POD_NAME} to ${LOCAL_API_URL}"
+              break
+            fi
+            case "${out}" in
+              *"already exist"*)
+                if [ -s "${creds}" ]; then
+                  echo "Machine ${POD_NAME} is still registered (previous run did not unregister), reusing its credentials"
+                  break
+                fi
+                echo "Machine ${POD_NAME} exists on LAPI but this pod has no credentials for it: delete it with 'cscli machines delete ${POD_NAME}'"
+                ;;
+            esac
+            echo "${out}"
             echo "Registration to ${LOCAL_API_URL} failed, retrying in 5s"
             sleep 5
           done

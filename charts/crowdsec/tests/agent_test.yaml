@@ -29,12 +29,15 @@ tests:
       - matchRegex:
           path: data["config.yaml.local"]
           pattern: "unregister_on_exit: true"
-  - it: registers on every container start with the token, then runs the image entrypoint
+  - it: registers the pod with the token, then runs the image entrypoint
     template: agent/workload.yaml
     asserts:
       - matchRegex:
           path: spec.template.spec.containers[0].command[2]
-          pattern: "(?s)lapi register.*--token \"\\$\\{REGISTRATION_TOKEN\\}\".*exec /bin/bash /docker_start.sh"
+          pattern: "(?s)lapi register.*--machine \"\\$\\{POD_NAME\\}\" .*--token \"\\$\\{REGISTRATION_TOKEN\\}\".*exec /bin/bash /docker_start.sh"
+      - matchRegex:
+          path: spec.template.spec.containers[0].command[2]
+          pattern: "(?s)\\*\"already exist\"\\*\\).*-s \"\\$\\{creds\\}\".*reusing its credentials"
       - equal:
           path: spec.template.spec.initContainers[0].name
           value: wait-for-lapi
