@@ -37,6 +37,14 @@ spec:
       tolerations:
 {{ toYaml .Values.lapi.tolerations | indent 8 }}
       {{- end }}
+      {{- if .Values.lapi.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.lapi.nodeSelector | indent 8 }}
+      {{- end }}
+      {{- if .Values.lapi.affinity }}
+      affinity:
+{{ toYaml .Values.lapi.affinity | indent 8 }}
+      {{- end }}
       initContainers:
         - name: install-kubectl
           image: {{ include "registerJobKubectlImage" . | quote }}
