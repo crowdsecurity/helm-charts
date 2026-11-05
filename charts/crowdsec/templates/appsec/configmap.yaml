@@ -1,5 +1,5 @@
 {{- if .Values.appsec.enabled }}
-{{- $configLocal := mustMergeOverwrite (include "crowdsec.logProcessor.configLocal" . | fromYaml) (deepCopy .Values.appsec.config) }}
+{{- $configLocal := mustMergeOverwrite (include "crowdsec.logProcessor.configLocal" .Values.appsec | fromYaml) (deepCopy .Values.appsec.config) }}
 apiVersion: v1
 kind: ConfigMap
 metadata:

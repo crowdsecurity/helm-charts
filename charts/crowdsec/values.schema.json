@@ -744,6 +744,13 @@
             "Deployment"
           ]
         },
+        "registration": {
+          "type": "string",
+          "enum": [
+            "token",
+            "none"
+          ]
+        },
         "replicas": {
           "type": "integer",
           "minimum": 1
@@ -1065,6 +1072,13 @@
           "enum": [
             "DaemonSet",
             "Deployment"
+          ]
+        },
+        "registration": {
+          "type": "string",
+          "enum": [
+            "token",
+            "none"
           ]
         },
         "replicas": {

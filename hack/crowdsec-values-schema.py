@@ -78,6 +78,7 @@ podlog = obj({"namespace": S(), "pod": S(), "program": S()}, required=["namespac
 
 agent = obj({**pod_common,
     "enabled": B(), "kind": {"type": "string", "enum": ["DaemonSet", "Deployment"]},
+    "registration": {"type": "string", "enum": ["token", "none"]},
     "replicas": I(1),
     "hub": hub(["collections", "parsers", "scenarios", "postoverflows", "contexts"]),
     "podLogs": {"type": "array", "items": podlog},
@@ -89,6 +90,7 @@ agent = obj({**pod_common,
 
 appsec = obj({**pod_common,
     "enabled": B(), "kind": {"type": "string", "enum": ["DaemonSet", "Deployment"]},
+    "registration": {"type": "string", "enum": ["token", "none"]},
     "replicas": I(1), "port": I(1),
     "hub": hub(["collections", "scenarios", "postoverflows", "appsecConfigs", "appsecRules"]),
     "acquisition": OBJARR,

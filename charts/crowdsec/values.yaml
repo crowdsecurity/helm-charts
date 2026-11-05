@@ -308,6 +308,8 @@ agent:
   kind: DaemonSet
   ## @param agent.replicas Number of replicas when `kind` is `Deployment`
   replicas: 1
+  ## @param agent.registration How pods get their LAPI machine without TLS: `token` registers each pod with the registration token; `none` uses a machine registered beforehand (set `AGENT_USERNAME` and `AGENT_PASSWORD` in `env`, see the README)
+  registration: token
 
   ## Hub items installed at startup (https://app.crowdsec.net/hub).
   ## @param agent.hub.collections Collections to install
@@ -468,6 +470,8 @@ appsec:
   kind: Deployment
   ## @param appsec.replicas Number of replicas when `kind` is `Deployment`
   replicas: 1
+  ## @param appsec.registration How pods get their LAPI machine without TLS: `token` registers each pod with the registration token; `none` uses a machine registered beforehand (set `AGENT_USERNAME` and `AGENT_PASSWORD` in `env`, see the README)
+  registration: token
   ## @param appsec.port AppSec listener port exposed by the container and the Service (must match `listen_addr` in `acquisition`)
   port: 7422
 

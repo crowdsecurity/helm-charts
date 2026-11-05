@@ -10,6 +10,17 @@ tests:
     asserts:
       - hasDocuments:
           count: 0
+  - it: uses pre-registered credentials with registration none
+    set:
+      appsec: {enabled: true, registration: none}
+    asserts:
+      - template: appsec/workload.yaml
+        notExists:
+          path: spec.template.spec.containers[0].command
+      - template: appsec/configmap.yaml
+        matchRegex:
+          path: data["config.yaml.local"]
+          pattern: "unregister_on_exit: false"
   - it: works out of the box when enabled
     set:
       appsec.enabled: true

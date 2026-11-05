@@ -6,6 +6,27 @@ templates:
   - agent/configmap.yaml
   - agent/service.yaml
 tests:
+  - it: uses pre-registered credentials with registration none
+    set:
+      agent.registration: none
+      agent.env: [{name: AGENT_USERNAME, value: node-a}]
+    asserts:
+      - template: agent/workload.yaml
+        notExists:
+          path: spec.template.spec.containers[0].command
+      - template: agent/workload.yaml
+        notContains:
+          path: spec.template.spec.containers[0].env
+          any: true
+          content: {name: REGISTRATION_TOKEN}
+      - template: agent/workload.yaml
+        contains:
+          path: spec.template.spec.containers[0].env
+          content: {name: AGENT_USERNAME, value: node-a}
+      - template: agent/configmap.yaml
+        matchRegex:
+          path: data["config.yaml.local"]
+          pattern: "unregister_on_exit: false"
   - it: runs as a DaemonSet reading pod logs from the host
     template: agent/workload.yaml
     asserts:

@@ -9,6 +9,13 @@
 {{- fail "image.tag: the debian image is not supported, use the default (alpine) image: the chart relies on its busybox tools (wget)." -}}
 {{- end -}}
 
+{{- range $component := list "agent" "appsec" -}}
+{{- $values := get $.Values $component -}}
+{{- if and $values.enabled $.Values.tls.enabled (eq $values.registration "none") -}}
+{{- fail (printf "%s.registration: none cannot be used with tls.enabled: with TLS, the client certificate is the machine identity." $component) -}}
+{{- end -}}
+{{- end -}}
+
 {{- if not (or .Values.lapi.enabled $logProcessors) -}}
 {{- fail "Nothing to deploy: enable at least one of lapi, agent or appsec." -}}
 {{- end -}}
@@ -30,8 +37,15 @@
 {{- if or .Values.lapi.console.enrollKey .Values.lapi.console.instanceName .Values.lapi.console.tags -}}
 {{- fail "lapi.console only applies to the LAPI deployed by this chart: enroll the external LAPI directly." -}}
 {{- end -}}
-{{- if and (not .Values.tls.enabled) (not .Values.auth.existingSecret) -}}
-{{- fail "auth.existingSecret is required when lapi.enabled is false: agents need the registration token of the external LAPI." -}}
+{{- $tokenComponents := list -}}
+{{- range $component := list "agent" "appsec" -}}
+{{- $values := get $.Values $component -}}
+{{- if and $values.enabled (eq $values.registration "token") -}}
+{{- $tokenComponents = append $tokenComponents $component -}}
+{{- end -}}
+{{- end -}}
+{{- if and (not .Values.tls.enabled) $tokenComponents (not .Values.auth.existingSecret) -}}
+{{- fail (printf "auth.existingSecret is required when lapi.enabled is false: %s need the registration token of the external LAPI (or set registration: none and provide pre-registered credentials)." (join " and " $tokenComponents)) -}}
 {{- end -}}
 {{- if and .Values.tls.enabled .Values.tls.certManager.enabled (not .Values.tls.certManager.issuerRef) -}}
 {{- fail "tls.certManager.issuerRef is required when lapi.enabled is false: the agent certificate must be signed by the CA trusted by the external LAPI." -}}

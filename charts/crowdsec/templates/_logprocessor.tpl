@@ -50,16 +50,17 @@ spec:
     {{- include "crowdsec.logProcessor.podTemplate" . | nindent 4 }}
 {{- end -}}
 
-{{/* Usage: include "crowdsec.logProcessor.configLocal" . */}}
+{{/* Usage: include "crowdsec.logProcessor.configLocal" .Values.agent */}}
 {{- /*
   Every pod is one machine: registered by the container command with the token (named after the pod),
   or created by LAPI at login with TLS (<CN>@<pod IP>). It is removed on clean shutdown, and LAPI
   deletes the ones left behind by lost pods (db_config.flush.agents_autodelete).
+  With registration: none, the machine is registered outside the chart: it must survive restarts.
 */ -}}
 {{- define "crowdsec.logProcessor.configLocal" -}}
 {{- toYaml (dict "api" (dict "client" (dict
   "credentials_path" "/run/crowdsec/local_api_credentials.yaml"
-  "unregister_on_exit" true))) -}}
+  "unregister_on_exit" (ne .registration "none")))) -}}
 {{- end -}}
 
 {{/*
@@ -68,6 +69,7 @@ spec:
 */}}
 {{- define "crowdsec.logProcessor.podTemplate" -}}
 {{- $ctx := .ctx -}}
+{{- $tokenRegistration := and (not $ctx.Values.tls.enabled) (eq .values.registration "token") -}}
 {{- $values := .values -}}
 {{- $checksum := include (print $ctx.Template.BasePath (printf "/%s/configmap.yaml" .component)) $ctx | sha256sum -}}
 metadata:
@@ -111,7 +113,7 @@ spec:
     - name: {{ .component }}
       image: {{ include "crowdsec.image" $ctx }}
       imagePullPolicy: {{ $ctx.Values.image.pullPolicy }}
-      {{- if not $ctx.Values.tls.enabled }}
+      {{- if $tokenRegistration }}
       {{- /*
         Registers the pod with the auto-registration token before the image entrypoint, as one
         machine named after the pod. A clean exit unregisters it, so a restart registers again.
@@ -150,7 +152,7 @@ spec:
           exec /bin/bash /docker_start.sh
       {{- end }}
       env:
-        {{- if not $ctx.Values.tls.enabled }}
+        {{- if $tokenRegistration }}
         - name: POD_NAME
           valueFrom:
             fieldRef:

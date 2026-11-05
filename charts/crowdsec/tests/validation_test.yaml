@@ -70,6 +70,30 @@ tests:
     asserts:
       - failedTemplate:
           errorPattern: "auth.existingSecret is required"
+  - it: names the components that need the external LAPI registration token
+    values: [values/base.yaml]
+    set:
+      lapi: {enabled: false, externalURL: "http://lapi:8080"}
+      agent.registration: none
+      appsec: {enabled: true, acquisition: [{source: appsec, listen_addr: "0.0.0.0:7422", appsec_config: crowdsecurity/appsec-default}]}
+    asserts:
+      - failedTemplate:
+          errorPattern: "auth.existingSecret is required when lapi.enabled is false: appsec need"
+  - it: needs no registration token with pre-registered machines on an external LAPI
+    values: [values/base.yaml]
+    set:
+      lapi: {enabled: false, externalURL: "http://lapi:8080"}
+      agent.registration: none
+    asserts:
+      - hasDocuments: {count: 0}
+  - it: refuses registration none with TLS
+    values: [values/base.yaml]
+    set:
+      tls.enabled: true
+      agent.registration: none
+    asserts:
+      - failedTemplate:
+          errorPattern: "agent.registration: none cannot be used with tls.enabled"
   - it: requires an issuer for TLS with an external LAPI
     values: [values/base.yaml]
     set:

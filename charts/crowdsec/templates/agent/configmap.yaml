@@ -10,7 +10,7 @@
 ) }}
 {{- end }}
 {{- $acquisition = concat $acquisition .Values.agent.acquisition }}
-{{- $configLocal := mustMergeOverwrite (include "crowdsec.logProcessor.configLocal" . | fromYaml) (deepCopy .Values.agent.config) }}
+{{- $configLocal := mustMergeOverwrite (include "crowdsec.logProcessor.configLocal" .Values.agent | fromYaml) (deepCopy .Values.agent.config) }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
