@@ -476,16 +476,20 @@ appsec:
   port: 7422
 
   ## @param appsec.hub.collections Collections to install
+  ## @param appsec.hub.parsers Parsers to install (AppSec events go through the parsers of the AppSec pod)
   ## @param appsec.hub.scenarios Scenarios to install
   ## @param appsec.hub.postoverflows Postoverflows to install
+  ## @param appsec.hub.contexts Contexts to install (alert context sent to LAPI and the Console)
   ## @param appsec.hub.appsecConfigs AppSec configs to install
   ## @param appsec.hub.appsecRules AppSec rules to install
   hub:
     collections:
       - crowdsecurity/appsec-virtual-patching
       - crowdsecurity/appsec-generic-rules
+    parsers: []
     scenarios: []
     postoverflows: []
+    contexts: []
     appsecConfigs: []
     appsecRules: []
 

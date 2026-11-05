@@ -21,6 +21,18 @@ tests:
         matchRegex:
           path: data["config.yaml.local"]
           pattern: "unregister_on_exit: false"
+  - it: installs hub parsers and contexts
+    template: appsec/workload.yaml
+    set:
+      appsec.enabled: true
+      appsec.hub: {parsers: [crowdsecurity/nginx-logs], contexts: [crowdsecurity/http_base]}
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content: {name: PARSERS, value: crowdsecurity/nginx-logs}
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content: {name: CONTEXTS, value: crowdsecurity/http_base}
   - it: works out of the box when enabled
     set:
       appsec.enabled: true
