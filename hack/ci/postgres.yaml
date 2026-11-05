@@ -1,0 +1,46 @@
+# Throwaway PostgreSQL used by `ct install` (see .github/workflows/lint-test.yaml). Not for production.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: crowdsec-ci-db
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres
+  namespace: crowdsec-ci-db
+spec:
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:17-alpine
+          env:
+            - name: POSTGRES_USER
+              value: crowdsec
+            - name: POSTGRES_PASSWORD
+              value: crowdsec-ci
+            - name: POSTGRES_DB
+              value: crowdsec
+          ports:
+            - containerPort: 5432
+          readinessProbe:
+            exec:
+              command: ["pg_isready", "-U", "crowdsec"]
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+  namespace: crowdsec-ci-db
+spec:
+  selector:
+    app: postgres
+  ports:
+    - port: 5432

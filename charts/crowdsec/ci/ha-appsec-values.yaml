@@ -1,0 +1,46 @@
+# Two LAPI replicas, AppSec, an agent Deployment with a network datasource and custom files.
+lapi:
+  replicas: 2
+  podDisruptionBudget:
+    enabled: true
+  database:
+    host: postgres.crowdsec-ci-db.svc
+    existingSecret: crowdsec-db
+  onlineAPI:
+    enabled: false
+  files:
+    profiles.yaml: |
+      name: default_ip_remediation
+      filters:
+        - Alert.Remediation == true && Alert.GetScope() == "Ip"
+      decisions:
+        - type: ban
+          duration: 4h
+      on_success: break
+agent:
+  kind: Deployment
+  acquisition:
+    - source: http
+      listen_addr: 0.0.0.0:8081
+      path: /logs
+      auth_type: headers
+      headers:
+        key: ci-test
+      labels:
+        type: nginx
+  extraPorts:
+    - name: http-logs
+      port: 8081
+  files:
+    scenarios/ci-scenario.yaml: |
+      type: trigger
+      name: ci/test-trigger
+      description: "CI test scenario"
+      filter: "evt.Meta.log_type == 'ci-test'"
+      labels:
+        remediation: false
+appsec:
+  enabled: true
+  replicas: 2
+  podDisruptionBudget:
+    enabled: true

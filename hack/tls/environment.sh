@@ -4,7 +4,8 @@
 [ -z "$NAMESPACE" ] && NAMESPACE=crowdsec
 
 export NAME_CA=$RELEASE-ca
-export NAME_LAPI_SERVICE=$RELEASE-service
+# Service name of the chart (<fullname>-lapi). Adjust if the release name does not contain "crowdsec".
+export NAME_LAPI_SERVICE=$RELEASE-lapi
 export NAME_LAPI_CSR=$NAME_LAPI_SERVICE.$NAMESPACE
 export NAME_AGENT_CSR=$RELEASE-agent.$NAMESPACE
 export NAME_BOUNCER_CSR=$RELEASE-bouncer.$NAMESPACE

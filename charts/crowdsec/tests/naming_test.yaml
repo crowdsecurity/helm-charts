@@ -1,0 +1,43 @@
+suite: naming
+values:
+  - values/base.yaml
+templates:
+  - lapi/deployment.yaml
+  - lapi/configmap.yaml
+tests:
+  - it: prefixes resources with the release name
+    template: lapi/deployment.yaml
+    release:
+      name: edge
+    asserts:
+      - equal:
+          path: metadata.name
+          value: edge-crowdsec-lapi
+  - it: does not repeat the chart name
+    template: lapi/deployment.yaml
+    release:
+      name: crowdsec
+    asserts:
+      - equal:
+          path: metadata.name
+          value: crowdsec-lapi
+  - it: honors fullnameOverride
+    template: lapi/deployment.yaml
+    set:
+      fullnameOverride: cs
+    asserts:
+      - equal:
+          path: metadata.name
+          value: cs-lapi
+  - it: sets recommended labels
+    template: lapi/deployment.yaml
+    release:
+      name: crowdsec
+    asserts:
+      - isSubset:
+          path: metadata.labels
+          content:
+            app.kubernetes.io/name: crowdsec
+            app.kubernetes.io/instance: crowdsec
+            app.kubernetes.io/component: lapi
+            app.kubernetes.io/managed-by: Helm

@@ -1,0 +1,141 @@
+{{- /*
+  Enrolls the instance in the Console once its Central API credentials exist. Enrollment is tied to
+  those credentials, shared by every LAPI replica, so it runs here rather than at each LAPI start:
+  a bad key or an unreachable Central API fails this Job instead of LAPI.
+  A plain Job rather than a Helm hook, so that Helm, Flux, Argo CD and `helm template` pipelines
+  behave the same. Its name carries a hash of the enrollment settings: it runs again only when they
+  change. An already enrolled instance is left as is, unless overwrite is set.
+  With auth.existingSecret, the enrollKey key is optional: the Job does nothing without it, and
+  changing the key in that Secret does not run the Job again.
+*/ -}}
+{{- $values := .Values.lapi -}}
+{{- if and $values.enabled $values.onlineAPI.enabled (or $values.console.enrollKey .Values.auth.existingSecret) }}
+{{- $settings := list $values.console.enrollKey $values.console.instanceName $values.console.tags $values.console.overwrite (include "crowdsec.authSecretName" .) (include "crowdsec.onlineAPISecretName" .) }}
+{{- $name := printf "%s-%s" (include "crowdsec.componentName" (list . "console-enroll") | trunc 54 | trimSuffix "-") (toJson $settings | sha256sum | trunc 8) }}
+{{- $job := $values.onlineAPI.registrationJob }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ $name }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "crowdsec.labels" (list . "console-enroll") | nindent 4 }}
+  {{- include "crowdsec.annotations" (dict "ctx" .) | nindent 2 }}
+spec:
+  backoffLimit: 1
+  activeDeadlineSeconds: 300
+  template:
+    metadata:
+      labels:
+        {{- include "crowdsec.selectorLabels" (list . "console-enroll") | nindent 8 }}
+        {{- with (merge (dict) $job.podLabels .Values.podLabels .Values.commonLabels) }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- with (merge (dict) $job.podAnnotations .Values.podAnnotations) }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+      restartPolicy: Never
+      automountServiceAccountToken: false
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: enroll
+          image: {{ include "crowdsec.image" . }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+            - /bin/bash
+            - -c
+            - |
+              set -euo pipefail
+              if [ -z "${ENROLL_KEY:-}" ]; then
+                echo "No enrollKey in Secret {{ include "crowdsec.authSecretName" . }}, nothing to enroll."
+                exit 0
+              fi
+              # Work on a copy of the image config: the root filesystem is read-only.
+              cp /staging/etc/crowdsec/config.yaml /work/config.yaml
+              yq -i '
+                .api.server.online_client.credentials_path = "/etc/crowdsec-capi/online_api_credentials.yaml" |
+                .api.server.profiles_path = "/staging/etc/crowdsec/profiles.yaml" |
+                .api.server.console_path = "/work/console.yaml" |
+                .config_paths.hub_dir = "/staging/etc/crowdsec/hub/" |
+                .config_paths.index_path = "/staging/etc/crowdsec/hub/.index.json"' /work/config.yaml
+              args=()
+              if [ -n "${ENROLL_INSTANCE_NAME:-}" ]; then
+                args+=(--name "${ENROLL_INSTANCE_NAME}")
+              fi
+              while IFS= read -r tag; do
+                if [ -n "${tag}" ]; then
+                  args+=(--tags "${tag}")
+                fi
+              done <<< "${ENROLL_TAGS:-}"
+              {{- if $values.console.overwrite }}
+              args+=(--overwrite)
+              {{- end }}
+              cscli -c /work/config.yaml console enroll "${args[@]}" "${ENROLL_KEY}"
+          env:
+            - name: HOME
+              value: /work
+            - name: ENROLL_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "crowdsec.authSecretName" . }}
+                  key: enrollKey
+                  optional: true
+            {{- with $values.console.instanceName }}
+            - name: ENROLL_INSTANCE_NAME
+              value: {{ . | quote }}
+            {{- end }}
+            {{- with $values.console.tags }}
+            - name: ENROLL_TAGS
+              value: {{ join "\n" . | quote }}
+            {{- end }}
+          {{- /*
+            Runs as root without any capability: cscli reads the hub index of the image, which only
+            root can read. The root filesystem stays read-only.
+          */}}
+          securityContext:
+            {{- toYaml (mustMergeOverwrite (deepCopy (.Values.helperContainers.securityContext | default dict)) (dict "runAsUser" 0 "runAsGroup" 0 "runAsNonRoot" false)) | nindent 12 }}
+          {{- with .Values.helperContainers.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: work
+              mountPath: /work
+            - name: tmp
+              mountPath: /tmp
+            - name: data
+              mountPath: /var/lib/crowdsec/data
+            - name: capi-credentials
+              mountPath: /etc/crowdsec-capi
+              readOnly: true
+      volumes:
+        - name: work
+          emptyDir: {}
+        - name: tmp
+          emptyDir: {}
+        - name: data
+          emptyDir: {}
+        - name: capi-credentials
+          secret:
+            secretName: {{ include "crowdsec.onlineAPISecretName" . }}
+            items:
+              - key: online_api_credentials.yaml
+                path: online_api_credentials.yaml
+{{- end }}

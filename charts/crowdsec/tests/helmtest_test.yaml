@@ -1,0 +1,46 @@
+suite: helm test pods
+values:
+  - values/base.yaml
+templates:
+  - tests/test-connection.yaml
+tests:
+  - it: checks each component with wget, retrying while pods start
+    documentSelector: {path: metadata.name, value: RELEASE-NAME-crowdsec-test-agent}
+    asserts:
+      - contains:
+          path: spec.containers[0].env
+          content: {name: URL, value: "http://RELEASE-NAME-crowdsec-agent:6060/metrics"}
+      - matchRegex:
+          path: spec.containers[0].command[2]
+          pattern: '(?s)for _ in \$\(seq 36\).*wget -q -O /dev/null -T 5 "\$\{URL\}"'
+      - notExists:
+          path: spec.volumes
+  - it: checks LAPI on /health without TLS
+    documentSelector: {path: metadata.name, value: RELEASE-NAME-crowdsec-test-lapi}
+    asserts:
+      - contains:
+          path: spec.containers[0].env
+          content: {name: URL, value: "http://RELEASE-NAME-crowdsec-lapi.NAMESPACE.svc:8080/health"}
+      - notExists:
+          path: spec.volumes
+  - it: verifies the LAPI certificate against its CA with TLS
+    documentSelector: {path: metadata.name, value: RELEASE-NAME-crowdsec-test-lapi}
+    set:
+      tls.enabled: true
+    asserts:
+      - contains:
+          path: spec.containers[0].env
+          content: {name: SSL_CERT_FILE, value: /etc/ssl/crowdsec/ca.crt}
+      - contains:
+          path: spec.containers[0].volumeMounts
+          content: {name: tls, mountPath: /etc/ssl/crowdsec, readOnly: true}
+      - contains:
+          path: spec.volumes
+          content: {name: tls, secret: {secretName: RELEASE-NAME-crowdsec-lapi-tls, items: [{key: ca.crt, path: ca.crt}]}}
+  - it: does not mount the LAPI CA in the other test pods
+    documentSelector: {path: metadata.name, value: RELEASE-NAME-crowdsec-test-agent}
+    set:
+      tls.enabled: true
+    asserts:
+      - notExists:
+          path: spec.volumes

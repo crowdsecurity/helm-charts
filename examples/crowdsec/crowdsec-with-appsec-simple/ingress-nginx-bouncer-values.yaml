@@ -8,7 +8,7 @@ controller:
     imagePullPolicy: IfNotPresent
     env:
       - name: API_URL
-        value: "http://crowdsec-service.default.svc.cluster.local:8080" # crowdsec lapi service-name
+        value: "http://crowdsec-lapi.default.svc.cluster.local:8080" # crowdsec lapi service-name
       - name: API_KEY
         value: "abcdefgh<MY_BOUNCER_KEY>abcdefgh" # generated with `cscli bouncers add -n <bouncer_name>
       - name: BOUNCER_CONFIG
@@ -20,7 +20,7 @@ controller:
       - name: APPSEC_ENABLED
         value: "true"
       - name: APPSEC_URL
-        value: "http://crowdsec-appsec-service.default.svc.cluster.local:7422" # crowdsec appsec service-name
+        value: "http://crowdsec-appsec.default.svc.cluster.local:7422" # crowdsec appsec service-name
     command: ['sh', '-c', "sh /docker_start.sh; mkdir -p /lua_plugins/crowdsec/; cp -R /crowdsec/* /lua_plugins/crowdsec/"]
     volumeMounts:
     - name: crowdsec-bouncer-plugin

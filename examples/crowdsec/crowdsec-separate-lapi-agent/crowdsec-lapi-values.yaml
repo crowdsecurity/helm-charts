@@ -1,33 +1,18 @@
-container_runtime: containerd
-image:
-  tag: v1.6.4
-config:
-  config.yaml.local: |
-    api:
-      server:
-        auto_registration:
-          enabled: true
-          token: "${REGISTRATION_TOKEN}" # /!\ Do not modify this variable (auto-generated and handled by the chart)
-          allowed_ranges:
-            - "127.0.0.1/32"
-            - "192.168.0.0/16"
-            - "10.0.0.0/8"
-            - "172.16.0.0/12"
+# LAPI only, in its own release/namespace. Agents from other releases connect to it.
+#
+# Prerequisites in the crowdsec-lapi namespace:
+#   kubectl -n crowdsec-lapi create secret generic crowdsec-db --from-literal=password=<db password>
+#   kubectl -n crowdsec-lapi create secret generic crowdsec-auth \
+#     --from-literal=registrationToken=$(openssl rand -hex 24) \
+#     --from-literal=csLapiSecret=$(openssl rand -hex 32)
+auth:
+  existingSecret: crowdsec-auth
+lapi:
+  database:
+    host: postgres.databases.svc
+    existingSecret: crowdsec-db
+  # console:
+  #   instanceName: k8s_cluster
+  #   tags: [k8s, linux]
 agent:
   enabled: false
-lapi:
-  secrets:
-    registrationToken: "mNfQd9nWbbwCYY4CMKay9HooRUx3AYkkNfLDQUrCTjHJvnmnzYadpYgxyxrPiv2j"
-    csLapiSecret: "mNfQd9nWbbwCYY4CMKay9HooRUx3AYkkNfLDQUrCTjHJvnmnzYadpYgxyxrPiv2j"
-  replicas: 1
-  env:
-    #- name: ENROLL_KEY
-    #  value: "YOUR_ENROLL_KEY"
-    #- name: ENROLL_INSTANCE_NAME
-    #  value: "k8s_cluster"
-    #- name: ENROLL_TAGS
-    #  value: "k8s linux test"
-    - name: BOUNCER_KEY_nginx
-      value: abcdefgh<MY_BOUNCER_KEY>abcdefgh
-    #- name: DISABLE_ONLINE_API
-    #  value: "true"

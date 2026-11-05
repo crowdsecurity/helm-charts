@@ -1,0 +1,4 @@
+{{- if .Values.agent.enabled }}
+{{- $ports := include "crowdsec.logProcessor.ports" (dict "values" .Values.agent) | fromYamlArray }}
+{{- include "crowdsec.applyOverrides" (dict "manifest" (include "crowdsec.logProcessor.workload" (dict "ctx" . "component" "agent" "values" .Values.agent "ports" $ports "hostLogs" (not (empty .Values.agent.podLogs)))) "values" .Values.agent) }}
+{{- end }}

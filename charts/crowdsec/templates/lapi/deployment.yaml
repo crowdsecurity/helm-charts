@@ -1,0 +1,3 @@
+{{- if .Values.lapi.enabled }}
+{{- include "crowdsec.applyOverrides" (dict "manifest" (include "crowdsec.lapi.deployment" .) "values" .Values.lapi) }}
+{{- end }}

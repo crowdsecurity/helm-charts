@@ -1,0 +1,9 @@
+lapi:
+  database:
+    host: pg.example.svc
+    existingSecret: crowdsec-db
+agent:
+  podLogs:
+    - namespace: ingress-nginx
+      pod: ingress-nginx-controller-*
+      program: nginx
