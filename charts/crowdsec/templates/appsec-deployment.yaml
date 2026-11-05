@@ -153,11 +153,13 @@ spec:
         {{- end }}
         resources:
           {{- toYaml .Values.appsec.resources | nindent 10 }}
+        {{- if or .Values.appsec.ports .Values.appsec.metrics.enabled }}
         ports:
-          - name: appsec
-            containerPort: 7422
-            protocol: TCP
-          {{- if .Values.appsec.metrics.enabled }}
+        {{- end }}
+        {{- with .Values.appsec.ports }}
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{ if .Values.appsec.metrics.enabled }}
           - name: metrics
             containerPort: 6060
             protocol: TCP
