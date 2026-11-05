@@ -3,6 +3,7 @@ values:
   - values/base.yaml
 templates:
   - onlineapi/enroll-job.yaml
+  - onlineapi/registration-job.yaml
   - lapi/deployment.yaml
   - lapi/configmap.yaml
 tests:
@@ -107,3 +108,23 @@ tests:
       - isSubset:
           path: spec.template.metadata.annotations
           content: {sidecar.istio.io/inject: "false"}
+  - it: schedules the Jobs on the LAPI nodes (#373)
+    set:
+      lapi.console.enrollKey: abc
+      lapi.nodeSelector: {pool: security}
+      lapi.tolerations: [{key: dedicated, operator: Equal, value: security, effect: NoSchedule}]
+      lapi.affinity: &affinity
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms: [{matchExpressions: [{key: pool, operator: In, values: [security]}]}]
+    asserts:
+      - template: onlineapi/enroll-job.yaml
+        isSubset: &scheduling
+          path: spec.template.spec
+          content:
+            nodeSelector: {pool: security}
+            tolerations: [{key: dedicated, operator: Equal, value: security, effect: NoSchedule}]
+            affinity: *affinity
+      - template: onlineapi/registration-job.yaml
+        documentSelector: {path: kind, value: Job}
+        isSubset: *scheduling

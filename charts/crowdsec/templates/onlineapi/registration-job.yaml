@@ -96,6 +96,10 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      {{- with .Values.lapi.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       initContainers:
         - name: kubectl
           image: {{ include "crowdsec.imageRef" (list . $job.image "") }}
