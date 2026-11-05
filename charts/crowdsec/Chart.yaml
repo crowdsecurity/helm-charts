@@ -3,7 +3,7 @@ name: crowdsec
 description: CrowdSec is an open-source, lightweight security engine that detects and responds to bad behaviours.
 type: application
 version: 2.0.0
-appVersion: v1.8.1
+appVersion: v1.8.2
 kubeVersion: ">=1.27.0-0"
 home: https://crowdsec.net
 icon: https://raw.githubusercontent.com/crowdsecurity/crowdsec-docs/main/crowdsec-docs/static/img/crowdsec_logo.png

@@ -1,6 +1,6 @@
 # crowdsec
 
-![Version: 2.0.0](https://img.shields.io/badge/Version-2.0.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v1.8.1](https://img.shields.io/badge/AppVersion-v1.8.1-informational?style=flat-square)
+![Version: 2.0.0](https://img.shields.io/badge/Version-2.0.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v1.8.2](https://img.shields.io/badge/AppVersion-v1.8.2-informational?style=flat-square)
 
 [CrowdSec](https://crowdsec.net) is an open-source, lightweight security engine that detects and responds to bad behaviours.
 
@@ -247,6 +247,10 @@ Use `tls.certManager.secretTemplate` to add annotations to the Secrets, e.g. to 
 
 Without cert-manager, set `tls.certManager.enabled: false` and provide `tls.existingSecrets.lapi` and `tls.existingSecrets.agent`
 (each with `tls.crt`, `tls.key` and `ca.crt`). The [hack/tls](../../hack/tls) scripts show how to create them.
+
+Enabling TLS on an existing release leaves the machines of the token-registered pods behind: they try to unregister
+over HTTP while LAPI already serves HTTPS. `agents_autodelete` removes them after 2 hours, or delete them with
+`cscli machines delete`. Bouncers must also switch to `https` and trust the CA (`ca.crt` of `<release>-crowdsec-lapi-tls`).
 
 ## Central API and Console
 

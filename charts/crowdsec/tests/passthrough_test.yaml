@@ -22,7 +22,7 @@ tests:
       - template: lapi/deployment.yaml
         equal:
           path: spec.template.spec.containers[0].image
-          value: mirror.example.com/crowdsecurity/crowdsec:v1.8.1@sha256:abc
+          value: mirror.example.com/crowdsecurity/crowdsec:v1.8.2@sha256:abc
       - template: onlineapi/registration-job.yaml
         documentSelector: {path: kind, value: Job}
         equal:
@@ -36,7 +36,7 @@ tests:
     asserts:
       - equal:
           path: spec.template.spec.containers[0].image
-          value: ghcr.io/crowdsecurity/crowdsec:v1.8.1
+          value: ghcr.io/crowdsecurity/crowdsec:v1.8.2
   - it: passes pod, container and workload overrides through on every component
     set:
       appsec.enabled: true

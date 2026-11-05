@@ -45,10 +45,19 @@ Use the tables below to translate them.
      ```
 4. Bouncer API keys, alerts and decisions are stored in the database. When moving from SQLite, either re-register
    the bouncers (`cscli bouncers add`, or `BOUNCER_KEY_<name>` variables to keep the same keys) or migrate the data.
-5. When keeping the 1.x database, 1.x LAPI pods left one machine each (named after the pod), which are never cleaned up
-   automatically. 2.0 uses a single `<release>-crowdsec-lapi` machine: delete the old ones with `cscli machines delete`.
-6. Translate your values with the tables below, then `helm uninstall` the 1.x release and install 2.0
-   (an in-place upgrade also works, but the workloads are recreated anyway because their selectors changed).
+5. When keeping the 1.x database, the 1.x machines stay in it: one per LAPI pod and one per agent and AppSec pod (named
+   after the pod, as 1.x never unregistered them). 2.0 uses a single `<release>-crowdsec-lapi` machine for LAPI, and its
+   agents register under new names. Delete the 1.x LAPI machines with `cscli machines delete`. The agent and AppSec ones
+   are removed by `agents_autodelete` after 2 hours without heartbeat, unless they own alerts: delete those by hand too.
+6. Translate your values with the tables below, then either `helm uninstall` the 1.x release and install 2.0, or upgrade
+   in place after deleting the 1.x workloads. Their selectors changed and Kubernetes cannot update a selector, so with a
+   release named `crowdsec` (where the names are the same in 1.x and 2.0) the upgrade otherwise fails with
+   `spec.selector: ... field is immutable`:
+   ```sh
+   kubectl -n crowdsec delete daemonset/crowdsec-agent deployment/crowdsec-lapi deployment/crowdsec-appsec --ignore-not-found
+   helm upgrade crowdsec crowdsec/crowdsec -n crowdsec -f values-2.0.yaml
+   ```
+   Either way, there is no detection and no LAPI between the deletion and the start of the 2.0 pods.
 
 ## Values mapping
 
