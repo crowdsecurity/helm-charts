@@ -24,4 +24,28 @@ rules:
       verbs: ["create"]
 {{- end }}
 {{- end }}
+--- 
+{{- end }}
+{{- $hasKubernetes := false -}}
+{{- if .Values.agent.additionalAcquisition }}
+{{- range .Values.agent.additionalAcquisition }}
+{{- if eq .source "kubernetes" }}
+{{- $hasKubernetes = true -}}
+{{- end }}
+{{- end }}
+{{- end }}
+{{- if $hasKubernetes }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ .Release.Name }}-logs
+rules:
+  - apiGroups: [""]
+    resources:
+      - pods
+      - pods/log
+    verbs:
+      - get
+      - list
+      - watch
 {{- end }}
