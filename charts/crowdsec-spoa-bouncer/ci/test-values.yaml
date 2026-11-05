@@ -1,0 +1,5 @@
+# CI test values for crowdsec-spoa-bouncer
+bouncer:
+  # Test API key for CI (chart will deploy but pod won't be functional without real LAPI)
+  crowdsec_key: "test-api-key-for-ci"
+  crowdsec_url: "http://crowdsec-service.crowdsec.svc.cluster.local:8080/"
