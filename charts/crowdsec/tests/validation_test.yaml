@@ -2,6 +2,25 @@ suite: validation
 templates:
   - validate.yaml
 tests:
+  - it: refuses Console enrollment without the Central API
+    set:
+      lapi.database: {host: pg, existingSecret: db}
+      agent.podLogs: [{namespace: a, pod: b, program: c}]
+      lapi.onlineAPI.enabled: false
+      lapi.console.enrollKey: abc
+    asserts:
+      - failedTemplate:
+          errorPattern: "lapi.console requires lapi.onlineAPI.enabled"
+  - it: refuses Console enrollment with an external LAPI
+    set:
+      lapi.enabled: false
+      lapi.externalURL: http://lapi:8080
+      auth.existingSecret: my-auth
+      agent.podLogs: [{namespace: a, pod: b, program: c}]
+      lapi.console.enrollKey: abc
+    asserts:
+      - failedTemplate:
+          errorPattern: "lapi.console only applies to the LAPI deployed by this chart"
   - it: rejects the removed 1.x priorityClassName key
     set:
       agent.priorityClassName: high

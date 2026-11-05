@@ -11,6 +11,7 @@ set:
   lapi.metrics.serviceMonitor.enabled: true
   agent.metrics.serviceMonitor.enabled: true
   appsec.metrics.serviceMonitor.enabled: true
+  lapi.console.enrollKey: abc
 templates:
   - auth-secret.yaml
   - lapi/configmap.yaml
@@ -24,6 +25,7 @@ templates:
   - appsec/workload.yaml
   - appsec/service.yaml
   - onlineapi/registration-job.yaml
+  - onlineapi/enroll-job.yaml
   - tls/certificates.yaml
   - tests/test-connection.yaml
 tests:
@@ -48,6 +50,8 @@ tests:
         equal: {path: spec.template.metadata.labels.team, value: sec}
       - template: onlineapi/registration-job.yaml
         documentSelector: {path: kind, value: Job}
+        equal: {path: spec.template.metadata.labels.team, value: sec}
+      - template: onlineapi/enroll-job.yaml
         equal: {path: spec.template.metadata.labels.team, value: sec}
   - it: applies the global podLabels and podAnnotations to the registration Job pod (#234, #247)
     template: onlineapi/registration-job.yaml

@@ -1,0 +1,109 @@
+suite: console enrollment
+values:
+  - values/base.yaml
+templates:
+  - onlineapi/enroll-job.yaml
+  - lapi/deployment.yaml
+  - lapi/configmap.yaml
+tests:
+  - it: does not enroll without a key
+    template: onlineapi/enroll-job.yaml
+    asserts:
+      - hasDocuments: {count: 0}
+  - it: enrolls in a plain Job, not at LAPI start
+    set:
+      lapi.console: {enrollKey: abc, instanceName: prod, tags: [k8s, eu]}
+    asserts:
+      - template: lapi/deployment.yaml
+        notContains:
+          path: spec.template.spec.containers[0].env
+          any: true
+          content: {name: ENROLL_KEY}
+      - template: onlineapi/enroll-job.yaml
+        notExists:
+          path: metadata.annotations["helm.sh/hook"]
+      - template: onlineapi/enroll-job.yaml
+        matchRegex:
+          path: metadata.name
+          pattern: "^RELEASE-NAME-crowdsec-console-enroll-[0-9a-f]{8}$"
+      - template: onlineapi/enroll-job.yaml
+        contains:
+          path: spec.template.spec.containers[0].env
+          content: {name: ENROLL_KEY, valueFrom: {secretKeyRef: {name: RELEASE-NAME-crowdsec-auth, key: enrollKey, optional: true}}}
+      - template: onlineapi/enroll-job.yaml
+        contains:
+          path: spec.template.spec.containers[0].env
+          content: {name: ENROLL_INSTANCE_NAME, value: prod}
+      - template: onlineapi/enroll-job.yaml
+        contains:
+          path: spec.template.spec.containers[0].env
+          content: {name: ENROLL_TAGS, value: "k8s\neu"}
+      - template: onlineapi/enroll-job.yaml
+        matchRegex:
+          path: spec.template.spec.containers[0].command[2]
+          pattern: 'cscli -c /work/config.yaml console enroll "\$\{args\[@\]\}" "\$\{ENROLL_KEY\}"'
+      - template: onlineapi/enroll-job.yaml
+        notMatchRegex:
+          path: spec.template.spec.containers[0].command[2]
+          pattern: "--overwrite"
+      - template: onlineapi/enroll-job.yaml
+        contains:
+          path: spec.template.spec.volumes
+          content: {name: capi-credentials, secret: {secretName: RELEASE-NAME-crowdsec-capi-credentials, items: [{key: online_api_credentials.yaml, path: online_api_credentials.yaml}]}}
+  - it: runs as root without capabilities, on a read-only root filesystem, without API token
+    template: onlineapi/enroll-job.yaml
+    set:
+      lapi.console.enrollKey: abc
+    asserts:
+      - isSubset:
+          path: spec.template.spec.containers[0].securityContext
+          content:
+            runAsUser: 0
+            runAsNonRoot: false
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            capabilities: {drop: [ALL]}
+      - equal:
+          path: spec.template.spec.automountServiceAccountToken
+          value: false
+  - it: overwrites the enrollment when asked
+    template: onlineapi/enroll-job.yaml
+    set:
+      lapi.console: {enrollKey: abc, overwrite: true}
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[0].command[2]
+          pattern: "args\\+=\\(--overwrite\\)"
+  - it: runs with auth.existingSecret, whose enrollKey key is optional
+    template: onlineapi/enroll-job.yaml
+    set:
+      auth.existingSecret: my-auth
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content: {name: ENROLL_KEY, valueFrom: {secretKeyRef: {name: my-auth, key: enrollKey, optional: true}}}
+      - matchRegex:
+          path: spec.template.spec.containers[0].command[2]
+          pattern: "nothing to enroll"
+  - it: uses an existing Central API Secret
+    template: onlineapi/enroll-job.yaml
+    set:
+      lapi.console.enrollKey: abc
+      lapi.onlineAPI.existingSecret: my-capi
+    asserts:
+      - equal:
+          path: spec.template.spec.volumes[3].secret.secretName
+          value: my-capi
+  - it: applies the registration Job pod labels and annotations
+    template: onlineapi/enroll-job.yaml
+    set:
+      lapi.console.enrollKey: abc
+      lapi.onlineAPI.registrationJob: {podLabels: {job: "yes"}, podAnnotations: {sidecar.istio.io/inject: "false"}}
+      podLabels: {team: pods}
+    asserts:
+      - isSubset:
+          path: spec.template.metadata.labels
+          content: {job: "yes", team: pods, app.kubernetes.io/component: console-enroll}
+      - isSubset:
+          path: spec.template.metadata.annotations
+          content: {sidecar.istio.io/inject: "false"}

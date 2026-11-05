@@ -139,17 +139,6 @@ tests:
         notMatchRegex:
           path: data["config.yaml.local"]
           pattern: online_client
-  - it: passes console enrollment settings
-    template: lapi/deployment.yaml
-    set:
-      lapi.console: {instanceName: prod, tags: [k8s, eu]}
-    asserts:
-      - contains:
-          path: spec.template.spec.containers[0].env
-          content: {name: ENROLL_TAGS, value: "k8s eu"}
-      - contains:
-          path: spec.template.spec.containers[0].env
-          content: {name: ENROLL_INSTANCE_NAME, value: prod}
   - it: serves HTTPS with TLS
     template: lapi/deployment.yaml
     set:

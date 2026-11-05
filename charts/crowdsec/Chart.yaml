@@ -37,6 +37,8 @@ annotations:
       description: The upstream CrowdSec image is used as-is, without the custom entrypoint script
     - kind: changed
       description: With TLS enabled, agents and AppSec always authenticate to LAPI with client certificates
+    - kind: changed
+      description: Console enrollment runs in a dedicated Job instead of at each LAPI start, so an invalid key or an unreachable Central API no longer crashes LAPI
     - kind: added
       description: Strict values.schema.json validation that names any unknown or 1.x key
     - kind: added

@@ -89,22 +89,8 @@ spec:
             - name: CUSTOM_HOSTNAME
               value: {{ $machine }}
             {{- include "crowdsec.lapi.configEnv" . | nindent 12 }}
-            {{- if $values.onlineAPI.enabled }}
-            - name: ENROLL_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "crowdsec.authSecretName" . }}
-                  key: enrollKey
-                  optional: true
-            {{- with $values.console.instanceName }}
-            - name: ENROLL_INSTANCE_NAME
-              value: {{ . | quote }}
-            {{- end }}
-            {{- with $values.console.tags }}
-            - name: ENROLL_TAGS
-              value: {{ join " " . | quote }}
-            {{- end }}
-            {{- else }}
+            {{- /* Console enrollment runs in the console-enroll hook Job, not at each start */}}
+            {{- if not $values.onlineAPI.enabled }}
             - name: DISABLE_ONLINE_API
               value: "true"
             {{- end }}

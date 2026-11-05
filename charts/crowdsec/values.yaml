@@ -128,8 +128,8 @@ lapi:
   ## @param lapi.onlineAPI.registrationJob.image.tag Tag of the `kubectl` image
   ## @param lapi.onlineAPI.registrationJob.image.digest Digest of the `kubectl` image
   ## @param lapi.onlineAPI.registrationJob.image.pullPolicy Pull policy of the `kubectl` image
-  ## @param lapi.onlineAPI.registrationJob.podLabels Labels of the Job pod (merged with the global `podLabels`)
-  ## @param lapi.onlineAPI.registrationJob.podAnnotations Annotations of the Job pod (merged with the global `podAnnotations`), e.g. `sidecar.istio.io/inject: "false"` so that a sidecar does not keep the Job running
+  ## @param lapi.onlineAPI.registrationJob.podLabels Labels of the registration and Console enrollment Job pods (merged with the global `podLabels`)
+  ## @param lapi.onlineAPI.registrationJob.podAnnotations Annotations of the registration and Console enrollment Job pods (merged with the global `podAnnotations`), e.g. `sidecar.istio.io/inject: "false"` so that a sidecar does not keep the Job running
   onlineAPI:
     enabled: true
     existingSecret: ""
@@ -143,13 +143,15 @@ lapi:
       podLabels: {}
       podAnnotations: {}
 
-  ## @param lapi.console.enrollKey CrowdSec Console enrollment key (stored in the auth Secret; or set `enrollKey` in `auth.existingSecret`)
-  ## @param lapi.console.instanceName Name of the instance in the Console
-  ## @param lapi.console.tags Tags of the instance in the Console
+  ## @param lapi.console.enrollKey CrowdSec Console enrollment key (stored in the auth Secret; or set `enrollKey` in `auth.existingSecret`). A Job enrolls the instance
+  ## @param lapi.console.instanceName Name of the instance in the Console (applied at enrollment)
+  ## @param lapi.console.tags Tags of the instance in the Console (applied at enrollment)
+  ## @param lapi.console.overwrite Overwrite an existing enrollment, to apply a new key, name or tags to an already enrolled instance
   console:
     enrollKey: ""
     instanceName: ""
     tags: []
+    overwrite: false
 
   ## @param lapi.config Settings merged into the LAPI `config.yaml.local`, on top of the chart-managed settings
   config: {}

@@ -466,6 +466,9 @@
               "items": {
                 "type": "string"
               }
+            },
+            "overwrite": {
+              "type": "boolean"
             }
           }
         },

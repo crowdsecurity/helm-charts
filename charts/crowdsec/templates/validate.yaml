@@ -20,9 +20,15 @@
 {{- if not .Values.lapi.database.existingSecret -}}
 {{- fail "lapi.database.existingSecret is required: create a Secret holding the database password." -}}
 {{- end -}}
+{{- if and (or .Values.lapi.console.enrollKey .Values.lapi.console.instanceName .Values.lapi.console.tags) (not .Values.lapi.onlineAPI.enabled) -}}
+{{- fail "lapi.console requires lapi.onlineAPI.enabled: Console enrollment goes through the Central API." -}}
+{{- end -}}
 {{- else if $logProcessors -}}
 {{- if not .Values.lapi.externalURL -}}
 {{- fail "lapi.externalURL is required when lapi.enabled is false." -}}
+{{- end -}}
+{{- if or .Values.lapi.console.enrollKey .Values.lapi.console.instanceName .Values.lapi.console.tags -}}
+{{- fail "lapi.console only applies to the LAPI deployed by this chart: enroll the external LAPI directly." -}}
 {{- end -}}
 {{- if and (not .Values.tls.enabled) (not .Values.auth.existingSecret) -}}
 {{- fail "auth.existingSecret is required when lapi.enabled is false: agents need the registration token of the external LAPI." -}}
