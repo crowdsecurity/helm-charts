@@ -250,7 +250,7 @@ secrets:
     ## @param secrets.externalSecret.registrationTokenKey [string] The key in the external secret that holds the registrationToken
     registrationTokenKey: ""
 
-# lapi will deploy pod with crowdsec lapi and dashboard as deployment
+# lapi will deploy pod with crowdsec lapi as deployment
 ## @section lapi
 lapi:
   # -- enable lapi (by default enabled)
