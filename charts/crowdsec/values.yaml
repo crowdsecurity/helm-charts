@@ -879,6 +879,9 @@ appsec:
   # -- affinity for appsec
   ## @param appsec.affinity [object] Affinity rules for scheduling AppSec pods
   affinity: {}
+  # -- topologySpreadConstraints for appsec
+  ## @param appsec.topologySpreadConstraints [array] Topology spread constraints for AppSec pods
+  topologySpreadConstraints: []
 
   # -- livenessProbe for appsec
   ## @param appsec.livenessProbe [object] Liveness probe configuration for AppSec pods
