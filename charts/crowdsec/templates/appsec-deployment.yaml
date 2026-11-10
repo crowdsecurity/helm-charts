@@ -311,6 +311,10 @@ spec:
       affinity:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      {{- with .Values.appsec.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       priorityClassName: {{ .Values.appsec.priorityClassName }}
       {{- with .Values.appsec.podSecurityContext }}
       securityContext:
